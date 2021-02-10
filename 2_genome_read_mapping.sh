@@ -723,8 +723,6 @@ done
 
 
 ################################################################################################################
-#### OUTPUT is stored here 
-
-
+#### OUTPUT is stored here: data/coverage_and_heterozygosity 
 
 
