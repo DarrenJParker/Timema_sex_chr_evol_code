@@ -367,9 +367,7 @@ done
 
 mv ./mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/*_coverage_1000_cov.txt ./mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/for_plotting
 
-
-## move to mac to plot
-# here /Users/dparker/Documents/University/Lausanne/Sex_chromosomes/mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/for_plotting
+### the output from the code above is provided in data/Sample_coverage for convenience
 
 cd /Users/dparker/Documents/University/Lausanne/Sex_chromosomes/mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/for_plotting 
 
