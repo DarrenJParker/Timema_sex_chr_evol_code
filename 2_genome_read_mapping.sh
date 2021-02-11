@@ -382,6 +382,11 @@ for i in ./*_coverage_1000_cov.txt; do
 done
 
 ### this gives cov ests for angsD cutoffs.
+# collect together for angsD
+
+cat *_BWA_mapqfilt_30aDR_coverage_1000_cov.txtcovest.csv | grep -v 'sample' > All_v8_BWA_mapqfilt_30aDR_coverage_1000_cov.txtcovest.csv
+## provided in data/Sample_coverage for convenience
+
 
 
 #######################################################################################################################
@@ -549,9 +554,6 @@ done
 
 ## calculated with plot_genome_cov.R (above)
 ## WILL use 2x med cov after 0s filtered out.
-
-cd /Users/dparker/Documents/University/Lausanne/Sex_chromosomes/mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/for_plotting
-cat *_BWA_mapqfilt_30aDR_coverage_1000_cov.txtcovest.csv | grep -v 'sample' > All_v8_BWA_mapqfilt_30aDR_coverage_1000_cov.txtcovest.csv
 
 ## add to here (axiom)
 
