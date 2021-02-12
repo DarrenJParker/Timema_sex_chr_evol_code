@@ -4,8 +4,9 @@ Need to check all paths are correct!
 
 ## ID X linked scaffolds
 
-* 1_read_prep.sh
-* 2_genome_read_mapping.sh
+* **1_read_prep.sh**
+* **2_genome_read_mapping.sh**
+* **Male_and_female_coverage.R**
 
 
 ## Gene expression analysis
