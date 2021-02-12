@@ -109,63 +109,6 @@ cov_plot <- function(df, samp, min_cov, max_cov) {
 }
 
 
-cov_plot_LG_plus_ove <- function(df, samp) {
-
-	df1 <- eval(parse(text=df))
-	df1$LG <- as.character(df1$LG)
-
-	p1 <- ggplot(df1, aes(x=eval(parse(text=samp)))) +
-		theme_bw() +
-		geom_line(data=subset(df1,LG == "lg1"), color="#1B9E77", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg2"), color="#D95F02", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg3"), color="#7570B3", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg4"), color="#E7298A", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg5"), color="#66A61E", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg6"), color="#E6AB02", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg7"), color="#A6761D", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg8"), color="yellow2", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg9"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg10"), color="lightblue", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg11"), color="royalblue2", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg12"), color="darkorchid", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lgX"), color="red3", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG != "NA"), color="black", size = 1, stat="density") +	
-		ggtitle(paste(samp, sep = "")) +
-		xlim(c(0,40)) + 
-		xlab("Coverage")
-	
-	fake_dat <- as.data.frame(cbind(
-		seq(1,14),
-		c("lg1", "lg2", "lg3", "lg4", "lg5", "lg6", "lg7", "lg8", "lg9", "lg10", "lg11", "lg12", "lgX", "all_lg")
-		))
-
-	p222 <- ggplot(fake_dat, aes(V2, V1)) + 
-		theme_bw() +
-		geom_point(aes(colour = factor(V2)), shape = 95, size = 15) +
-		scale_colour_manual(values=c(
-		"lg1" ="#1B9E77",
-		"lg2" ="#D95F02",
-		"lg3" ="#7570B3",
-		"lg4" ="#E7298A", 
-		"lg5" ="#66A61E",
-		"lg6" ="#E6AB02", 
-		"lg7" ="#A6761D", 
-		"lg8" ="yellow2",
-		"lg9" ="#666666",
-		"lg10" ="lightblue",
-		"lg11" ="royalblue2",
-		"lg12" ="darkorchid",
-		"lgX"  = "red3",
-		"all_lg" = "black"
-		)) + theme(legend.title=element_blank())
-
-	legend_out <- cowplot::get_legend(p222)
-	
-	out_list = list("p1" = p1, "legend" = legend_out)
-	return(out_list )	
-}
-
-
 cov_plot_LG <- function(df, samp) {
 
 	df1 <- eval(parse(text=df))
@@ -223,54 +166,7 @@ cov_plot_LG <- function(df, samp) {
 
 }
 
-cov_plot_LG_XA <- function(df, samp) {
 
-	df1 <- eval(parse(text=df))
-	df1$LG <- as.character(df1$LG)
-
-	p1 <- ggplot(df1, aes(x=eval(parse(text=samp)))) +
-		theme_bw() +
-
-		geom_line(data=subset(df1,LG == "lg1"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg2"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg3"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg4"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg5"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg6"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg7"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg8"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg9"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg10"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg11"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lg12"), color="#666666", size = 1, stat="density") +
-		geom_line(data=subset(df1,LG == "lgX"), color="red3", size = 1, stat="density") +
-		#geom_line(data=subset(df1,LG != "NA"), color="black", size = 1, stat="density") +	
-		ggtitle(paste(samp, sep = "")) +
-		xlim(c(0,40)) + 
-		xlab("Coverage")
-
-	fake_dat <- as.data.frame(cbind(
-		seq(1,2),
-		c("lgX", "A")
-		))
-
-	p222 <- ggplot(fake_dat, aes(V2, V1)) + 
-		theme_bw() +
-		geom_point(aes(colour = factor(V2)), shape = 95, size = 15) +
-		scale_colour_manual(values=c(
-		"A" ="#666666",
-		"lgX"  = "red3"
-		)) + theme(legend.title=element_blank())
-
-	legend_out <- cowplot::get_legend(p222)
-	
-	out_list = list("p1" = p1, "legend" = legend_out)
-	return(out_list )	
-
-
-}
-
- 
 #################################################################################################################
 #################################################################################################################
 ### Plot contig coverage
@@ -524,6 +420,186 @@ Tps_out$p2_adj,
 ncol = 2, nrow = 3)
 dev.off()
 getwd() ## where has my plot gone....
+
+
+
+
+
+#######################################################################################################################################################################
+########## Coverage and linkage groups
+
+
+
+## get contigs assingned to a single linkage group
+dat1_Tbi$LG <- gsub("_.*", "", as.character(dat1_Tbi$lg_biggest_block))
+dat1_Tce$LG <- gsub("_.*", "", as.character(dat1_Tce$lg_biggest_block))
+dat1_Tcm$LG <- gsub("_.*", "", as.character(dat1_Tcm$lg_biggest_block))
+dat1_Tpa$LG <- gsub("_.*", "", as.character(dat1_Tpa$lg_biggest_block))
+dat1_Tps$LG <- gsub("_.*", "", as.character(dat1_Tps$lg_biggest_block))
+
+dat1_Tbi_inLG <- subset(dat1_Tbi, dat1_Tbi$LG != "NA" & dat1_Tbi$multi_linkage_groups == "NO")
+dat1_Tce_inLG <- subset(dat1_Tce, dat1_Tce$LG != "NA" & dat1_Tce$multi_linkage_groups == "NO")
+dat1_Tcm_inLG <- subset(dat1_Tcm, dat1_Tcm$LG != "NA" & dat1_Tcm$multi_linkage_groups == "NO")
+dat1_Tpa_inLG <- subset(dat1_Tpa, dat1_Tpa$LG != "NA" & dat1_Tpa$multi_linkage_groups == "NO")
+dat1_Tps_inLG <- subset(dat1_Tps, dat1_Tps$LG != "NA" & dat1_Tps$multi_linkage_groups == "NO")
+
+
+
+
+
+
+head(dat1_Tbi_inLG)
+
+
+
+
+gsub("_.*", "", as.character(dat1_Tbi$lg_biggest_block)[1:100])
+
+
+
+
+#################################################################################################################
+#################################################################################################################
+### Plot by linkage group
+
+### Tbi
+
+Tbi_a1 <- plot_grid(
+cov_plot_LG("dat1_Tbi", "Tbi_M_13_Tbi")$p1,
+cov_plot_LG("dat1_Tbi", "Tbi_M_14_Tbi")$p1,
+cov_plot_LG("dat1_Tbi", "Tbi_M_15_Tbi")$p1,
+cov_plot_LG("dat1_Tbi", "Tbi_M_16_Tbi")$p1,
+cov_plot_LG("dat1_Tbi", "Tbi_F_CC86B")$p1,
+cov_plot_LG("dat1_Tbi", "Tbi_F_CC86C")$p1,
+cov_plot_LG("dat1_Tbi", "Tbi_F_CC87B")$p1,
+cov_plot_LG("dat1_Tbi", "Tbi_F_CC87C")$p1,
+cov_plot_LG("dat1_Tbi", "Tbi_F_CC88B")$p1,
+ncol = 2, nrow = 5)
+
+Tbi_a2 <- plot_grid(
+cov_plot_LG("dat1_Tbi", "Tbi_M_13_Tbi")$legend, 
+ncol = 1)
+
+pdf(paste("Tbi_cov_LG",".pdf", sep = ""), width = 	10, height = 15)
+plot_grid(Tbi_a1, Tbi_a2, ncol = 2, rel_widths = c(4,1))
+dev.off()
+getwd() ## where has my plot gone....?
+
+ 
+### Tce
+
+Tce_a1 <- plot_grid(
+cov_plot_LG("dat1_Tce", "Tce_M_05_HM15")$p1,
+cov_plot_LG("dat1_Tce", "Tce_M_06_HM16")$p1,
+cov_plot_LG("dat1_Tce", "Tce_M_07_HM33")$p1,
+cov_plot_LG("dat1_Tce", "Tce_M_08_HM61")$p1,
+cov_plot_LG("dat1_Tce", "Tce_F_CC22B")$p1,
+cov_plot_LG("dat1_Tce", "Tce_F_CC22C")$p1,
+cov_plot_LG("dat1_Tce", "Tce_F_CC24B")$p1,
+cov_plot_LG("dat1_Tce", "Tce_F_CC24C")$p1,
+cov_plot_LG("dat1_Tce", "Tce_F_CC25B")$p1,
+ncol = 2, nrow = 5)
+
+Tce_a2 <- plot_grid(
+cov_plot_LG("dat1_Tce", "Tce_F_CC22B")$legend, 
+ncol = 1)
+
+pdf(paste("Tce_cov_LG", ".pdf", sep = ""), width = 	10, height = 15)
+plot_grid(Tce_a1, Tce_a2, ncol = 2, rel_widths = c(4,1))
+dev.off()
+getwd() ## where has my plot gone....?
+
+### Tcm
+
+Tcm_a1 <- plot_grid(
+cov_plot_LG("dat1_Tcm", "Tcm_M_01_HM148")$p1,
+cov_plot_LG("dat1_Tcm", "Tcm_M_02_HM149")$p1,
+cov_plot_LG("dat1_Tcm", "Tcm_M_03_HM150")$p1,
+cov_plot_LG("dat1_Tcm", "Tcm_M_04_HM151")$p1,
+cov_plot_LG("dat1_Tcm", "Tcm_F_HM217")$p1,
+cov_plot_LG("dat1_Tcm", "Tcm_F_HM218")$p1,
+cov_plot_LG("dat1_Tcm", "Tcm_F_HM219")$p1,
+cov_plot_LG("dat1_Tcm", "Tcm_F_HM220")$p1,
+cov_plot_LG("dat1_Tcm", "Tcm_F_HM221")$p1,
+ncol = 2, nrow = 5)
+
+Tcm_a2 <- plot_grid(
+cov_plot_LG("dat1_Tcm", "Tcm_F_HM221")$legend, 
+ncol = 1)
+
+pdf(paste("Tcm_cov_LG", ".pdf", sep = ""), width = 	10, height = 15)
+plot_grid(Tcm_a1, Tcm_a2, ncol = 2, rel_widths = c(4,1))
+dev.off()
+getwd() ## where has my plot gone....?
+
+### Tpa
+
+
+Tpa_a1 <- plot_grid(
+cov_plot_LG("dat1_Tpa", "Tpa_M_09_Tpa")$p1,
+cov_plot_LG("dat1_Tpa", "Tpa_M_10_Tpa")$p1,
+cov_plot_LG("dat1_Tpa", "Tpa_M_11_Tpa")$p1,
+cov_plot_LG("dat1_Tpa", "Tpa_M_12_Tpa")$p1,
+cov_plot_LG("dat1_Tpa", "Tpa_F_H54")$p1,
+#cov_plot_LG("dat1_Tpa", "Tpa_F_H56")$p1,
+cov_plot_LG("dat1_Tpa", "Tpa_F_PA_CD")$p1,
+cov_plot_LG("dat1_Tpa", "Tpa_F_PA_E")$p1,
+cov_plot_LG("dat1_Tpa", "Tpa_F_Pa_AB")$p1,
+ncol = 2, nrow = 5)
+
+Tpa_a2 <- plot_grid(
+cov_plot_LG("dat1_Tpa", "Tpa_F_Pa_AB")$legend, 
+ncol = 1)
+
+pdf(paste("Tpa_cov_LG",".pdf", sep = ""), width = 	10, height = 15)
+plot_grid(Tpa_a1, Tpa_a2, ncol = 2, rel_widths = c(4,1))
+dev.off()
+getwd() ## where has my plot gone....?
+
+
+
+### Tps
+
+
+Tps_a1 <- plot_grid(
+cov_plot_LG("dat1_Tps", "Tps_M_17_HM99")$p1,
+cov_plot_LG("dat1_Tps", "Tps_M_18_HM100")$p1,
+cov_plot_LG("dat1_Tps", "Tps_M_19_HM101")$p1,
+cov_plot_LG("dat1_Tps", "Tps_M_20_15255")$p1,
+#cov_plot_LG("dat1_Tps", "Tps_F_ReSeq_Ps08")$p1,
+#cov_plot_LG("dat1_Tps", "Tps_F_ReSeq_Ps12")$p1,
+cov_plot_LG("dat1_Tps", "Tps_F_ReSeq_Ps14")$p1,
+cov_plot_LG("dat1_Tps", "Tps_F_ReSeq_Ps16")$p1,
+cov_plot_LG("dat1_Tps", "Tps_F_ReSeq_Ps18")$p1,
+ncol = 2, nrow = 5)
+
+Tps_a2 <- plot_grid(
+cov_plot_LG("dat1_Tps", "Tps_M_20_15255")$legend, 
+ncol = 1)
+
+pdf(paste("Tps_cov_LG", ".pdf", sep = ""), width = 	10, height = 15)
+plot_grid(Tps_a1, Tps_a2, ncol = 2, rel_widths = c(4,1))
+dev.off()
+getwd() ## where has my plot gone....?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ########################################################################################################################################################################
 ####### output session info
