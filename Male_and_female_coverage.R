@@ -8,7 +8,8 @@ library(modeest)
 library(plyr)
 library(cowplot)
 library(grid)
-
+library(matrixStats)
+library(spatstat)
 
 
 ########################################################################################################################################################################
@@ -429,7 +430,6 @@ getwd() ## where has my plot gone....
 ########## Coverage and linkage groups
 
 
-
 ## get contigs assingned to a single linkage group
 dat1_Tbi$LG <- gsub("_.*", "", as.character(dat1_Tbi$lg_biggest_block))
 dat1_Tce$LG <- gsub("_.*", "", as.character(dat1_Tce$lg_biggest_block))
@@ -444,22 +444,6 @@ dat1_Tpa_inLG <- subset(dat1_Tpa, dat1_Tpa$LG != "NA" & dat1_Tpa$multi_linkage_g
 dat1_Tps_inLG <- subset(dat1_Tps, dat1_Tps$LG != "NA" & dat1_Tps$multi_linkage_groups == "NO")
 
 
-
-
-
-
-head(dat1_Tbi_inLG)
-
-
-
-
-gsub("_.*", "", as.character(dat1_Tbi$lg_biggest_block)[1:100])
-
-
-
-
-#################################################################################################################
-#################################################################################################################
 ### Plot by linkage group
 
 ### Tbi
@@ -592,6 +576,197 @@ getwd() ## where has my plot gone....?
 
 
 
+
+
+#######################################################################################################################################################################
+########## heterozy on the X
+
+calc_prop_het <- function(df, samp_names) {
+	df_out <- df
+	out_head_1 <- colnames(df_out )
+	out_head_2 <- c()
+	for(s in samp_names){
+		out_head_2 <- c(out_head_2, paste("Phet_", s, sep = ""))
+		print(s)
+		Phet <- eval(parse(text=paste('df_out$hetero_mlest_',s, sep=''))) / (eval(parse(text=paste('df_out$homo_mlest_',s, sep=''))) + eval(parse(text=paste('df_out$hetero_mlest_',s, sep=''))))
+		df_out <- cbind(df_out, Phet)
+	}
+	
+	colnames(df_out) <- c(out_head_1, out_head_2)
+	print(out_head_2)
+	return(df_out)
+}
+
+
+Tbi_df_filt <- Tbi_out$df_filt
+Tce_df_filt <- Tce_out$df_filt
+Tcm_df_filt <- Tcm_out$df_filt
+Tpa_df_filt <- Tpa_out$df_filt
+Tps_df_filt <- Tps_out$df_filt
+
+Tbi_samp_names <- c("Tbi_F_CC86B", "Tbi_F_CC86C", "Tbi_F_CC87B", "Tbi_F_CC87C", "Tbi_F_CC88B", "Tbi_M_13_Tbi", "Tbi_M_14_Tbi", "Tbi_M_15_Tbi", "Tbi_M_16_Tbi")
+Tce_samp_names <- c("Tce_F_CC22B", "Tce_F_CC22C", "Tce_F_CC24B", "Tce_F_CC24C", "Tce_F_CC25B", "Tce_M_05_HM15", "Tce_M_06_HM16", "Tce_M_07_HM33", "Tce_M_08_HM61")
+Tcm_samp_names <- c("Tcm_F_HM218", "Tcm_F_HM219", "Tcm_F_HM220", "Tcm_F_HM221", "Tcm_M_01_HM148", "Tcm_M_02_HM149", "Tcm_M_03_HM150", "Tcm_M_04_HM151")
+Tpa_samp_names <- c("Tpa_F_H54", "Tpa_F_PA_CD", "Tpa_F_PA_E", "Tpa_F_Pa_AB", "Tpa_M_09_Tpa", "Tpa_M_10_Tpa", "Tpa_M_11_Tpa", "Tpa_M_12_Tpa")
+Tps_samp_names <- c("Tps_F_ReSeq_Ps14", "Tps_F_ReSeq_Ps16", "Tps_F_ReSeq_Ps18", "Tps_M_17_HM99", "Tps_M_18_HM100", "Tps_M_19_HM101", "Tps_M_20_15255")
+
+Tbi_df_filt_het <- calc_prop_het(Tbi_df_filt, Tbi_samp_names) 
+Tce_df_filt_het <- calc_prop_het(Tce_df_filt, Tce_samp_names) 
+Tcm_df_filt_het <- calc_prop_het(Tcm_df_filt, Tcm_samp_names) 
+Tpa_df_filt_het <- calc_prop_het(Tpa_df_filt, Tpa_samp_names) 
+Tps_df_filt_het <- calc_prop_het(Tps_df_filt, Tps_samp_names) 
+
+head(Tbi_df_filt_het )
+
+X_A_Phet <-  function(df, samp_names){
+
+	### hard class	
+	
+	df_hard_X  <- subset(df, df$class_hard == "X")
+	df_hard_A  <- subset(df, df$class_hard == "A")		
+	
+	out_df_hard <- c()
+	for(s in samp_names){
+		print(s)
+		wt_med_X <- weighted.median(eval(parse(text=paste('df_hard_X$Phet_',s, sep=''))), eval(parse(text=paste('df_hard_X$',"length", sep=''))))
+		wt_med_A <- weighted.median(eval(parse(text=paste('df_hard_A$Phet_',s, sep=''))), eval(parse(text=paste('df_hard_A$',"length", sep=''))))
+	
+		out_line <- c(s, "X", wt_med_X)
+		out_df_hard <- rbind(out_df_hard, out_line)
+		out_line <- c(s, "A", wt_med_A)
+		out_df_hard <- rbind(out_df_hard, out_line)					
+	}	
+
+	out_df_hard <- as.data.frame(out_df_hard)
+	colnames(out_df_hard) <- c("samp", "class", "wt_med_Phet")
+	out_df_hard$wt_med_Phet <- as.numeric(as.character(out_df_hard$wt_med_Phet))
+
+
+	### soft class	
+	
+	df_soft_X  <- subset(df, df$class_soft == "X")
+	df_soft_A  <- subset(df, df$class_soft == "A")		
+	
+	out_df_soft <- c()
+	for(s in samp_names){
+		print(s)
+		wt_med_X <- weighted.median(eval(parse(text=paste('df_soft_X$Phet_',s, sep=''))), eval(parse(text=paste('df_soft_X$',"length", sep=''))))
+		wt_med_A <- weighted.median(eval(parse(text=paste('df_soft_A$Phet_',s, sep=''))), eval(parse(text=paste('df_soft_A$',"length", sep=''))))
+	
+		out_line <- c(s, "X", wt_med_X)
+		out_df_soft <- rbind(out_df_soft, out_line)
+		out_line <- c(s, "A", wt_med_A)
+		out_df_soft <- rbind(out_df_soft, out_line)					
+	}	
+
+	out_df_soft <- as.data.frame(out_df_soft)
+	colnames(out_df_soft) <- c("samp", "class", "wt_med_Phet")
+	out_df_soft$wt_med_Phet <- as.numeric(as.character(out_df_soft$wt_med_Phet))
+
+
+	### split in 3 cats
+	
+	df_XX  <- subset(df, df$to_fill == "XX")
+	df_XA  <- subset(df, df$to_fill == "XA")
+	df_AA  <- subset(df, df$to_fill == "AA")		
+	
+	print(c(length(df_XX[,1]), length(df_XA[,1]), length(df_AA[,1])))
+	
+	out_df3cat <- c()
+	for(s in samp_names){
+		print(s)
+		wt_med_XX <- weighted.median(eval(parse(text=paste('df_XX$Phet_',s, sep=''))), eval(parse(text=paste('df_XX$',"length", sep=''))))
+		wt_med_XA <- weighted.median(eval(parse(text=paste('df_XA$Phet_',s, sep=''))), eval(parse(text=paste('df_XA$',"length", sep=''))))		
+		wt_med_AA <- weighted.median(eval(parse(text=paste('df_AA$Phet_',s, sep=''))), eval(parse(text=paste('df_AA$',"length", sep=''))))
+	
+		out_line <- c(s, "XX", wt_med_XX)
+		out_df3cat <- rbind(out_df3cat, out_line)
+		out_line <- c(s, "XA", wt_med_XA)
+		out_df3cat <- rbind(out_df3cat, out_line)		
+		out_line <- c(s, "AA", wt_med_AA)
+		out_df3cat <- rbind(out_df3cat, out_line)					
+	}	
+
+	out_df3cat <- as.data.frame(out_df3cat)
+	colnames(out_df3cat) <- c("samp", "class", "wt_med_Phet")
+	out_df3cat$wt_med_Phet <- as.numeric(as.character(out_df3cat$wt_med_Phet))
+
+	
+	out_list = list("out_df_soft" = out_df_soft, "out_df_hard" = out_df_hard, "out_df3cat" = out_df3cat)
+	return(out_list)	
+	
+}
+
+Tbi_Phet <- X_A_Phet(Tbi_df_filt_het, Tbi_samp_names)
+Tce_Phet <- X_A_Phet(Tce_df_filt_het, Tce_samp_names)
+Tcm_Phet <- X_A_Phet(Tcm_df_filt_het, Tcm_samp_names)
+Tpa_Phet <- X_A_Phet(Tpa_df_filt_het, Tpa_samp_names)
+Tps_Phet <- X_A_Phet(Tps_df_filt_het, Tps_samp_names)
+
+#### plot
+
+
+plot_phet_1 <- function(df,tit_text){
+	p1 <- ggplot(df, aes(samp, wt_med_Phet, fill = class)) + 
+		geom_bar(position="dodge",stat="identity") +
+		theme_bw() +
+		theme(axis.text.x = element_text(angle = 90)) +
+		xlab ("Sample") + 
+		ylab ("Heterozygosity") +
+		scale_fill_manual(values=c("darkgrey", "red3")) + ggtitle(tit_text) 
+	return(p1)
+}	
+
+plot_phet_2 <- function(df,tit_text){
+	p1 <- ggplot(df, aes(samp, wt_med_Phet, fill = class)) + 
+		geom_bar(position="dodge",stat="identity") +
+		theme_bw() +
+		theme(axis.text.x = element_text(angle = 90)) +
+		xlab ("Sample") + 
+		ylab ("Heterozygosity") +
+		scale_fill_manual(values=c("darkgrey", "darkorange2")) + ggtitle(tit_text) 
+	return(p1)
+}	
+
+
+plot_phet_3 <- function(df,tit_text){
+	p1 <- ggplot(df, aes(samp, wt_med_Phet, fill = class)) + 
+		geom_bar(position="dodge",stat="identity") +
+		theme_bw() +
+		theme(axis.text.x = element_text(angle = 90)) +
+		xlab ("Sample") + 
+		ylab ("Heterozygosity") +
+		scale_fill_manual(values=c("darkgrey", "darkorange2", "red3")) + ggtitle(tit_text) 
+	return(p1)
+}	
+
+
+pdf(paste("Phet_hard_class_", cutoff_len, ".pdf", sep = ""), width = 9, height = 12)
+plot_grid(
+plot_phet_1(Tbi_Phet$out_df_hard, "Tbi"),
+plot_phet_1(Tce_Phet$out_df_hard, "Tce"),
+plot_phet_1(Tcm_Phet$out_df_hard, "Tcm"),
+plot_phet_1(Tpa_Phet$out_df_hard, "Tpa"),
+plot_phet_1(Tps_Phet$out_df_hard, "Tps"), ncol = 2 
+)
+dev.off()
+getwd() ## where has my plot gone....?
+
+
+pdf(paste("Phet_soft_class_", cutoff_len, ".pdf", sep = ""), width = 	9, height = 12)
+plot_grid(
+plot_phet_2(Tbi_Phet$out_df_soft, "Tbi"),
+plot_phet_2(Tce_Phet$out_df_soft, "Tce"),
+plot_phet_2(Tcm_Phet$out_df_soft, "Tcm"),
+plot_phet_2(Tpa_Phet$out_df_soft, "Tpa"),
+plot_phet_2(Tps_Phet$out_df_soft, "Tps"), ncol = 2 
+)
+dev.off()
+getwd() ## where has my plot gone....?
+
+
+
+# plot_phet_3(Tpa_Phet$out_df3cat, "Tpa")
 
 
 
