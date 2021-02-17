@@ -10,7 +10,7 @@ library(cowplot)
 library(grid)
 library(matrixStats)
 library(spatstat)
-
+library(RColorBrewer)
 
 ########################################################################################################################################################################
 ### DATA
@@ -49,6 +49,16 @@ c(length(dat_Tce[,1]), length(dat1_Tce[,1]))
 c(length(dat_Tcm[,1]), length(dat1_Tcm[,1]))
 c(length(dat_Tpa[,1]), length(dat1_Tpa[,1]))
 c(length(dat_Tps[,1]), length(dat1_Tps[,1]))
+
+
+## get LG
+dat1_Tbi$LG <- gsub("_.*", "", as.character(dat1_Tbi$lg_biggest_block))
+dat1_Tce$LG <- gsub("_.*", "", as.character(dat1_Tce$lg_biggest_block))
+dat1_Tcm$LG <- gsub("_.*", "", as.character(dat1_Tcm$lg_biggest_block))
+dat1_Tpa$LG <- gsub("_.*", "", as.character(dat1_Tpa$lg_biggest_block))
+dat1_Tps$LG <- gsub("_.*", "", as.character(dat1_Tps$lg_biggest_block))
+
+head(dat1_Tbi)
 
 ### output
 
@@ -431,12 +441,6 @@ getwd() ## where has my plot gone....
 
 
 ## get contigs assingned to a single linkage group
-dat1_Tbi$LG <- gsub("_.*", "", as.character(dat1_Tbi$lg_biggest_block))
-dat1_Tce$LG <- gsub("_.*", "", as.character(dat1_Tce$lg_biggest_block))
-dat1_Tcm$LG <- gsub("_.*", "", as.character(dat1_Tcm$lg_biggest_block))
-dat1_Tpa$LG <- gsub("_.*", "", as.character(dat1_Tpa$lg_biggest_block))
-dat1_Tps$LG <- gsub("_.*", "", as.character(dat1_Tps$lg_biggest_block))
-
 dat1_Tbi_inLG <- subset(dat1_Tbi, dat1_Tbi$LG != "NA" & dat1_Tbi$multi_linkage_groups == "NO")
 dat1_Tce_inLG <- subset(dat1_Tce, dat1_Tce$LG != "NA" & dat1_Tce$multi_linkage_groups == "NO")
 dat1_Tcm_inLG <- subset(dat1_Tcm, dat1_Tcm$LG != "NA" & dat1_Tcm$multi_linkage_groups == "NO")
@@ -606,7 +610,7 @@ Tps_df_filt <- Tps_out$df_filt
 
 Tbi_samp_names <- c("Tbi_F_CC86B", "Tbi_F_CC86C", "Tbi_F_CC87B", "Tbi_F_CC87C", "Tbi_F_CC88B", "Tbi_M_13_Tbi", "Tbi_M_14_Tbi", "Tbi_M_15_Tbi", "Tbi_M_16_Tbi")
 Tce_samp_names <- c("Tce_F_CC22B", "Tce_F_CC22C", "Tce_F_CC24B", "Tce_F_CC24C", "Tce_F_CC25B", "Tce_M_05_HM15", "Tce_M_06_HM16", "Tce_M_07_HM33", "Tce_M_08_HM61")
-Tcm_samp_names <- c("Tcm_F_HM218", "Tcm_F_HM219", "Tcm_F_HM220", "Tcm_F_HM221", "Tcm_M_01_HM148", "Tcm_M_02_HM149", "Tcm_M_03_HM150", "Tcm_M_04_HM151")
+Tcm_samp_names <- c("Tcm_F_HM217", "Tcm_F_HM218", "Tcm_F_HM219", "Tcm_F_HM220", "Tcm_F_HM221", "Tcm_M_01_HM148", "Tcm_M_02_HM149", "Tcm_M_03_HM150", "Tcm_M_04_HM151")
 Tpa_samp_names <- c("Tpa_F_H54", "Tpa_F_PA_CD", "Tpa_F_PA_E", "Tpa_F_Pa_AB", "Tpa_M_09_Tpa", "Tpa_M_10_Tpa", "Tpa_M_11_Tpa", "Tpa_M_12_Tpa")
 Tps_samp_names <- c("Tps_F_ReSeq_Ps14", "Tps_F_ReSeq_Ps16", "Tps_F_ReSeq_Ps18", "Tps_M_17_HM99", "Tps_M_18_HM100", "Tps_M_19_HM101", "Tps_M_20_15255")
 
@@ -626,6 +630,7 @@ X_A_Phet <-  function(df, samp_names){
 	df_hard_A  <- subset(df, df$class_hard == "A")		
 	
 	out_df_hard <- c()
+	out_df_XA_ratio_hard <- c()
 	for(s in samp_names){
 		print(s)
 		wt_med_X <- weighted.median(eval(parse(text=paste('df_hard_X$Phet_',s, sep=''))), eval(parse(text=paste('df_hard_X$',"length", sep=''))))
@@ -634,20 +639,28 @@ X_A_Phet <-  function(df, samp_names){
 		out_line <- c(s, "X", wt_med_X)
 		out_df_hard <- rbind(out_df_hard, out_line)
 		out_line <- c(s, "A", wt_med_A)
-		out_df_hard <- rbind(out_df_hard, out_line)					
+		out_df_hard <- rbind(out_df_hard, out_line)		
+		
+		X_A_ratio <- wt_med_X / wt_med_A
+		out_line <- c(s, "XA_ratio_hard", X_A_ratio)
+		out_df_XA_ratio_hard <- 	rbind(out_df_XA_ratio_hard, out_line)		
 	}	
 
 	out_df_hard <- as.data.frame(out_df_hard)
 	colnames(out_df_hard) <- c("samp", "class", "wt_med_Phet")
 	out_df_hard$wt_med_Phet <- as.numeric(as.character(out_df_hard$wt_med_Phet))
 
-
+	out_df_XA_ratio_hard <- as.data.frame(out_df_XA_ratio_hard)
+	colnames(out_df_XA_ratio_hard) <- c("samp", "class", "wt_med_Phet_XA_ratio")
+	out_df_XA_ratio_hard$wt_med_Phet_XA_ratio <- as.numeric(as.character(out_df_XA_ratio_hard$wt_med_Phet_XA_ratio))	
+	
 	### soft class	
 	
 	df_soft_X  <- subset(df, df$class_soft == "X")
 	df_soft_A  <- subset(df, df$class_soft == "A")		
 	
 	out_df_soft <- c()
+	out_df_XA_ratio_soft <- c()
 	for(s in samp_names){
 		print(s)
 		wt_med_X <- weighted.median(eval(parse(text=paste('df_soft_X$Phet_',s, sep=''))), eval(parse(text=paste('df_soft_X$',"length", sep=''))))
@@ -656,13 +669,21 @@ X_A_Phet <-  function(df, samp_names){
 		out_line <- c(s, "X", wt_med_X)
 		out_df_soft <- rbind(out_df_soft, out_line)
 		out_line <- c(s, "A", wt_med_A)
-		out_df_soft <- rbind(out_df_soft, out_line)					
+		out_df_soft <- rbind(out_df_soft, out_line)	
+		
+		X_A_ratio <- wt_med_X / wt_med_A
+		out_line <- c(s, "XA_ratio_soft", X_A_ratio)
+		out_df_XA_ratio_soft <- 	rbind(out_df_XA_ratio_soft, out_line)						
 	}	
 
 	out_df_soft <- as.data.frame(out_df_soft)
 	colnames(out_df_soft) <- c("samp", "class", "wt_med_Phet")
 	out_df_soft$wt_med_Phet <- as.numeric(as.character(out_df_soft$wt_med_Phet))
 
+	out_df_XA_ratio_soft <- as.data.frame(out_df_XA_ratio_soft)
+	colnames(out_df_XA_ratio_soft) <- c("samp", "class", "wt_med_Phet_XA_ratio")
+	out_df_XA_ratio_soft$wt_med_Phet_XA_ratio <- as.numeric(as.character(out_df_XA_ratio_soft$wt_med_Phet_XA_ratio))	
+	
 
 	### split in 3 cats
 	
@@ -692,7 +713,7 @@ X_A_Phet <-  function(df, samp_names){
 	out_df3cat$wt_med_Phet <- as.numeric(as.character(out_df3cat$wt_med_Phet))
 
 	
-	out_list = list("out_df_soft" = out_df_soft, "out_df_hard" = out_df_hard, "out_df3cat" = out_df3cat)
+	out_list = list("out_df_soft" = out_df_soft, "out_df_hard" = out_df_hard, "out_df3cat" = out_df3cat, "out_df_XA_ratio_hard" = 	out_df_XA_ratio_hard,  "out_df_XA_ratio_soft" = 	out_df_XA_ratio_soft)
 	return(out_list)	
 	
 }
@@ -769,10 +790,299 @@ getwd() ## where has my plot gone....?
 # plot_phet_3(Tpa_Phet$out_df3cat, "Tpa")
 
 
+###################################################################################################
+### XA ratio
+
+XA_ratio_all <- as.data.frame(rbind(
+Tbi_Phet$out_df_XA_ratio_hard,
+Tce_Phet$out_df_XA_ratio_hard,
+Tcm_Phet$out_df_XA_ratio_hard,
+Tpa_Phet$out_df_XA_ratio_hard,
+Tps_Phet$out_df_XA_ratio_hard,
+Tbi_Phet$out_df_XA_ratio_soft,
+Tce_Phet$out_df_XA_ratio_soft,
+Tcm_Phet$out_df_XA_ratio_soft,
+Tpa_Phet$out_df_XA_ratio_soft,
+Tps_Phet$out_df_XA_ratio_soft))
+
+
+str(XA_ratio_all)
 
 
 
+XA_ratio_all$sex <- str_split_fixed(XA_ratio_all$samp, "_", 3)[,2]
+XA_ratio_all$sp <- str_split_fixed(XA_ratio_all$samp, "_", 3)[,1]
+XA_ratio_F_hard <- subset(XA_ratio_all, XA_ratio_all$sex == "F" & XA_ratio_all$class == "XA_ratio_hard")
+XA_ratio_F_soft <- subset(XA_ratio_all, XA_ratio_all$sex == "F" & XA_ratio_all$class == "XA_ratio_soft")
 
+
+XA_het_ratio_hard <- ggplot(XA_ratio_F_hard, aes(samp, wt_med_Phet_XA_ratio, fill = sp)) + 
+		geom_bar(position="dodge",stat="identity", colour="black") +
+		theme_bw() +
+		theme(axis.text.x = element_text(angle = 90)) +
+		ylim(c(0,1)) + geom_hline(yintercept= 0.75,  linetype="dashed") + 
+		
+		xlab ("Sample") + 
+		ylab ("X:A Heterozygosity") + scale_fill_brewer(palette = "Set3") + 
+		scale_y_continuous(expand = c(0,0), limits = c(0,1)) 
+		
+
+XA_het_ratio_soft <- ggplot(XA_ratio_F_soft, aes(samp, wt_med_Phet_XA_ratio, fill = sp)) + 
+		geom_bar(position="dodge",stat="identity", colour="black") +
+		theme_bw() +
+		theme(axis.text.x = element_text(angle = 90)) +
+		ylim(c(0,1)) + geom_hline(yintercept= 0.75,  linetype="dashed") + 
+		
+		xlab ("Sample") + 
+		ylab ("X:A Heterozygosity") + scale_fill_brewer(palette = "Set3") + 
+		scale_y_continuous(expand = c(0,0), limits = c(0,1)) 
+
+
+pdf(paste("XA_Phet_ratio_hard_class_", cutoff_len, ".pdf", sep = ""), width = 	7, height = 10)
+XA_het_ratio_hard 
+dev.off()
+getwd() ## where has my plot gone....?
+
+
+pdf(paste("XA_Phet_ratio_soft_class_", cutoff_len, ".pdf", sep = ""), width = 	7, height = 10)
+XA_het_ratio_soft 
+dev.off()
+getwd() ## where has my plot gone....?
+
+min(XA_ratio_F_hard$wt_med_Phet_XA_ratio)
+max(XA_ratio_F_hard$wt_med_Phet_XA_ratio)
+
+##########################################################################################################
+### by LG  
+
+
+head(Tbi_df_filt_het)
+
+LG_Phet <-  function(df, samp_names){
+
+	df_filt <- subset(df, df$multi_linkage_groups == "NO")
+	print(head(df_filt))		
+	### LG 	
+
+	df_filt_lg1   <- subset(df_filt, df_filt$LG == "lg1")	
+	df_filt_lg2   <- subset(df_filt, df_filt$LG == "lg2")
+	df_filt_lg3   <- subset(df_filt, df_filt$LG == "lg3")
+	df_filt_lg4   <- subset(df_filt, df_filt$LG == "lg4")
+	df_filt_lg5   <- subset(df_filt, df_filt$LG == "lg5")
+	df_filt_lg6   <- subset(df_filt, df_filt$LG == "lg6")	
+	df_filt_lg7   <- subset(df_filt, df_filt$LG == "lg7")
+	df_filt_lg8   <- subset(df_filt, df_filt$LG == "lg8")
+	df_filt_lg9   <- subset(df_filt, df_filt$LG == "lg9")
+	df_filt_lg10  <- subset(df_filt, df_filt$LG == "lg10")
+	df_filt_lg11  <- subset(df_filt, df_filt$LG == "lg11")
+	df_filt_lg12  <- subset(df_filt, df_filt$LG == "lg12")
+	df_filt_lgX   <- subset(df_filt, df_filt$LG == "lgX")
+	
+	print(head(df_filt_lg6 ))
+	
+		
+	out_df_LG <- c()
+	for(s in samp_names){
+		print(s)
+		wt_med_lg1  <- weighted.median(eval(parse(text=paste('df_filt_lg1$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg1$',"length", sep=''))))
+		wt_med_lg2  <- weighted.median(eval(parse(text=paste('df_filt_lg2$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg2$',"length", sep=''))))
+		wt_med_lg3  <- weighted.median(eval(parse(text=paste('df_filt_lg3$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg3$',"length", sep=''))))
+		wt_med_lg4  <- weighted.median(eval(parse(text=paste('df_filt_lg4$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg4$',"length", sep=''))))
+		wt_med_lg5  <- weighted.median(eval(parse(text=paste('df_filt_lg5$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg5$',"length", sep=''))))
+		wt_med_lg6  <- weighted.median(eval(parse(text=paste('df_filt_lg6$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg6$',"length", sep=''))))
+		wt_med_lg7  <- weighted.median(eval(parse(text=paste('df_filt_lg7$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg7$',"length", sep=''))))
+		wt_med_lg8  <- weighted.median(eval(parse(text=paste('df_filt_lg8$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg8$',"length", sep=''))))
+		wt_med_lg9  <- weighted.median(eval(parse(text=paste('df_filt_lg9$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg9$',"length", sep=''))))
+		wt_med_lg10 <- weighted.median(eval(parse(text=paste('df_filt_lg10$Phet_',s, sep=''))), eval(parse(text=paste('df_filt_lg10$',"length", sep=''))))
+		wt_med_lg11 <- weighted.median(eval(parse(text=paste('df_filt_lg11$Phet_',s, sep=''))), eval(parse(text=paste('df_filt_lg11$',"length", sep=''))))
+		wt_med_lg12 <- weighted.median(eval(parse(text=paste('df_filt_lg12$Phet_',s, sep=''))), eval(parse(text=paste('df_filt_lg12$',"length", sep=''))))
+		wt_med_lgX  <- weighted.median(eval(parse(text=paste('df_filt_lgX$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lgX$',"length", sep=''))))
+
+		out_line <- c(s, "lg1", wt_med_lg1)
+		out_df_LG <- rbind(out_df_LG, out_line)	
+		out_line <- c(s, "lg2", wt_med_lg2)
+		out_df_LG <- rbind(out_df_LG, out_line)
+		out_line <- c(s, "lg3", wt_med_lg3)
+		out_df_LG <- rbind(out_df_LG, out_line)				
+		out_line <- c(s, "lg4", wt_med_lg4)
+		out_df_LG <- rbind(out_df_LG, out_line)	
+		out_line <- c(s, "lg5", wt_med_lg5)
+		out_df_LG <- rbind(out_df_LG, out_line)
+		out_line <- c(s, "lg6", wt_med_lg6)
+		out_df_LG <- rbind(out_df_LG, out_line)	
+		out_line <- c(s, "lg7", wt_med_lg7)
+		out_df_LG <- rbind(out_df_LG, out_line)	
+		out_line <- c(s, "lg8", wt_med_lg8)
+		out_df_LG <- rbind(out_df_LG, out_line)
+		out_line <- c(s, "lg9", wt_med_lg9)
+		out_df_LG <- rbind(out_df_LG, out_line)	
+		out_line <- c(s, "lg10", wt_med_lg10)
+		out_df_LG <- rbind(out_df_LG, out_line)	
+		out_line <- c(s, "lg11", wt_med_lg11)
+		out_df_LG <- rbind(out_df_LG, out_line)
+		out_line <- c(s, "lg12", wt_med_lg12)
+		out_df_LG <- rbind(out_df_LG, out_line)
+		out_line <- c(s, "lgX", wt_med_lgX)
+		out_df_LG <- rbind(out_df_LG, out_line)			
+	}	
+
+	out_df_LG <- as.data.frame(out_df_LG)
+	colnames(out_df_LG) <- c("samp", "LG", "wt_med_Phet")
+	out_df_LG$wt_med_Phet <- as.numeric(as.character(out_df_LG$wt_med_Phet))
+	out_df_LG$LG_ord <- ordered(out_df_LG$LG, levels=c("lg1","lg2","lg3","lg4","lg5","lg6","lg7","lg8","lg9","lg10","lg11","lg12","lgX")) 
+
+	#out_list = list("out_df_soft" = out_df_soft, "out_df_hard" = out_df_hard, "out_df3cat" = out_df3cat)
+	return(out_df_LG)	
+	
+}
+
+Tbi_LG_Phet <- LG_Phet(Tbi_df_filt_het, Tbi_samp_names)
+Tce_LG_Phet <- LG_Phet(Tce_df_filt_het, Tce_samp_names)
+Tcm_LG_Phet <- LG_Phet(Tcm_df_filt_het, Tcm_samp_names)
+Tpa_LG_Phet <- LG_Phet(Tpa_df_filt_het, Tpa_samp_names)
+Tps_LG_Phet <- LG_Phet(Tps_df_filt_het, Tps_samp_names)
+
+plot_phet_LG_1 <- function(df,tit_text){
+	p1 <- ggplot(df, aes(samp, wt_med_Phet, fill = LG_ord)) + 
+		geom_bar(position="dodge",stat="identity") +
+		theme_bw() +
+		theme(axis.text.x = element_text(angle = 90)) +
+		xlab ("Sample") + 
+		ylab ("Heterozygosity") + 
+		scale_fill_manual(values=c("#1B9E77", "#D95F02","#7570B3", "#E7298A", "#66A61E", "#E6AB02", "#A6761D", "yellow2","#666666","lightblue","royalblue2", "darkorchid", "red3")) + ggtitle(tit_text) 
+	return(p1)
+}	
+
+
+
+pdf(paste("Phet_LG_", cutoff_len, ".pdf", sep = ""), width = 	9, height = 20)
+plot_grid(
+plot_phet_LG_1(Tbi_LG_Phet, "Tbi"),
+plot_phet_LG_1(Tce_LG_Phet, "Tce"),
+plot_phet_LG_1(Tcm_LG_Phet, "Tcm"),
+plot_phet_LG_1(Tpa_LG_Phet, "Tpa"),
+plot_phet_LG_1(Tps_LG_Phet, "Tps"),
+ncol = 1)
+dev.off()
+getwd() ## where has my plot gone....?
+
+
+############################################# ############################################# ############################################# 
+############################################# hist
+
+### Hard to see much here
+hist_min_len = 20000
+
+
+
+Tbi_df_filt_het_l <- as.data.frame(cbind(
+c(
+Tbi_df_filt_het$Phet_Tbi_F_CC86B, 
+Tbi_df_filt_het$Phet_Tbi_F_CC86C,
+Tbi_df_filt_het$Phet_Tbi_F_CC87B,
+Tbi_df_filt_het$Phet_Tbi_F_CC87C,
+Tbi_df_filt_het$Phet_Tbi_F_CC88B,
+Tbi_df_filt_het$Phet_Tbi_M_13_Tbi, 
+Tbi_df_filt_het$Phet_Tbi_M_14_Tbi,
+Tbi_df_filt_het$Phet_Tbi_M_15_Tbi,
+Tbi_df_filt_het$Phet_Tbi_M_16_Tbi),
+c(
+rep("Tbi_F_CC86B", length(Tbi_df_filt_het[,1])),
+rep("Tbi_F_CC86C", length(Tbi_df_filt_het[,1])),
+rep("Tbi_F_CC87B", length(Tbi_df_filt_het[,1])),
+rep("Tbi_F_CC87C", length(Tbi_df_filt_het[,1])),
+rep("Tbi_F_CC88B", length(Tbi_df_filt_het[,1])),
+rep("Tbi_M_13_Tbi", length(Tbi_df_filt_het[,1])),
+rep("Tbi_M_14_Tbi", length(Tbi_df_filt_het[,1])),
+rep("Tbi_M_15_Tbi", length(Tbi_df_filt_het[,1])),
+rep("Tbi_M_16_Tbi", length(Tbi_df_filt_het[,1]))),
+c(
+Tbi_df_filt_het$length, 
+Tbi_df_filt_het$length, 
+Tbi_df_filt_het$length, 
+Tbi_df_filt_het$length, 
+Tbi_df_filt_het$length, 
+Tbi_df_filt_het$length, 
+Tbi_df_filt_het$length, 
+Tbi_df_filt_het$length, 
+Tbi_df_filt_het$length),
+c(
+Tbi_df_filt_het$class_hard, 
+Tbi_df_filt_het$class_hard, 
+Tbi_df_filt_het$class_hard, 
+Tbi_df_filt_het$class_hard, 
+Tbi_df_filt_het$class_hard, 
+Tbi_df_filt_het$class_hard, 
+Tbi_df_filt_het$class_hard, 
+Tbi_df_filt_het$class_hard, 
+Tbi_df_filt_het$class_hard)))
+
+colnames(Tbi_df_filt_het_l) <- c("Phet", "samp", "length", "class_hard")
+Tbi_df_filt_het_l$Phet <- as.numeric(Tbi_df_filt_het_l$Phet)
+Tbi_df_filt_het_l$length <- as.numeric(Tbi_df_filt_het_l$length)
+
+
+
+Tbi_df_filt_het_l_s <- subset(Tbi_df_filt_het_l, Tbi_df_filt_het_l$length >= hist_min_len)
+head(Tbi_df_filt_het_l_s )
+
+length(Tbi_df_filt_het_l_s[,1])
+
+# ggplot(Tbi_df_filt_het_l_s, aes(log(Phet))) + 
+	# theme_bw() +
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC86B"), color="darkgrey", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC86B"), color="red3", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC86C"), color="darkgrey", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC86C"), color="red3", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC87B"), color="darkgrey", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC87B"), color="red3", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC87C"), color="darkgrey", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC87C"), color="red3", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC88B"), color="darkgrey", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC88B"), color="red3", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_M_13_Tbi"), color="darkgrey", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_M_13_Tbi"), color="red3", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_M_14_Tbi"), color="darkgrey", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_M_14_Tbi"), color="red3", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_M_15_Tbi"), color="darkgrey", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_M_15_Tbi"), color="red3", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_M_16_Tbi"), color="darkgrey", size = 1, stat="density") + 
+	# geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_M_16_Tbi"), color="red3", size = 1, stat="density") 
+
+
+
+Tbi_Phet_hist_F <- ggplot(Tbi_df_filt_het_l_s, aes(log(Phet + 1))) + 
+	theme_bw() +
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC86B"), color="darkgrey", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC86B"), color="red3", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC86C"), color="darkgrey", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC86C"), color="red3", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC87B"), color="darkgrey", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC87B"), color="red3", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC87C"), color="darkgrey", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC87C"), color="red3", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_F_CC88B"), color="darkgrey", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_F_CC88B"), color="red3", size = 1, stat="density") + xlim(c(-.0001, 0.01)) + ggtitle(paste("Tbi Females min len = ",hist_min_len))
+
+
+Tbi_Phet_hist_M <- ggplot(Tbi_df_filt_het_l_s, aes(log10(Phet + 1))) + 
+	theme_bw() +
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_M_13_Tbi"), color="darkgrey", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_M_13_Tbi"), color="red3", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_M_14_Tbi"), color="darkgrey", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_M_14_Tbi"), color="red3", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_M_15_Tbi"), color="darkgrey", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_M_15_Tbi"), color="red3", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "A" & samp == "Tbi_M_16_Tbi"), color="darkgrey", size = 1, stat="density") + 
+	geom_line(data=subset(Tbi_df_filt_het_l_s,class_hard  == "X" & samp == "Tbi_M_16_Tbi"), color="red3", size = 1, stat="density") + xlim(c(-.0001, 0.01)) + ggtitle(paste("Tbi Males, min len = ",hist_min_len))
+
+
+plot_grid(Tbi_Phet_hist_F, Tbi_Phet_hist_M, ncol = 1)
+
+pdf(paste("Tbi_Phet_hist", hist_min_len, ".pdf", sep = ""), width = 8, height = 7)
+plot_grid(Tbi_Phet_hist_F, Tbi_Phet_hist_M, ncol = 1)
+dev.off()
+getwd() ## where has my plot gone....?
 
 
 
