@@ -16,11 +16,9 @@
 
 ## data
 
-* **linkage_groups.tar.gz**
-     * linkage groups for each species inferred from Nosil et al (2018) as described in Jaron et al. (2020).
-     
-* **coverage_and_heterozygosity**
-     * Coverage and heterozygosity estimates for each sample.
+* **linkage_groups.tar.gz** | linkage groups for each species inferred from Nosil et al (2018) as described in Jaron et al. (2020).
+* **Sample_coverage** | per base coverage for each sample.
+* **coverage_and_heterozygosity** | Contig coverage and heterozygosity estimates for each sample.
 
 
 ## References
