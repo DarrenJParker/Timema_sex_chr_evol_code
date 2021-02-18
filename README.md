@@ -11,6 +11,7 @@ Need to check all paths are correct!
 
 ## Gene expression analysis
 
+* **3_RNAseq_mapping.sh** || need to add trimming + download reads
 
 ## data
 
