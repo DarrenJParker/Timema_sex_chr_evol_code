@@ -1,7 +1,7 @@
 # Timema_sex_chr_evol
 
-Need to check all paths are correct!
-Need to explain all accessory scripts
+* Need to check all paths are correct!
+* Need to explain all accessory scripts
 
 ## ID X linked scaffolds
 
