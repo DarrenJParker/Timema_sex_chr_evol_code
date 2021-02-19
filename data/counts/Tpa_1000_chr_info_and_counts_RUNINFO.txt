@@ -1,0 +1,30 @@
+Files:
+data/output/HTseq_out_ALL/Tpa_WBHDLGRT_v8_H2E.counts.csv
+data/output/gene_lens/Tpa_exon_by_gene_id_lengths.csv
+data/output/MF_cov/Tpa_MFcov_filt_1000.csv
+data/gffs/Tpa_b3v08.max_arth_b2g_droso_b2g_forHTSeq.gff
+data/output/LG_pos/Tpa_gene_rel_pos_lg.csv
+data/TBITCETCMTPATPS_HOG_matrix.txt
+
+N Autosomal scafs (soft class): 136276
+Number of bases Autosomal (soft class):  678706803
+N X-linked scafs (soft class): 18884
+Number of bases X-linked (soft class):  108244937
+Percentage of genome X-linked  (soft class): 13.754965075749118
+N Autosomal scafs (hard class): 148908
+Number of bases Autosomal (hard class):  728780640
+N X-linked scafs (hard class): 6252
+Number of bases X-linked (hard class):  58171100
+Percentage of genome X-linked  (hard class): 7.3919526501078705
+
+Number of genes Autosomal (soft): 15069
+Number of genes X-linked (soft): 1457
+Number of genes Autosomal (hard): 15680
+Number of genes X-linked (hard): 846
+Number of genes with no chromosome info: 3
+
+Number of orths: 3173
+Number of orthologs Autosomal (soft): 2932
+Number of orthologs  X-linked (soft): 240
+Number of orthologs  Autosomal (hard): 3030
+Number of orthologs  X-linked (hard): 142

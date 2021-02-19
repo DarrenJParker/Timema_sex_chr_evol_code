@@ -232,26 +232,84 @@ cp HTseq_out/Tcm* HTseq_out_ALL/Tcm
 cp HTseq_out/Tpa* HTseq_out_ALL/Tpa
 cp HTseq_out/Tps* HTseq_out_ALL/Tps
 
-cd HTseq_out_ALL
+cd data/output/HTseq_out_ALL
 
-python3 ~/Gen_BioInf/HTSeq_to_edgeR.py -i Tbi -o Tbi_WBGNHDLG_v8
-python3 ~/Gen_BioInf/HTSeq_to_edgeR.py -i Tce -o Tce_WBGNHDLG_v8
-python3 ~/Gen_BioInf/HTSeq_to_edgeR.py -i Tcm -o Tcm_WBGNHDLG_v8
-python3 ~/Gen_BioInf/HTSeq_to_edgeR.py -i Tpa -o Tpa_WBGNHDLG_v8
-python3 ~/Gen_BioInf/HTSeq_to_edgeR.py -i Tps -o Tps_WBGNHDLG_v8
+python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tbi -o Tbi_WBHDLGRT_v8
+python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tce -o Tce_WBHDLGRT_v8
+python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tcm -o Tcm_WBHDLGRT_v8
+python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tpa -o Tpa_WBHDLGRT_v8
+python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tps -o Tps_WBHDLGRT_v8
 
 
 ###################################################################################################################################
 ####### get total exon len by gene
 
 
-mkdir mapping_RNAseq_v8/gene_lens
-cd mapping_RNAseq_v8/gene_lens
+mkdir data/output/gene_lens
+cd    data/output/gene_lens
 
 for f in ../../Genomes/gffs/*_b2g_forHTSeq.gff ; do
 	sp=`echo $f | sed 's/.*\///' | sed 's/_.*//'`
 	echo $sp
-	python3 ~/Gen_BioInf/gff_feature_lengths.py -i $f -o $sp
+	python3 ../../../accessory_scripts/gff_feature_lengths.py -i $f -o $sp
 done
+
+
 	
+###################################################################################################################################
+### get rel position of genes in Nosil's linkage map
+
+### select largest alignment block. most have one large block and many little ones.
+### work out rel position of each gene.
+# NOTE I match the midpoint of the largest alignment block to midpoint of the part of UNIL scaf it aligned to.
+
+mkdir data/output/LG_pos
+
+python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tbi_scf_block_alignment.tsv \
+                                               -g Tbi_b3v08.max_arth_b2g_droso_b2g.gff \
+                                               -o data/output/LG_pos/Tbi
+
+python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tce_scf_block_alignment.tsv \
+                                               -g Tce_b3v08.max_arth_b2g_droso_b2g.gff \
+                                               -o data/output/LG_pos/Tce
+
+python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tcm_scf_block_alignment.tsv \
+                                               -g Tcm_b3v08.max_arth_b2g_droso_b2g.gff \
+                                               -o data/output/LG_pos/Tcm
+
+python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tpa_scf_block_alignment.tsv \
+                                               -g Tpa_b3v08.max_arth_b2g_droso_b2g.gff \
+                                               -o data/output/LG_pos/Tpa
+
+python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tps_scf_block_alignment.tsv \
+                                               -g Tps_b3v08.max_arth_b2g_droso_b2g.gff \
+                                               -o data/output/LG_pos/Tps
+
+
+###################################################################################################################################
+### bring coverage, orthologs, and counts together
+##### STORED output in data/counts for convenience
+
+mkdir data/counts
+
+for sp in "Tbi" "Tce" "Tcm" "Tpa" "Tps"; do
+echo $sp
+for scaf_len in 1000 5000; do
+echo $scaf_len        
+
+python3 accessory_scripts/sex_chr_cov_readcounts_tidier.py \
+-c "data/output/MF_cov/"$sp"_MFcov_filt_"$scaf_len".csv"  \
+-g "data/gffs/"$sp"_b3v08.max_arth_b2g_droso_b2g_forHTSeq.gff" \
+-l "data/output/gene_lens/"$sp"_exon_by_gene_id_lengths.csv" \
+-L "data/output/LG_pos/"$sp"_gene_rel_pos_lg.csv" \
+-r "data/output/HTseq_out_ALL/"$sp"_WBHDLGRT_v8_H2E.counts.csv" \
+-y data/TBITCETCMTPATPS_HOG_matrix.txt \
+-o "data/counts/"$sp"_"$scaf_len
+
+done
+done
+
+
+
+
 
