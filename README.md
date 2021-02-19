@@ -13,7 +13,8 @@
 ## Gene expression analysis
 
 * **3_RNAseq_mapping.sh** || need to add trimming + download reads
-
+* **Orthologs_on_the_X.R** | looking if X linked genes are the same in each species
+ 
 ## data
 
 * **linkage_groups.tar.gz** | linkage groups for each species inferred from Nosil et al (2018) as described in Jaron et al. (2020).
