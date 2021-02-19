@@ -28,3 +28,6 @@ Number of orthologs Autosomal (soft): 2932
 Number of orthologs  X-linked (soft): 240
 Number of orthologs  Autosomal (hard): 3030
 Number of orthologs  X-linked (hard): 142
+
+M_F_cov_filename	A_scafs_N_soft	A_len_soft	X_scafs_N_soft	X_len_soft	X_%	A_scafs_N_hard	A_len_hard	X_scafs_N_hard	X_len_hard	X_%	genes_A_soft	genes_X_soft	genes_A_hard	genes_X_hard	gene_no_scaf_info	genes_A_soft_orth	genes_X_soft_orth	genes_A_hard_orth	genes_X_hard_orth
+data/output/MF_cov/Tpa_MFcov_filt_1000.csv	136276	678706803	18884	108244937	13.754965075749118	148908	728780640	6252	58171100	7.3919526501078705	15069	1457	15680	846	3	2932	240	3030	142

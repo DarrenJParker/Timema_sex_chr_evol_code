@@ -407,7 +407,16 @@ out_file_stats.write("Number of orthologs  X-linked (soft): " + str(genes_X_soft
 out_file_stats.write("Number of orthologs  Autosomal (hard): " + str(genes_A_hard_orth) + "\n")
 out_file_stats.write("Number of orthologs  X-linked (hard): " + str(genes_X_hard_orth) + "\n")
 
-
+out_file_stats.write("\n" "M_F_cov_filename" + "\t" + 
+	                 "A_scafs_N_soft" + "\t" + "A_len_soft" + "\t" + "X_scafs_N_soft" + "\t" + "X_len_soft" + "\t" + "X_%" + "\t" + 
+                     "A_scafs_N_hard" + "\t" + "A_len_hard" + "\t" + "X_scafs_N_hard" + "\t" + "X_len_hard" + "\t" + "X_%" + "\t" +	
+	                 "genes_A_soft" + "\t"       + "genes_X_soft" + "\t"      + "genes_A_hard" + "\t"      + "genes_X_hard" + "\t" + "gene_no_scaf_info" + "\t" + 
+					 "genes_A_soft_orth" + "\t" + "genes_X_soft_orth" + "\t" + "genes_A_hard_orth" + "\t" + "genes_X_hard_orth" + "\n")
+out_file_stats.write(str(M_F_cov_filename) + "\t" + 
+	                 str(A_scafs_N_soft) + "\t" + str(A_len_soft) + "\t" + str(X_scafs_N_soft) + "\t" + str(X_len_soft) + "\t" + str((X_len_soft / (X_len_soft + A_len_soft)) * 100) + "\t" + 
+                     str(A_scafs_N_hard) + "\t" + str(A_len_hard) + "\t" + str(X_scafs_N_hard) + "\t" + str(X_len_hard) + "\t" + str((X_len_hard / (X_len_hard + A_len_hard)) * 100) + "\t" +	
+	                 str(genes_A_soft) + "\t"       + str(genes_X_soft) + "\t"      + str(genes_A_hard) + "\t"      + str(genes_X_hard) + "\t" + str(gene_no_scaf_info) + "\t" + 
+					 str(genes_A_soft_orth) + "\t" + str(genes_X_soft_orth) + "\t" + str(genes_A_hard_orth) + "\t" + str(genes_X_hard_orth) + "\n")
 
 print("\n\nFinished, Walker.\n\n")	
  		
