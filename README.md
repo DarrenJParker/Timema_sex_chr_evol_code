@@ -20,6 +20,7 @@
 * **Sample_coverage** | per base coverage for each sample.
 * **coverage_and_heterozygosity** | Contig coverage and heterozygosity estimates for each sample.
 * **TBITCETCMTPATPS_HOG_matrix.txt** | 1-to-1 orthologs for the five species. Orthologs were obtained using OrthoDB standalone pipeline (v. 2.4.4) (Kriventseva et al, 2015) as described in Jaron et al. (2020).
+* **counts** | RNAseq read counts with sex chromosome information
 
 
 ## References
