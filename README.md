@@ -8,12 +8,12 @@
 * **1_read_prep.sh**
 * **2_genome_read_mapping.sh**
 * **Male_and_female_coverage.R**
-
+* **Orthologs_on_the_X.R** | looking if X linked genes are the same in each species
 
 ## Gene expression analysis
 
-* **3_RNAseq_mapping.sh** || need to add trimming + download reads
-* **Orthologs_on_the_X.R** | looking if X linked genes are the same in each species
+* **3_RNAseq_mapping.sh** | need to add trimming + download reads
+* **Expression_analyses.R** | Dosage compensation and sex-biased genes
  
 ## data
 
