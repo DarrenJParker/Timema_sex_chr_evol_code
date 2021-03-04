@@ -78,16 +78,12 @@ STAR --runThreadN 12 --runMode genomeGenerate \
 
 
 ########################################################################################################################
+##### Download RNAseq Reads
+
+########################################################################################################################
 ##### Trim RNAseq Reads
 
 # ADD
-
-
-
-
-
-
-
 
 #### map reads
 #### MEMORY - mapping failed with 20GB - upped to 60GB
@@ -95,33 +91,6 @@ STAR --runThreadN 12 --runMode genomeGenerate \
 ### Mapping to sp ref
 
 mkdir mapping_RNAseq_v8/STAR_out
-
-#### mapping WB - but also altering names of libs to make more consistant with TS stuff
-
-for i in /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/READS/RNA_seq/Whole_body/Qual_Trimmed_1a/*.fq.gz; do
-        cd /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/mapping_RNAseq_v8/STAR_out
-        foo2_filename=`echo "$i"`
-        foo3_base=`echo "$i" | sed 's/Eth.*//' | sed 's/S2e.*//' | sed 's/Swb.*//' |  sed 's/Stb.*//' |  sed 's/_SF_/_SF_WB_/' | sed 's/_SM_/_SM_WB_/' | sed 's/_AF_/_AF_WB_/' | sed 's/_R1_/_Re1/' | sed 's/_R2_/_Re2/' | sed 's/_R3_/_Re3/' | sed 's/.*\///'`
-        sp=`echo "$i" | sed 's/.fq//' | sed 's/.*\///' | sed 's/_.*//'`
-        echo $foo2_filename
-        echo $foo3_base
-        echo $sp
-		
-		mkdir $foo3_base
-		cd $foo3_base
-
-		ref_name=`echo "/scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/mapping_RNAseq_v8/REFS/"$sp`
-		echo $ref_name
-		echo ""
-
-		STAR --runMode alignReads --outSAMtype BAM Unsorted --readFilesCommand zcat \
-		--genomeDir $ref_name \
-		--outFileNamePrefix $foo3_base \
-		--readFilesIn $foo2_filename		
-done
-
-
-#### mapping TS - but also altering names of libs to make more consistant with WB stuff
 	
 for i in /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/READS/RNA_seq/Tissue_specific/Qual_Trimmed_1a/*.fq.gz; do
         cd /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/mapping_RNAseq_v8/STAR_out/
