@@ -10,7 +10,7 @@ library(Rtsne)
 library(cowplot)
 library(edgeR)
 library(hash)
-
+library(pheatmap)
 
 
 ### read data
@@ -37,6 +37,42 @@ dat1_Tps_raw$lg <- str_split_fixed(as.character(dat1_Tps_raw$lg_pos), "_",2)[,1]
 dir.create("../Exp_out")
 setwd("../Exp_out")
 
+
+#########################################################################################################################
+## gene info into dicts
+
+all_raw_dfs <- c("dat1_Tbi_raw", "dat1_Tce_raw", "dat1_Tcm_raw", "dat1_Tpa_raw", "dat1_Tps_raw")
+
+Orth_dict <- hash()
+hard_chr_dict <- hash()
+soft_chr_dict <- hash()
+all_orths = c()
+
+for(d in all_raw_dfs){
+	sp <- strsplit(d, "_")[[1]][2]
+	test_df <- eval(parse(text=paste(d,sep='')))
+
+	for(i in seq(1:length(test_df[,1]))){
+		gene_n <- test_df$gene_id[i]
+		HOG_n  <- test_df$HOG[i]
+		hard_n <- test_df$chr_hard[i]
+		soft_n <- test_df$chr_soft[i]
+		if(! is.na(HOG_n)){
+			Orth_dict[[paste(sp, HOG_n, sep = "___")]] <- gene_n
+			all_orths = c(all_orths, HOG_n)
+		}
+	
+		if(! is.na(hard_n)){
+			hard_chr_dict[[gene_n]] <- hard_n
+		}
+
+		if(! is.na(soft_n)){
+			soft_chr_dict[[gene_n]] <- soft_n
+		}
+	}
+}
+
+all_orths <- unique(all_orths)
 
 #########################################################################################################################
 ## functions
@@ -367,9 +403,7 @@ Tcm_LG_F_TPM <- get_TPM(y_Tcm_LG_F_TPM, dat1_Tcm, "Tcm_SF_LG", "Tcm_SM_LG")
 Tpa_LG_F_TPM <- get_TPM(y_Tpa_LG_F_TPM, dat1_Tpa, "Tpa_SF_LG", "Tpa_SM_LG")
 Tps_LG_F_TPM <- get_TPM(y_Tps_LG_F_TPM, dat1_Tps, "Tps_SF_LG", "Tps_SM_LG")
 
-
-head(Tbi_WB_F_TPM )
-
+head(Tps_LG_F_TPM) 
 ###################################################################################
 ### Dosage comp
 
@@ -1260,14 +1294,12 @@ get_DE_genes <- function(fita,FDRa){
 
 ####### design matrix
 
-## using 0M for male and 1F for female samples
+## using 1M for male and 0F for female samples
+## +ve vals = higher exp in MALES - matches with the logMF stuff above
 
 sex_SB = factor(c(
-"1F","1F","1F","0M","0M","0M"
+"0F","0F","0F","1M","1M","1M"
 ))
-
-data.frame(Sample=colnames(y_Tbi_WB_F ),sex_SB)
-
 
 call_SB <- function(y, sig_level){
 	
@@ -1333,6 +1365,8 @@ TTT_LG_Tce_sex_bias_FPKM <- call_SB(y_Tce_LG_F_FPKM, 0.05)
 TTT_LG_Tcm_sex_bias_FPKM <- call_SB(y_Tcm_LG_F_FPKM, 0.05)
 TTT_LG_Tpa_sex_bias_FPKM <- call_SB(y_Tpa_LG_F_FPKM, 0.05)
 TTT_LG_Tps_sex_bias_FPKM <- call_SB(y_Tps_LG_F_FPKM, 0.05)
+
+head(TTT_RT_Tbi_sex_bias_FPKM$table)
 
 
 N_SB_genes_FPKM <- as.data.frame(cbind(
@@ -1996,11 +2030,12 @@ dev.off()
 MB_FB_on_X <- function(TTT_df, FDR, logFC_cut, full_info_table, chr_class){
 	
 	TTT_df_sig = subset(TTT_df, TTT_df$FDR < 0.05)
-	TTT_df_sig_MB = subset(TTT_df_sig, TTT_df_sig$logFC < 0)
-	TTT_df_sig_FB = subset(TTT_df_sig, TTT_df_sig$logFC > 0)
-	TTT_df_sig_MB_FC = subset(TTT_df_sig_MB, TTT_df_sig_MB$logFC <= -1 * logFC_cut )	
-	TTT_df_sig_FB_FC = subset(TTT_df_sig_FB, TTT_df_sig_FB$logFC >= logFC_cut)		
-
+	TTT_df_sig_MB = subset(TTT_df_sig, TTT_df_sig$logFC > 0)
+	TTT_df_sig_FB = subset(TTT_df_sig, TTT_df_sig$logFC < 0)
+	TTT_df_sig_MB_FC = subset(TTT_df_sig_MB, TTT_df_sig_MB$logFC >=  logFC_cut)	
+	TTT_df_sig_FB_FC = subset(TTT_df_sig_FB, TTT_df_sig_FB$logFC <=  -1 * logFC_cut)		
+	
+	print(head(TTT_df_sig ))
 
 	FB_genes = as.character(TTT_df_sig_FB_FC$genes)
 	MB_genes = as.character(TTT_df_sig_MB_FC$genes)
@@ -2012,7 +2047,7 @@ MB_FB_on_X <- function(TTT_df, FDR, logFC_cut, full_info_table, chr_class){
 	print("N male-biased")
 	print(length(MB_genes))	
 
-	## only consider genes that wee expressed
+	## only consider genes that were expressed
 	exp_info_table <- subset(full_info_table, full_info_table$gene_id %in% all_exp_genes)
 
 	FB_genes_df = subset(exp_info_table,   exp_info_table$gene_id %in% FB_genes)
@@ -2434,7 +2469,6 @@ getwd() ## where has my plot gone....
 #######################################################################################################################################################################
 ##### plot log2MF along chromosome 
 
-
 plot_MF_along_chr = function(RT_df, HD_df, LG_df, lg_want, sp){
 	
 	# add Tiss = 
@@ -2448,12 +2482,12 @@ plot_MF_along_chr = function(RT_df, HD_df, LG_df, lg_want, sp){
 		c(RT_df$tiss, HD_df$tiss, LG_df$tiss),
 		c(as.character(RT_df$lg_pos), as.character(HD_df$lg_pos ), as.character(LG_df$lg_pos )),
 		c(RT_df$gene_rel_midpoint, HD_df$gene_rel_midpoint, LG_df$gene_rel_midpoint),
-		c(RT_df[,(length(RT_df) - 2)],   HD_df[,(length(HD_df) - 2)],  LG_df[,(length(LG_df) - 2)]),
-		c(RT_df[,(length(RT_df) - 1)],   HD_df[,(length(HD_df) - 1)],  LG_df[,(length(LG_df) - 1)])
+		c(eval(parse(text=paste('RT_df','$', sp, '_SF_RT_meanFPKM',sep=''))),  eval(parse(text=paste('HD_df','$', sp, '_SF_HD_meanFPKM',sep=''))),  eval(parse(text=paste('LG_df','$', sp, '_SF_LG_meanFPKM',sep='')))),
+		c(eval(parse(text=paste('RT_df','$', sp, '_SM_RT_meanFPKM',sep=''))),  eval(parse(text=paste('HD_df','$', sp, '_SM_HD_meanFPKM',sep=''))),  eval(parse(text=paste('LG_df','$', sp, '_SM_LG_meanFPKM',sep=''))))
 	))
 	
 	colnames(join_df) <- c("tiss", "lg", "gene_rel_midpoint", "F_AvFPKM", "M_AvFPKM")
-	
+	print(head(join_df))
 	
 	join_df$tiss = as.character(join_df$tiss)	
 	#join_df$lg   = as.character(join_df$lg)	
@@ -2471,7 +2505,6 @@ plot_MF_along_chr = function(RT_df, HD_df, LG_df, lg_want, sp){
 	print(head(join_df_lg))		
 	P1 = ggplot(join_df_lg, aes(gene_rel_midpoint)) + 
  		 geom_point(aes(y = AvFPKM_log2MF, colour = tiss)) + geom_line(aes(y = AvFPKM_log2MF, colour = tiss))
- 		 
  		 
  	## per tissue
  	
@@ -2505,9 +2538,7 @@ plot_MF_along_chr = function(RT_df, HD_df, LG_df, lg_want, sp){
 
 	title <- ggdraw() + draw_label(paste(sp, "|", lg_want), fontface='bold')
 	P1_together2 <-	plot_grid(title, P1_together, ncol=1, rel_heights=c(0.1, 2)) 
-
-
-
+	
  	return(P1_together2) 
 }
 
@@ -2696,43 +2727,351 @@ getwd() ## where has my plot gone....
 ##### Ortholog heatmap
 
 
+### get log2MF into dict
+
+RT_FPKM_log2MF_dict <- hash()
+RT_FPKM_Male_dict   <- hash()
+RT_FPKM_Female_dict <- hash()
+for(i in seq(1:length(All_RT_F_FPKM_log2MF_long[,1]))){
+	gene_n <- All_RT_F_FPKM_log2MF_long$gene_id[i]
+	expr_n <- All_RT_F_FPKM_log2MF_long$AvFPKM_log2MF[i]
+	RT_FPKM_log2MF_dict[[gene_n]] <- expr_n
+	AvFPKM_Male_n <- All_RT_F_FPKM_log2MF_long$AvFPKM_Male[i]
+	RT_FPKM_Male_dict[[gene_n]] <- AvFPKM_Male_n
+	AvFPKM_Female_n <- All_RT_F_FPKM_log2MF_long$AvFPKM_Female[i]
+	RT_FPKM_Female_dict[[gene_n]] <- AvFPKM_Female_n
+}
+
+HD_FPKM_log2MF_dict <- hash()
+HD_FPKM_Male_dict   <- hash()
+HD_FPKM_Female_dict <- hash()
+for(i in seq(1:length(All_HD_F_FPKM_log2MF_long[,1]))){
+	gene_n <- All_HD_F_FPKM_log2MF_long$gene_id[i]
+	expr_n <- All_HD_F_FPKM_log2MF_long$AvFPKM_log2MF[i]
+	HD_FPKM_log2MF_dict[[gene_n]] <- expr_n
+	AvFPKM_Male_n <- All_HD_F_FPKM_log2MF_long$AvFPKM_Male[i]
+	HD_FPKM_Male_dict[[gene_n]] <- AvFPKM_Male_n
+	AvFPKM_Female_n <- All_HD_F_FPKM_log2MF_long$AvFPKM_Female[i]
+	HD_FPKM_Female_dict[[gene_n]] <- AvFPKM_Female_n
+}
+
+
+LG_FPKM_log2MF_dict <- hash()
+LG_FPKM_Male_dict   <- hash()
+LG_FPKM_Female_dict <- hash()
+for(i in seq(1:length(All_LG_F_FPKM_log2MF_long[,1]))){
+	gene_n <- All_LG_F_FPKM_log2MF_long$gene_id[i]
+	expr_n <- All_LG_F_FPKM_log2MF_long$AvFPKM_log2MF[i]
+	LG_FPKM_log2MF_dict[[gene_n]] <- expr_n
+	AvFPKM_Male_n <- All_LG_F_FPKM_log2MF_long$AvFPKM_Male[i]
+	LG_FPKM_Male_dict[[gene_n]] <- AvFPKM_Male_n
+	AvFPKM_Female_n <- All_LG_F_FPKM_log2MF_long$AvFPKM_Female[i]
+	LG_FPKM_Female_dict[[gene_n]] <- AvFPKM_Female_n
+}
+
+
+RT_TPM_log2MF_dict <- hash()
+RT_TPM_Male_dict   <- hash()
+RT_TPM_Female_dict <- hash()
+for(i in seq(1:length(All_RT_F_TPM_log2MF_long[,1]))){
+	gene_n <- All_RT_F_TPM_log2MF_long$gene_id[i]
+	expr_n <- All_RT_F_TPM_log2MF_long$AvTPM_log2MF[i]
+	RT_TPM_log2MF_dict[[gene_n]] <- expr_n
+	AvTPM_Male_n <- All_RT_F_TPM_log2MF_long$AvTPM_Male[i]
+	RT_TPM_Male_dict[[gene_n]] <- AvTPM_Male_n
+	AvTPM_Female_n <- All_RT_F_TPM_log2MF_long$AvTPM_Female[i]
+	RT_TPM_Female_dict[[gene_n]] <- AvTPM_Female_n
+}
+
+HD_TPM_log2MF_dict <- hash()
+HD_TPM_Male_dict   <- hash()
+HD_TPM_Female_dict <- hash()
+for(i in seq(1:length(All_HD_F_TPM_log2MF_long[,1]))){
+	gene_n <- All_HD_F_TPM_log2MF_long$gene_id[i]
+	expr_n <- All_HD_F_TPM_log2MF_long$AvTPM_log2MF[i]
+	HD_TPM_log2MF_dict[[gene_n]] <- expr_n
+	AvTPM_Male_n <- All_HD_F_TPM_log2MF_long$AvTPM_Male[i]
+	HD_TPM_Male_dict[[gene_n]] <- AvTPM_Male_n
+	AvTPM_Female_n <- All_HD_F_TPM_log2MF_long$AvTPM_Female[i]
+	HD_TPM_Female_dict[[gene_n]] <- AvTPM_Female_n
+}
+
+
+LG_TPM_log2MF_dict <- hash()
+LG_TPM_Male_dict   <- hash()
+LG_TPM_Female_dict <- hash()
+for(i in seq(1:length(All_LG_F_TPM_log2MF_long[,1]))){
+	gene_n <- All_LG_F_TPM_log2MF_long$gene_id[i]
+	expr_n <- All_LG_F_TPM_log2MF_long$AvTPM_log2MF[i]
+	LG_TPM_log2MF_dict[[gene_n]] <- expr_n
+	AvTPM_Male_n <- All_LG_F_TPM_log2MF_long$AvTPM_Male[i]
+	LG_TPM_Male_dict[[gene_n]] <- AvTPM_Male_n
+	AvTPM_Female_n <- All_LG_F_TPM_log2MF_long$AvTPM_Female[i]
+	LG_TPM_Female_dict[[gene_n]] <- AvTPM_Female_n
+}
+
+
+get_log2MF_vals_per_orth <- function(MF_dict_to_use, Male_dict_to_use, Female_dict_to_use){
+	sp_want = c("Tbi", "Tce", "Tcm", "Tpa", "Tps")
+	MF_dict <- eval(parse(text=MF_dict_to_use ))
+	Male_dict <- eval(parse(text=Male_dict_to_use))
+	Female_dict <- eval(parse(text=Female_dict_to_use))
+	mf_orth_df <- c()
+	exp_orth_df <- c()
+	for(orth in all_orths){
+		orth_MF <- c()
+		chr_hard_allsp <- ""
+		chr_soft_allsp <- ""
+		orth_Male_exp <- c()
+		orth_Female_exp <- c()
+		for(i in seq(1,length(sp_want))){
+			sp_c <- sp_want[i]
+			sp_orth <- paste(sp_c, "___", orth, sep = "")
+			gene_name <- Orth_dict[[sp_orth]]
+  	  		if(length(gene_name ) == 0){gene_name = NA}
+ 			log2MF_i <- MF_dict[[gene_name]]
+  		  	if(length(log2MF_i ) == 0){log2MF_i = NA}   
+  	  		orth_MF <- c(orth_MF, log2MF_i)
+    			chr_c_hard <-  hard_chr_dict[[gene_name]]
+    			if(length(chr_c_hard) == 0){chr_c_hard = NA} 
+		    chr_hard_allsp = paste(chr_hard_allsp, chr_c_hard, sep = "")
+		    chr_c_soft <-  soft_chr_dict[[gene_name]]
+		    if(length(chr_c_soft) == 0){chr_c_soft = NA} 
+		    chr_soft_allsp = paste(chr_soft_allsp, chr_c_soft, sep = "")
+		    
+ 			exp_Male_i <- Male_dict[[gene_name]]
+  		  	if(length(exp_Male_i ) == 0){exp_Male_i = NA}   
+  	  		orth_Male_exp <- c(orth_Male_exp, exp_Male_i)		    
+ 			exp_Female_i <- Female_dict[[gene_name]]
+  		  	if(length(exp_Female_i ) == 0){exp_Female_i = NA}   
+  	  		orth_Female_exp <- c(orth_Female_exp, exp_Female_i)		    
+		    		    
+			} 
+	
+		orth_MF <- (c(orth, orth_MF, chr_hard_allsp, chr_soft_allsp))
+		mf_orth_df <- as.data.frame(rbind(mf_orth_df, orth_MF))
+
+		orth_exp <- (c(orth, orth_Male_exp, orth_Female_exp, chr_hard_allsp, chr_soft_allsp))
+		exp_orth_df <- as.data.frame(rbind(exp_orth_df, orth_exp))
+		}
+	
+	colnames(mf_orth_df ) <- c("orth",sp_want, "hard_chr", "soft_chr")
+	rownames(mf_orth_df ) <- seq(1, length(mf_orth_df[,1]))
+	
+	male_head <- c()
+	for(s in sp_want){
+		male_head <- c(male_head, (paste(s, "_M", sep = "")))
+		}
+	female_head <- c()
+	for(s in sp_want){
+		female_head <- c(female_head, (paste(s, "_F", sep = "")))
+		}
+	
+	colnames(exp_orth_df  ) <- c("orth",male_head, female_head, "hard_chr", "soft_chr")
+	rownames(exp_orth_df  ) <- seq(1, length(exp_orth_df [,1]))
+	
+	output <- list("mf_orth_df" = mf_orth_df, "exp_orth_df" = exp_orth_df)
+	return(output)
+}
+
+RT_FPKM_allsp_orths <- get_log2MF_vals_per_orth("RT_FPKM_log2MF_dict", "RT_FPKM_Male_dict", "RT_FPKM_Female_dict")$exp_orth_df
+HD_FPKM_allsp_orths <- get_log2MF_vals_per_orth("HD_FPKM_log2MF_dict", "HD_FPKM_Male_dict", "HD_FPKM_Female_dict")$exp_orth_df
+LG_FPKM_allsp_orths <- get_log2MF_vals_per_orth("LG_FPKM_log2MF_dict", "LG_FPKM_Male_dict", "LG_FPKM_Female_dict")$exp_orth_df
+
+RT_FPKM_log2MF_allsp_orths <- get_log2MF_vals_per_orth("RT_FPKM_log2MF_dict", "RT_FPKM_Male_dict", "RT_FPKM_Female_dict")$mf_orth_df
+HD_FPKM_log2MF_allsp_orths <- get_log2MF_vals_per_orth("HD_FPKM_log2MF_dict", "HD_FPKM_Male_dict", "HD_FPKM_Female_dict")$mf_orth_df
+LG_FPKM_log2MF_allsp_orths <- get_log2MF_vals_per_orth("LG_FPKM_log2MF_dict", "LG_FPKM_Male_dict", "LG_FPKM_Female_dict")$mf_orth_df
+
+head(LG_FPKM_log2MF_allsp_orths)
+
+# plot_orth_heatmaps <- function(MF_orth_df){
+	# print(length(MF_orth_df[,1]))
+	# MF_orth_df_c <- na.omit(MF_orth_df)
+	# print(length(MF_orth_df_c[,1]))	
+	
+	
+	# # X_soft
+	# X_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "XXXXX")
+	# print(length(X_soft_df[,1]))
+	# X_soft_df_mat <- as.data.frame(cbind(X_soft_df$Tbi, X_soft_df$Tce, X_soft_df$Tcm, X_soft_df$Tpa, X_soft_df$Tps))
+	# rownames(X_soft_df_mat) <- X_soft_df$orth
+	# colnames(X_soft_df_mat) <- c("Tbi", "Tce", "Tcm", "Tpa", "Tps")
+	
+	# X_soft_df_mat$Tbi <- as.numeric(as.character(X_soft_df_mat$Tbi ))
+	# X_soft_df_mat$Tce <- as.numeric(as.character(X_soft_df_mat$Tce ))
+	# X_soft_df_mat$Tcm <- as.numeric(as.character(X_soft_df_mat$Tcm ))
+	# X_soft_df_mat$Tpa <- as.numeric(as.character(X_soft_df_mat$Tpa ))
+	# X_soft_df_mat$Tps <- as.numeric(as.character(X_soft_df_mat$Tps ))	
+	
+	# print(str(X_soft_df_mat))
+	# print(X_soft_df_mat)
+	
+	# breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
+
+	# X_soft_heatmap <- pheatmap(X_soft_df_mat , clustering_distance_rows = "euclidean", cluster_cols = FALSE, 
+	# clustering_method = "ward.D2", color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA)
+	
+	# # A_soft
+	# A_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "AAAAA")
+	# print(length(A_soft_df[,1]))
+	# A_soft_df_mat <- as.data.frame(cbind(A_soft_df$Tbi, A_soft_df$Tce, A_soft_df$Tcm, A_soft_df$Tpa, A_soft_df$Tps))
+	# rownames(A_soft_df_mat) <- A_soft_df$orth
+	# colnames(A_soft_df_mat) <- c("Tbi", "Tce", "Tcm", "Tpa", "Tps")
+	
+	# A_soft_df_mat$Tbi <- as.numeric(as.character(A_soft_df_mat$Tbi ))
+	# A_soft_df_mat$Tce <- as.numeric(as.character(A_soft_df_mat$Tce ))
+	# A_soft_df_mat$Tcm <- as.numeric(as.character(A_soft_df_mat$Tcm ))
+	# A_soft_df_mat$Tpa <- as.numeric(as.character(A_soft_df_mat$Tpa ))
+	# A_soft_df_mat$Tps <- as.numeric(as.character(A_soft_df_mat$Tps ))	
+	
+	# # print(str(A_soft_df_mat))
+	# # print(A_soft_df_mat)
+	
+	# breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
+
+	# A_soft_heatmap <- pheatmap(A_soft_df_mat , clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean",, 
+	# clustering_method = "ward.D2", color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA)
+	
+	# return(A_soft_heatmap)
+# }
 
 
 
+plot_orth_MF_heatmaps_X_soft <- function(MF_orth_df, tit_txt){
+	print(length(MF_orth_df[,1]))
+	MF_orth_df_c <- na.omit(MF_orth_df)
+	print(length(MF_orth_df_c[,1]))	
+	
+	
+	# X_soft
+	X_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "XXXXX")
+	print(length(X_soft_df[,1]))
+	X_soft_df_mat <- as.data.frame(cbind(X_soft_df$Tps, X_soft_df$Tcm, X_soft_df$Tce,  X_soft_df$Tpa, X_soft_df$Tbi))
+	rownames(X_soft_df_mat) <- X_soft_df$orth
+	colnames(X_soft_df_mat) <- c("Tps", "Tcm", "Tce", "Tpa", "Tbi")
+	
+	X_soft_df_mat$Tbi <- as.numeric(as.character(X_soft_df_mat$Tbi ))
+	X_soft_df_mat$Tce <- as.numeric(as.character(X_soft_df_mat$Tce ))
+	X_soft_df_mat$Tcm <- as.numeric(as.character(X_soft_df_mat$Tcm ))
+	X_soft_df_mat$Tpa <- as.numeric(as.character(X_soft_df_mat$Tpa ))
+	X_soft_df_mat$Tps <- as.numeric(as.character(X_soft_df_mat$Tps ))	
+	
+	# print(str(X_soft_df_mat))
+	# print(X_soft_df_mat)
+	
+	breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
+
+	X_soft_heatmap <- pheatmap(X_soft_df_mat, cluster_cols = FALSE, cluster_rows = FALSE, color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA, main = tit_txt)
+	
+	return(X_soft_heatmap)
+}
+
+	
+
+pdf("heatmap_X_MF_HD_FPKM_allsp_orths.pdf", width = 3, height = 14)
+plot_orth_MF_heatmaps_X_soft(HD_FPKM_log2MF_allsp_orths, "HD")
+dev.off()
+
+pdf("heatmap_X_MF_LG_FPKM_allsp_orths.pdf", width = 3, height = 14)
+plot_orth_MF_heatmaps_X_soft(LG_FPKM_log2MF_allsp_orths, "LG")
+dev.off()
+
+pdf("heatmap_X_MF_RT_FPKM_allsp_orths.pdf", width = 3, height = 14)
+plot_orth_MF_heatmaps_X_soft(RT_FPKM_log2MF_allsp_orths, "RT")
+dev.off()
 
 
+plot_orth_heatmaps_X_soft <- function(exp_orth_df, tit_txt ){
+	print(length(exp_orth_df[,1]))
+	exp_orth_df_c <- na.omit(exp_orth_df)
+	print(length(exp_orth_df_c[,1]))	
 
 
+	# X_soft
+	X_soft_df <- subset(exp_orth_df_c, exp_orth_df_c$soft_chr == "XXXXX")
+	print(length(X_soft_df[,1]))	
+
+	X_soft_df_mat <- as.data.frame(cbind(X_soft_df$Tbi_M, X_soft_df$Tce_M, X_soft_df$Tcm_M, X_soft_df$Tpa_M, X_soft_df$Tps_M, X_soft_df$Tbi_F, X_soft_df$Tce_F, X_soft_df$Tcm_F, X_soft_df$Tpa_F, X_soft_df$Tps_F))
+	print(head(X_soft_df_mat))
+	rownames(X_soft_df_mat) <- X_soft_df$orth
+	colnames(X_soft_df_mat) <- c("Tbi_M", "Tce_M", "Tcm_M", "Tpa_M", "Tps_M", "Tbi_F", "Tce_F", "Tcm_F", "Tpa_F", "Tps_F")
+	
+	X_soft_df_mat$Tbi_M <- log2(as.numeric(as.character(X_soft_df_mat$Tbi_M )))
+	X_soft_df_mat$Tce_M <- log2(as.numeric(as.character(X_soft_df_mat$Tce_M )))
+	X_soft_df_mat$Tcm_M <- log2(as.numeric(as.character(X_soft_df_mat$Tcm_M )))
+	X_soft_df_mat$Tpa_M <- log2(as.numeric(as.character(X_soft_df_mat$Tpa_M )))
+	X_soft_df_mat$Tps_M <- log2(as.numeric(as.character(X_soft_df_mat$Tps_M )))
+	X_soft_df_mat$Tbi_F <- log2(as.numeric(as.character(X_soft_df_mat$Tbi_F )))
+	X_soft_df_mat$Tce_F <- log2(as.numeric(as.character(X_soft_df_mat$Tce_F )))
+	X_soft_df_mat$Tcm_F <- log2(as.numeric(as.character(X_soft_df_mat$Tcm_F )))
+	X_soft_df_mat$Tpa_F <- log2(as.numeric(as.character(X_soft_df_mat$Tpa_F )))
+	X_soft_df_mat$Tps_F <- log2(as.numeric(as.character(X_soft_df_mat$Tps_F )))
+		
+	# print(str(X_soft_df_mat))
+	# print(X_soft_df_mat)
+	
+
+	X_soft_heatmap <- pheatmap(X_soft_df_mat , clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean", clustering_method = "ward.D2", show_rownames = F,border_color = NA, main = paste("X | soft | ", tit_txt, sep = ""))
+	return(X_soft_heatmap)
+}
 
 
+plot_orth_heatmaps_A_soft <- function(exp_orth_df, tit_txt ){
+	print(length(exp_orth_df[,1]))
+	exp_orth_df_c <- na.omit(exp_orth_df)
+	print(length(exp_orth_df_c[,1]))	
+	
+	# A_soft
+	A_soft_df <- subset(exp_orth_df_c, exp_orth_df_c$soft_chr == "AAAAA")
+	print(length(A_soft_df[,1]))	
 
+	A_soft_df_mat <- as.data.frame(cbind(A_soft_df$Tbi_M, A_soft_df$Tce_M, A_soft_df$Tcm_M, A_soft_df$Tpa_M, A_soft_df$Tps_M, A_soft_df$Tbi_F, A_soft_df$Tce_F, A_soft_df$Tcm_F, A_soft_df$Tpa_F, A_soft_df$Tps_F))
+	rownames(A_soft_df_mat) <- A_soft_df$orth
+	colnames(A_soft_df_mat) <- c("Tbi_M", "Tce_M", "Tcm_M", "Tpa_M", "Tps_M", "Tbi_F", "Tce_F", "Tcm_F", "Tpa_F", "Tps_F")
+	
+	A_soft_df_mat$Tbi_M <- log2(as.numeric(as.character(A_soft_df_mat$Tbi_M )))
+	A_soft_df_mat$Tce_M <- log2(as.numeric(as.character(A_soft_df_mat$Tce_M )))
+	A_soft_df_mat$Tcm_M <- log2(as.numeric(as.character(A_soft_df_mat$Tcm_M )))
+	A_soft_df_mat$Tpa_M <- log2(as.numeric(as.character(A_soft_df_mat$Tpa_M )))
+	A_soft_df_mat$Tps_M <- log2(as.numeric(as.character(A_soft_df_mat$Tps_M )))
+	A_soft_df_mat$Tbi_F <- log2(as.numeric(as.character(A_soft_df_mat$Tbi_F )))
+	A_soft_df_mat$Tce_F <- log2(as.numeric(as.character(A_soft_df_mat$Tce_F )))
+	A_soft_df_mat$Tcm_F <- log2(as.numeric(as.character(A_soft_df_mat$Tcm_F )))
+	A_soft_df_mat$Tpa_F <- log2(as.numeric(as.character(A_soft_df_mat$Tpa_F )))
+	A_soft_df_mat$Tps_F <- log2(as.numeric(as.character(A_soft_df_mat$Tps_F )))
+		
+	# print(str(A_soft_df_mat))
+	# print(A_soft_df_mat)
+	
 
+	A_soft_heatmap <- pheatmap(A_soft_df_mat , clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean", clustering_method = "ward.D2", show_rownames = F,border_color = NA, main = paste("Autosomes | soft | ", tit_txt, sep = ""))
+	
+	return(A_soft_heatmap)
+}
 
+pdf("heatmap_A_HD_FPKM_allsp_orths.pdf", width = 4, height = 7)
+plot_orth_heatmaps_A_soft(HD_FPKM_allsp_orths, "HD | FPKM")
+dev.off()
 
+pdf("heatmap_A_LG_FPKM_allsp_orths.pdf", width = 4, height = 7)
+plot_orth_heatmaps_A_soft(LG_FPKM_allsp_orths, "LG | FPKM")
+dev.off()
 
+pdf("heatmap_A_RT_FPKM_allsp_orths.pdf", width = 4, height = 7)
+plot_orth_heatmaps_A_soft(RT_FPKM_allsp_orths, "RT | FPKM")
+dev.off()
 
+pdf("heatmap_X_HD_FPKM_allsp_orths.pdf", width = 4, height = 7)
+plot_orth_heatmaps_X_soft(HD_FPKM_allsp_orths, "HD | FPKM")
+dev.off()
 
+pdf("heatmap_X_LG_FPKM_allsp_orths.pdf", width = 4, height = 7)
+plot_orth_heatmaps_X_soft(LG_FPKM_allsp_orths, "LG | FPKM")
+dev.off()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+pdf("heatmap_X_RT_FPKM_allsp_orths.pdf", width = 4, height = 7)
+plot_orth_heatmaps_X_soft(RT_FPKM_allsp_orths, "RT | FPKM")
+dev.off()
 
 
 
