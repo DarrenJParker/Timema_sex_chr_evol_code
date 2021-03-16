@@ -280,5 +280,9 @@ done
 
 
 
+### Expression_analyses.R
 
+
+cat FT_MB_FB_X_A_*FPKM* > FT_MB_FB_X_A_ALL_FPKM.csv
+cat FT_MB_FB_X_A_*TPM* > FT_MB_FB_X_A_ALL_TPM.csv
 
