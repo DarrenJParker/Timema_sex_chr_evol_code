@@ -83,7 +83,41 @@ STAR --runThreadN 12 --runMode genomeGenerate \
 ########################################################################################################################
 ##### Trim RNAseq Reads
 
-# ADD
+      
+#####################################################################################################################################
+#############################################################################################################################################################################################################################################################################
+#### adapators
+
+###  cutadapt v. 2.3 
+
+mkdir ./READS/Adaptor_removed_1a
+
+for i in ./READS/cat_and_clean/*.fq.gz; do
+        foo1=`echo "$i"`
+        foo2=`echo "$i" | sed 's/.fq.gz//' | sed 's/.*\///' | sed 's/_clean//'`
+        echo $foo1
+        echo $foo2
+        cutadapt --discard-trimmed  -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC -o "./READS/Adaptor_removed_1a/"$foo2"_Adapt_remov_1a.fq.gz" $foo1
+done
+
+###############################################################################################################################################################################################################################
+################ qual trim
+#########################################################################################################
+
+#
+#module add Bioinformatics/Software/vital-it
+#module load UHTS/Analysis/trimmomatic/0.36
+
+mkdir ./READS/qual_trim_2a_AT1a
+
+for i in ./READS/Adaptor_Trimmed_1a/*.fq.gz; do
+        foo1=`echo "$i"`
+        foo2=`echo "$i" | sed 's/.fq.gz//' | sed 's/.*\///' | sed 's/_Adapt_trim_1a//'`
+        echo $foo1
+        echo $foo2
+        trimmomatic SE -phred33 $foo1 "./READS/qual_trim_2a_AT1a/"$foo2"_trimmed_2a_AT1a.fq.gz"  LEADING:10 TRAILING:10 SLIDINGWINDOW:4:20 MINLEN:80
+done
+
 
 #### map reads
 #### MEMORY - mapping failed with 20GB - upped to 60GB
