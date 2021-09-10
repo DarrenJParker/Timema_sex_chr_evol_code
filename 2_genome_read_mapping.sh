@@ -679,7 +679,7 @@ done
 
 for sp in Tbi Tce Tcm Tpa Tps; do 
 	echo $sp
-	python3 add_hetero_info.py \
+	python3 accessory_scripts/add_hetero_info.py \
 	-i /Users/dparker/Documents/University/Lausanne/Sex_chromosomes/v8aDRra_angsD_out/mapped_as_paired/ \
 	-s $sp \
 	-c "/Users/dparker/Documents/University/Lausanne/Sex_chromosomes/v8aDR_cov_contig/"$sp"_pairedcov_minlen=1000_contig_cov_KF2_wLGinfopos.csv"
@@ -724,5 +724,9 @@ done
 
 ################################################################################################################
 #### OUTPUT is stored here: data/coverage_and_heterozygosity 
+
+
+
+
 
 

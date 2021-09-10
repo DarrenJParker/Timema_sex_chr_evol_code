@@ -1,4 +1,4 @@
-# Expression_analyses.R
+# Expression_analyses_keep_sex_specific_genes.R
 
 ### libs
 
@@ -33,26 +33,20 @@ dat1_Tcm_raw$lg <- str_split_fixed(as.character(dat1_Tcm_raw$lg_pos), "_",2)[,1]
 dat1_Tpa_raw$lg <- str_split_fixed(as.character(dat1_Tpa_raw$lg_pos), "_",2)[,1]
 dat1_Tps_raw$lg <- str_split_fixed(as.character(dat1_Tps_raw$lg_pos), "_",2)[,1]
 
-dat1_orth_raw <- read.table ("TbiTceTcmTpaTps_orth_1000_chr_info_and_counts.csv", header = T, sep = ',')
-
 #### change wd to output folder
-dir.create("../Exp_out")
-setwd("../Exp_out")
+dir.create("../Exp_out_wSS")
+setwd("../Exp_out_wSS")
 
 
 #########################################################################################################################
 ## gene info into dicts
-## Note hash tables in R studio give an error:
-# Error: protect(): protection stack overflow
-# Error: no more error handlers available (recursive errors?); invoking 'abort' restart
-# this is a bug https://github.com/rstudio/rstudio/issues/5546
+
 all_raw_dfs <- c("dat1_Tbi_raw", "dat1_Tce_raw", "dat1_Tcm_raw", "dat1_Tpa_raw", "dat1_Tps_raw")
 
 Orth_dict <- hash()
 hard_chr_dict <- hash()
 soft_chr_dict <- hash()
 all_orths = c()
-gene_to_orth_dict <- hash()
 
 for(d in all_raw_dfs){
 	sp <- strsplit(d, "_")[[1]][2]
@@ -66,11 +60,9 @@ for(d in all_raw_dfs){
 		if(! is.na(HOG_n)){
 			Orth_dict[[paste(sp, HOG_n, sep = "___")]] <- gene_n
 			all_orths = c(all_orths, HOG_n)
-			gene_to_orth_dict[[gene_n]] <- HOG_n
 		}
-	  
+	
 		if(! is.na(hard_n)){
-		  
 			hard_chr_dict[[gene_n]] <- hard_n
 		}
 
@@ -82,13 +74,9 @@ for(d in all_raw_dfs){
 
 all_orths <- unique(all_orths)
 
-soft_chr_dict[["TBI_07206"]]
-
-length(Orth_dict)
-length(hard_chr_dict)
-length(soft_chr_dict)
 #########################################################################################################################
 ## functions
+
 
 filt_and_norm_maj_FPKM <- function(y,cpm_cut,cut_in_Nsams,gene_lens){
 	
@@ -96,8 +84,7 @@ filt_and_norm_maj_FPKM <- function(y,cpm_cut,cut_in_Nsams,gene_lens){
 	print(dim(y)) ### number of genes / samples
 	#print(head(rpkm(y, gene.length=gene_lens)))
 	keep <- 
-	  rowSums(rpkm(y[,1:3], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams & 
-      rowSums(rpkm(y[,4:6], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams 	
+	  rowSums(rpkm(y[,1:6], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams
 
 	y <- y[keep,]
 	
@@ -110,36 +97,6 @@ filt_and_norm_maj_FPKM <- function(y,cpm_cut,cut_in_Nsams,gene_lens){
 	
 	return(y)
 }
-
-filt_and_norm_maj_orth_FPKM <- function(y,cpm_cut,cut_in_Nsams,gene_lens){
-	
-	cat("\nNumber number of genes / samples in orig data\n")
-	print(dim(y)) ### number of genes / samples
-	#print(head(rpkm(y, gene.length=gene_lens)))
-	keep <- 
-	  rowSums(rpkm(y[,1:3], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams & 
-      rowSums(rpkm(y[,4:6], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams &
-	  rowSums(rpkm(y[,7:9], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams & 
-      rowSums(rpkm(y[,10:12], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams &
-      rowSums(rpkm(y[,13:15], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams & 
-      rowSums(rpkm(y[,16:18], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams &
-	  rowSums(rpkm(y[,19:21], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams & 
-      rowSums(rpkm(y[,22:24], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams &
-	  rowSums(rpkm(y[,25:27], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams & 
-      rowSums(rpkm(y[,28:30], gene.length=gene_lens,log=FALSE)> cpm_cut) >= cut_in_Nsams 
-
-	y <- y[keep,]
-	
-	y$samples$lib.size <- colSums(y$counts) 
-	y <- calcNormFactors(y)
-	cat("\nLib norm factors\n")
-	print(y$samples)	
-	cat("\nNumber number of genes / samples after filtering\n")
-	print(dim(y))
-	
-	return(y)
-}
-
 
 
 filt_and_norm_maj_TPM <- function(y,cpm_cut,cut_in_Nsams,gene_lens){
@@ -159,8 +116,7 @@ filt_and_norm_maj_TPM <- function(y,cpm_cut,cut_in_Nsams,gene_lens){
 	# print(head(TPM_df))	
 	
 	keep <- 
-	  rowSums(TPM_df[,1:3] > cpm_cut) >= cut_in_Nsams & 
-      rowSums(TPM_df[,4:6] > cpm_cut) >= cut_in_Nsams 		
+	  rowSums(TPM_df[,1:6] > cpm_cut) >= cut_in_Nsams	
 
 	y <- y[keep,]
 	
@@ -285,6 +241,7 @@ y_Tps_LG_UF <- DGEList(counts=dat1_Tps[,c(
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 #### filter low expressed gene by FPKM or TPM, then TMM normalisation 
 
+### here expressd in at least 2 libs
 # FPKM 
 
 FPKM_filt_value = 2
@@ -329,7 +286,6 @@ y_Tce_LG_F_TPM <- filt_and_norm_maj_TPM(y_Tce_LG_UF,TPM_filt_value,2,dat1_Tce$to
 y_Tcm_LG_F_TPM <- filt_and_norm_maj_TPM(y_Tcm_LG_UF,TPM_filt_value,2,dat1_Tcm$tot_exon_len)
 y_Tpa_LG_F_TPM <- filt_and_norm_maj_TPM(y_Tpa_LG_UF,TPM_filt_value,2,dat1_Tpa$tot_exon_len)
 y_Tps_LG_F_TPM <- filt_and_norm_maj_TPM(y_Tps_LG_UF,TPM_filt_value,2,dat1_Tps$tot_exon_len)
-
 
 
 #################################################################################################################################################################
@@ -579,6 +535,11 @@ All_RT_F_TPM_long <- make_long_table_avEXP("Tbi_RT_F_TPM", "Tce_RT_F_TPM", "Tcm_
 All_HD_F_TPM_long <- make_long_table_avEXP("Tbi_HD_F_TPM", "Tce_HD_F_TPM", "Tcm_HD_F_TPM", "Tpa_HD_F_TPM", "Tps_HD_F_TPM",  "HD", "TPM")
 All_LG_F_TPM_long <- make_long_table_avEXP("Tbi_LG_F_TPM", "Tce_LG_F_TPM", "Tcm_LG_F_TPM", "Tpa_LG_F_TPM", "Tps_LG_F_TPM",  "LG", "TPM")
 
+
+length(All_RT_F_FPKM_long[,1])
+length(All_HD_F_FPKM_long[,1])
+length(All_LG_F_FPKM_long[,1])
+
 ###############################################################################################################################
 ##### box plots
 
@@ -692,21 +653,13 @@ wilcox_exp <- function(chr_type, exp_type){
 		X_df <- subset(curr_df, eval(parse(text=paste('curr_df' , '$' , 'chr_', chr_type, sep = ''))) == "X")
 		A_df <- subset(curr_df, eval(parse(text=paste('curr_df' , '$' , 'chr_', chr_type, sep = ''))) == "A")
 	
-		SFX_SFA_wx <- wilcox.test(eval(parse(text=paste('X_df', '$' , sp, '_SF_', tiss, '_mean', exp_type, sep = ''))),   eval(parse(text=paste('A_df', '$' , sp, '_SF_', tiss, '_mean', exp_type, sep = ''))), paired = FALSE) ##SFX-SFA
-		SFX_SMX_wx <- wilcox.test(eval(parse(text=paste('X_df', '$' , sp, '_SF_', tiss, '_mean', exp_type, sep = ''))),   eval(parse(text=paste('X_df', '$' , sp, '_SM_', tiss, '_mean', exp_type, sep = ''))), paired = FALSE) ##SFX-SMX
-		SFX_SMA_wx <- wilcox.test(eval(parse(text=paste('X_df', '$' , sp, '_SF_', tiss, '_mean', exp_type, sep = ''))),   eval(parse(text=paste('A_df', '$' , sp, '_SM_', tiss, '_mean', exp_type, sep = ''))), paired = FALSE) ##SFC-SMA
-		SFA_SMX_wx <- wilcox.test(eval(parse(text=paste('A_df', '$' , sp, '_SF_', tiss, '_mean', exp_type, sep = ''))),   eval(parse(text=paste('X_df', '$' , sp, '_SM_', tiss, '_mean', exp_type, sep = ''))), paired = FALSE) ##SFA-SMX		
-		SFA_SMA_wx <- wilcox.test(eval(parse(text=paste('A_df', '$' , sp, '_SF_', tiss, '_mean', exp_type, sep = ''))),   eval(parse(text=paste('A_df', '$' , sp, '_SM_', tiss, '_mean', exp_type, sep = ''))), paired = FALSE) ##SFA-SMA			
-		SMX_SMA_wx <- wilcox.test(eval(parse(text=paste('X_df', '$' , sp, '_SM_', tiss, '_mean', exp_type ,sep = ''))),   eval(parse(text=paste('A_df', '$' , sp, '_SM_', tiss, '_mean', exp_type, sep = ''))), paired = FALSE) ##SMx-SMa
- 
+		SF_XA_wx <- wilcox.test(eval(parse(text=paste('X_df', '$' , sp, '_SF_', tiss, '_mean', exp_type ,sep = ''))),   eval(parse(text=paste('A_df' , '$' , sp, '_SF_', tiss, '_mean', exp_type,sep=''))), paired = FALSE)	
+		SM_XA_wx <- wilcox.test(eval(parse(text=paste('X_df', '$' , sp, '_SM_', tiss, '_mean', exp_type ,sep = ''))),   eval(parse(text=paste('A_df' , '$' , sp, '_SM_', tiss, '_mean', exp_type,sep=''))), paired = FALSE)
+	
 		XA_wilcox_SFSM_df <- as.data.frame(rbind(
 		XA_wilcox_SFSM_df,
-		c(sp, tiss, "SFX_SFA", chr_type, exp_type, SFX_SFA_wx$p.value),
-		c(sp, tiss, "SFX_SMX", chr_type, exp_type, SFX_SMX_wx$p.value),
-		c(sp, tiss, "SFX_SMA", chr_type, exp_type, SFX_SMA_wx$p.value),
-		c(sp, tiss, "SFA_SMX", chr_type, exp_type, SFA_SMX_wx$p.value),
-		c(sp, tiss, "SFA_SMA", chr_type, exp_type, SFA_SMA_wx$p.value),
-		c(sp, tiss, "SMX_SMA", chr_type, exp_type, SMX_SMA_wx$p.value)		
+		c(sp, tiss, "SF", chr_type, exp_type, SF_XA_wx$p.value),
+		c(sp, tiss, "SM", chr_type, exp_type, SM_XA_wx$p.value)		
 		))
 		}
 	}
@@ -1258,7 +1211,7 @@ TPM_log2MF_hist_Tbi_LG <- TPM_MF_hists(All_LG_F_TPM_log2MF_long,"Tbi","LG")
 TPM_log2MF_hist_Tce_RT <- TPM_MF_hists(All_RT_F_TPM_log2MF_long,"Tce","RT")
 TPM_log2MF_hist_Tce_HD <- TPM_MF_hists(All_HD_F_TPM_log2MF_long,"Tce","HD")
 TPM_log2MF_hist_Tce_LG <- TPM_MF_hists(All_LG_F_TPM_log2MF_long,"Tce","LG")
-
+)
 TPM_log2MF_hist_Tcm_RT <- TPM_MF_hists(All_RT_F_TPM_log2MF_long,"Tcm","RT")
 TPM_log2MF_hist_Tcm_HD <- TPM_MF_hists(All_HD_F_TPM_log2MF_long,"Tcm","HD")
 TPM_log2MF_hist_Tcm_LG <- TPM_MF_hists(All_LG_F_TPM_log2MF_long,"Tcm","LG")
@@ -1351,6 +1304,30 @@ get_DE_genes <- function(fita,FDRa){
 sex_SB = factor(c(
 "0F","0F","0F","1M","1M","1M"
 ))
+
+call_SB <- function(y, sig_level){
+	
+	### design matrix
+	design <- model.matrix(~sex_SB) 
+	rownames(design) <- colnames(y)
+	print(design)
+
+	### Est dispersion 
+	y <- estimateDisp(y, design)
+	
+	### Fit model
+	fit_y <- glmFit(y, design,robust=TRUE)
+	
+	### Test
+	print(colnames(fit_y))
+	fit_c <-  glmLRT(fit_y,coef=2)
+	
+	### get_SB gene
+	TTT_SB <- get_DE_genes(fit_c, sig_level)
+	
+	return(TTT_SB)
+}
+
 
 call_SB <- function(y, sig_level){
 	
@@ -1522,6 +1499,7 @@ write.csv(add_softchr_to_TTT(TTT_LG_Tce_sex_bias_TPM$table), "TTT_LG_Tce_sex_bia
 write.csv(add_softchr_to_TTT(TTT_LG_Tcm_sex_bias_TPM$table), "TTT_LG_Tcm_sex_bias_TPM.csv", row.names = F)
 write.csv(add_softchr_to_TTT(TTT_LG_Tpa_sex_bias_TPM$table), "TTT_LG_Tpa_sex_bias_TPM.csv", row.names = F)
 write.csv(add_softchr_to_TTT(TTT_LG_Tps_sex_bias_TPM$table), "TTT_LG_Tps_sex_bias_TPM.csv", row.names = F)
+
 
 
 
@@ -2680,6 +2658,14 @@ Tpa_lgX1to3_MF_t <-	plot_grid(Tpa_percent_gene_top_3_title, Tpa_lgX1to3_MF, ncol
 Tps_lgX1to3_MF   <- plot_grid(Tps_lgX1_MF, Tps_lgX2_MF, Tps_lgX3_MF, ncol=3) 
 Tps_lgX1to3_MF_t <-	plot_grid(Tps_percent_gene_top_3_title, Tps_lgX1to3_MF, ncol=1, rel_heights=c(0.1, 2)) 
 
+Tbi_lg1_MF <- plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg1", "Tbi")
+Tce_lg1_MF <- plot_MF_along_chr(Tce_RT_F_FPKM, Tce_HD_F_FPKM, Tce_LG_F_FPKM, "lg1", "Tce")
+Tcm_lg1_MF <- plot_MF_along_chr(Tcm_RT_F_FPKM, Tcm_HD_F_FPKM, Tcm_LG_F_FPKM, "lg1", "Tcm")
+Tpa_lg1_MF <- plot_MF_along_chr(Tpa_RT_F_FPKM, Tpa_HD_F_FPKM, Tpa_LG_F_FPKM, "lg1", "Tpa")
+Tps_lg1_MF <- plot_MF_along_chr(Tps_RT_F_FPKM, Tps_HD_F_FPKM, Tps_LG_F_FPKM, "lg1", "Tps")
+
+
+
 ## Tbi lgX
 pdf("Tbi_lgX_MF.pdf", width = 12, height = 7)
 Tbi_lgX1to3_MF_t
@@ -2739,52 +2725,63 @@ dev.off()
 getwd() ## where has my plot gone....
 
 
-
-
-
-#### other LGs
-
-
-# # Tbi_lg1_lg12 <- plot_grid(
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg1",  "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg2",  "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg3",  "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg4",  "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg5",  "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg6",  "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg7",  "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg8",  "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg9",  "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg10", "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg11", "Tbi"),
-# plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, "lg12", "Tbi"), ncol = 2)
-
-
-# png(filename = "Tbi_lg1_lg12.png", width = 15, height = 30, units = "in", bg = "white", res = 300)
-# Tbi_lg1_lg12
-# dev.off()
-# getwd() ## where has my plot gone....
-
-
-lg_want <- "lg12"
-
-lgN_allsp <- plot_grid(
-plot_MF_along_chr(Tbi_RT_F_FPKM, Tbi_HD_F_FPKM, Tbi_LG_F_FPKM, lg_want,  "Tbi"),
-plot_MF_along_chr(Tce_RT_F_FPKM, Tce_HD_F_FPKM, Tce_LG_F_FPKM, lg_want,  "Tce"),
-plot_MF_along_chr(Tcm_RT_F_FPKM, Tcm_HD_F_FPKM, Tcm_LG_F_FPKM, lg_want,  "Tcm"),
-plot_MF_along_chr(Tpa_RT_F_FPKM, Tpa_HD_F_FPKM, Tpa_LG_F_FPKM, lg_want,  "Tpa"),
-plot_MF_along_chr(Tps_RT_F_FPKM, Tps_HD_F_FPKM, Tps_LG_F_FPKM, lg_want,  "Tps"), ncol = 2)
-
-pdf(paste(lg_want, "_allsp.pdf", sep = ""), width = 15, height = 22)
-lgN_allsp
+## Tbi lg1
+pdf("Tbi_lg1_MF.pdf", width = 12, height = 7)
+Tbi_lg1_MF 
 dev.off()
 getwd() ## where has my plot gone....
 
-png(filename = paste(lg_want, "_allsp.png", sep = ""), width = 15, height = 22, units = "in", bg = "white", res = 300)
-lgN_allsp
+png(filename = "Tbi_lg1_MF.png", width = 12, height = 7, units = "in", bg = "white", res = 300)
+Tbi_lg1_MF 
 dev.off()
 getwd() ## where has my plot gone....
 
+
+## Tce lg1
+pdf("Tce_lg1_MF.pdf", width = 12, height = 7)
+Tce_lg1_MF 
+dev.off()
+getwd() ## where has my plot gone....
+
+png(filename = "Tce_lg1_MF.png", width = 12, height = 7, units = "in", bg = "white", res = 300)
+Tce_lg1_MF 
+dev.off()
+getwd() ## where has my plot gone....
+
+## Tcm lg1
+pdf("Tcm_lg1_MF.pdf", width = 12, height = 7)
+Tcm_lg1_MF 
+dev.off()
+getwd() ## where has my plot gone....
+
+png(filename = "Tcm_lg1_MF.png", width = 12, height = 7, units = "in", bg = "white", res = 300)
+Tcm_lg1_MF 
+dev.off()
+getwd() ## where has my plot gone....
+
+
+## Tpa lg1
+pdf("Tpa_lg1_MF.pdf", width = 12, height = 7)
+Tpa_lg1_MF 
+dev.off()
+getwd() ## where has my plot gone....
+
+png(filename = "Tpa_lg1_MF.png", width = 12, height = 7, units = "in", bg = "white", res = 300)
+Tpa_lg1_MF 
+dev.off()
+getwd() ## where has my plot gone....
+
+
+## Tps lg1
+pdf("Tps_lg1_MF.pdf", width = 12, height = 7)
+Tps_lg1_MF 
+dev.off()
+getwd() ## where has my plot gone....
+
+png(filename = "Tps_lg1_MF.png", width = 12, height = 7, units = "in", bg = "white", res = 300)
+Tps_lg1_MF 
+dev.off()
+getwd() ## where has my plot gone....
 
 
 
@@ -2949,58 +2946,6 @@ LG_FPKM_log2MF_allsp_orths <- get_log2MF_vals_per_orth("LG_FPKM_log2MF_dict", "L
 
 head(LG_FPKM_log2MF_allsp_orths)
 
-# plot_orth_heatmaps <- function(MF_orth_df){
-	# print(length(MF_orth_df[,1]))
-	# MF_orth_df_c <- na.omit(MF_orth_df)
-	# print(length(MF_orth_df_c[,1]))	
-	
-	
-	# # X_soft
-	# X_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "XXXXX")
-	# print(length(X_soft_df[,1]))
-	# X_soft_df_mat <- as.data.frame(cbind(X_soft_df$Tbi, X_soft_df$Tce, X_soft_df$Tcm, X_soft_df$Tpa, X_soft_df$Tps))
-	# rownames(X_soft_df_mat) <- X_soft_df$orth
-	# colnames(X_soft_df_mat) <- c("Tbi", "Tce", "Tcm", "Tpa", "Tps")
-	
-	# X_soft_df_mat$Tbi <- as.numeric(as.character(X_soft_df_mat$Tbi ))
-	# X_soft_df_mat$Tce <- as.numeric(as.character(X_soft_df_mat$Tce ))
-	# X_soft_df_mat$Tcm <- as.numeric(as.character(X_soft_df_mat$Tcm ))
-	# X_soft_df_mat$Tpa <- as.numeric(as.character(X_soft_df_mat$Tpa ))
-	# X_soft_df_mat$Tps <- as.numeric(as.character(X_soft_df_mat$Tps ))	
-	
-	# print(str(X_soft_df_mat))
-	# print(X_soft_df_mat)
-	
-	# breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
-
-	# X_soft_heatmap <- pheatmap(X_soft_df_mat , clustering_distance_rows = "euclidean", cluster_cols = FALSE, 
-	# clustering_method = "ward.D2", color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA)
-	
-	# # A_soft
-	# A_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "AAAAA")
-	# print(length(A_soft_df[,1]))
-	# A_soft_df_mat <- as.data.frame(cbind(A_soft_df$Tbi, A_soft_df$Tce, A_soft_df$Tcm, A_soft_df$Tpa, A_soft_df$Tps))
-	# rownames(A_soft_df_mat) <- A_soft_df$orth
-	# colnames(A_soft_df_mat) <- c("Tbi", "Tce", "Tcm", "Tpa", "Tps")
-	
-	# A_soft_df_mat$Tbi <- as.numeric(as.character(A_soft_df_mat$Tbi ))
-	# A_soft_df_mat$Tce <- as.numeric(as.character(A_soft_df_mat$Tce ))
-	# A_soft_df_mat$Tcm <- as.numeric(as.character(A_soft_df_mat$Tcm ))
-	# A_soft_df_mat$Tpa <- as.numeric(as.character(A_soft_df_mat$Tpa ))
-	# A_soft_df_mat$Tps <- as.numeric(as.character(A_soft_df_mat$Tps ))	
-	
-	# # print(str(A_soft_df_mat))
-	# # print(A_soft_df_mat)
-	
-	# breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
-
-	# A_soft_heatmap <- pheatmap(A_soft_df_mat , clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean",, 
-	# clustering_method = "ward.D2", color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA)
-	
-	# return(A_soft_heatmap)
-# }
-
-
 
 plot_orth_MF_heatmaps_X_soft <- function(MF_orth_df, tit_txt){
 	print(length(MF_orth_df[,1]))
@@ -3021,6 +2966,8 @@ plot_orth_MF_heatmaps_X_soft <- function(MF_orth_df, tit_txt){
 	X_soft_df_mat$Tpa <- as.numeric(as.character(X_soft_df_mat$Tpa ))
 	X_soft_df_mat$Tps <- as.numeric(as.character(X_soft_df_mat$Tps ))	
 	
+	#X_soft_df_mat <- na.omit(X_soft_df_mat)
+	
 	# print(str(X_soft_df_mat))
 	# print(X_soft_df_mat)
 	
@@ -3031,189 +2978,57 @@ plot_orth_MF_heatmaps_X_soft <- function(MF_orth_df, tit_txt){
 	return(X_soft_heatmap)
 }
 
+	
 
-plot_orth_MF_heatmaps_X_soft_clust <- function(MF_orth_df, tit_txt){
-	print(length(MF_orth_df[,1]))
-	MF_orth_df_c <- na.omit(MF_orth_df)
-	print(length(MF_orth_df_c[,1]))	
-	
-	
-	# X_soft
-	X_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "XXXXX")
-	print(length(X_soft_df[,1]))
-	X_soft_df_mat <- as.data.frame(cbind(X_soft_df$Tps, X_soft_df$Tcm, X_soft_df$Tce,  X_soft_df$Tpa, X_soft_df$Tbi))
-	rownames(X_soft_df_mat) <- X_soft_df$orth
-	colnames(X_soft_df_mat) <- c("Tps", "Tcm", "Tce", "Tpa", "Tbi")
-	
-	X_soft_df_mat$Tbi <- as.numeric(as.character(X_soft_df_mat$Tbi ))
-	X_soft_df_mat$Tce <- as.numeric(as.character(X_soft_df_mat$Tce ))
-	X_soft_df_mat$Tcm <- as.numeric(as.character(X_soft_df_mat$Tcm ))
-	X_soft_df_mat$Tpa <- as.numeric(as.character(X_soft_df_mat$Tpa ))
-	X_soft_df_mat$Tps <- as.numeric(as.character(X_soft_df_mat$Tps ))	
-	
-	# print(str(X_soft_df_mat))
-	# print(X_soft_df_mat)
-	
-	breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
-
-	X_soft_heatmap <- pheatmap(X_soft_df_mat, cluster_cols = FALSE, color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA, main = tit_txt)
-	
-	return(X_soft_heatmap)
-}
-
-
-
-
-plot_orth_MF_heatmaps_A_soft <- function(MF_orth_df, tit_txt){
-	print(length(MF_orth_df[,1]))
-	MF_orth_df_c <- na.omit(MF_orth_df)
-	print(length(MF_orth_df_c[,1]))	
-	
-	
-	# A_soft
-	A_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "AAAAA")
-	print(length(A_soft_df[,1]))
-	A_soft_df_mat <- as.data.frame(cbind(A_soft_df$Tps, A_soft_df$Tcm, A_soft_df$Tce,  A_soft_df$Tpa, A_soft_df$Tbi))
-	rownames(A_soft_df_mat) <- A_soft_df$orth
-	colnames(A_soft_df_mat) <- c("Tps", "Tcm", "Tce", "Tpa", "Tbi")
-	
-	A_soft_df_mat$Tbi <- as.numeric(as.character(A_soft_df_mat$Tbi ))
-	A_soft_df_mat$Tce <- as.numeric(as.character(A_soft_df_mat$Tce ))
-	A_soft_df_mat$Tcm <- as.numeric(as.character(A_soft_df_mat$Tcm ))
-	A_soft_df_mat$Tpa <- as.numeric(as.character(A_soft_df_mat$Tpa ))
-	A_soft_df_mat$Tps <- as.numeric(as.character(A_soft_df_mat$Tps ))	
-	
-	# print(str(X_soft_df_mat))
-	# print(X_soft_df_mat)
-	
-	breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
-
-	A_soft_heatmap <- pheatmap(A_soft_df_mat, cluster_cols = FALSE, cluster_rows = FALSE, color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA, main = tit_txt)
-	
-	return(A_soft_heatmap)
-}
-
-
-plot_orth_MF_heatmaps_A_soft_clust <- function(MF_orth_df, tit_txt){
-	print(length(MF_orth_df[,1]))
-	MF_orth_df_c <- na.omit(MF_orth_df)
-	print(length(MF_orth_df_c[,1]))	
-	
-	
-	# A_soft
-	A_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "AAAAA")
-	print(length(A_soft_df[,1]))
-	A_soft_df_mat <- as.data.frame(cbind(A_soft_df$Tps, A_soft_df$Tcm, A_soft_df$Tce,  A_soft_df$Tpa, A_soft_df$Tbi))
-	rownames(A_soft_df_mat) <- A_soft_df$orth
-	colnames(A_soft_df_mat) <- c("Tps", "Tcm", "Tce", "Tpa", "Tbi")
-	
-	A_soft_df_mat$Tbi <- as.numeric(as.character(A_soft_df_mat$Tbi ))
-	A_soft_df_mat$Tce <- as.numeric(as.character(A_soft_df_mat$Tce ))
-	A_soft_df_mat$Tcm <- as.numeric(as.character(A_soft_df_mat$Tcm ))
-	A_soft_df_mat$Tpa <- as.numeric(as.character(A_soft_df_mat$Tpa ))
-	A_soft_df_mat$Tps <- as.numeric(as.character(A_soft_df_mat$Tps ))	
-	
-	# print(str(X_soft_df_mat))
-	# print(X_soft_df_mat)
-	
-	breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
-
-	A_soft_heatmap <- pheatmap(A_soft_df_mat, cluster_cols = FALSE, color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA, main = tit_txt)
-	
-	return(A_soft_heatmap)
-}
-
-
-head(HD_FPKM_log2MF_allsp_orths)
-
-pdf("heatmap_X_MF_HD_FPKM_allsp_orths.pdf", width = 3, height = 14)
+pdf("heatmap_X_MF_HD_FPKM_allsp_orths.pdf", width = 3, height = 18)
 plot_orth_MF_heatmaps_X_soft(HD_FPKM_log2MF_allsp_orths, "HD")
 dev.off()
 
-pdf("heatmap_X_MF_LG_FPKM_allsp_orths.pdf", width = 3, height = 14)
+pdf("heatmap_X_MF_LG_FPKM_allsp_orths.pdf", width = 3, height = 18)
 plot_orth_MF_heatmaps_X_soft(LG_FPKM_log2MF_allsp_orths, "LG")
 dev.off()
 
-pdf("heatmap_X_MF_RT_FPKM_allsp_orths.pdf", width = 3, height = 14)
+pdf("heatmap_X_MF_RT_FPKM_allsp_orths.pdf", width = 3, height = 18)
 plot_orth_MF_heatmaps_X_soft(RT_FPKM_log2MF_allsp_orths, "RT")
 dev.off()
 
-pdf("heatmap_A_MF_HD_FPKM_allsp_orths.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_A_soft(HD_FPKM_log2MF_allsp_orths, "HD")
-dev.off()
 
-pdf("heatmap_A_MF_LG_FPKM_allsp_orths.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_A_soft(LG_FPKM_log2MF_allsp_orths, "LG")
-dev.off()
-
-pdf("heatmap_A_MF_RT_FPKM_allsp_orths.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_A_soft(RT_FPKM_log2MF_allsp_orths, "RT")
-dev.off()
-
-pdf("heatmap_X_MF_HD_FPKM_allsp_orths_clust.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_X_soft_clust(HD_FPKM_log2MF_allsp_orths, "HD")
-dev.off()
-
-pdf("heatmap_X_MF_LG_FPKM_allsp_orths_clust.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_X_soft_clust(LG_FPKM_log2MF_allsp_orths, "LG")
-dev.off()
-
-pdf("heatmap_X_MF_RT_FPKM_allsp_orths_clust.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_X_soft_clust(RT_FPKM_log2MF_allsp_orths, "RT")
-dev.off()
-
-pdf("heatmap_A_MF_HD_FPKM_allsp_orths_clust.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_A_soft_clust(HD_FPKM_log2MF_allsp_orths, "HD")
-dev.off()
-
-pdf("heatmap_A_MF_LG_FPKM_allsp_orths_clust.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_A_soft_clust(LG_FPKM_log2MF_allsp_orths, "LG")
-dev.off()
-
-pdf("heatmap_A_MF_RT_FPKM_allsp_orths_clust.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_A_soft_clust(RT_FPKM_log2MF_allsp_orths, "RT")
-dev.off()
-
-
-
-
-### FKPM / TPM
-
-plot_orth_heatmaps_X_soft <- function(exp_orth_df, tit_txt ){
+plot_orth_heatmaps_X_soft_exp <- function(exp_orth_df, tit_txt ){
 	print(length(exp_orth_df[,1]))
 	exp_orth_df_c <- na.omit(exp_orth_df)
 	print(length(exp_orth_df_c[,1]))	
 
+
 	# X_soft
 	X_soft_df <- subset(exp_orth_df_c, exp_orth_df_c$soft_chr == "XXXXX")
-	print(length(X_soft_df[,1]))	
+	#print(length(X_soft_df[,1]))	
 
 	X_soft_df_mat <- as.data.frame(cbind(X_soft_df$Tbi_M, X_soft_df$Tce_M, X_soft_df$Tcm_M, X_soft_df$Tpa_M, X_soft_df$Tps_M, X_soft_df$Tbi_F, X_soft_df$Tce_F, X_soft_df$Tcm_F, X_soft_df$Tpa_F, X_soft_df$Tps_F))
 	print(head(X_soft_df_mat))
 	rownames(X_soft_df_mat) <- X_soft_df$orth
 	colnames(X_soft_df_mat) <- c("Tbi_M", "Tce_M", "Tcm_M", "Tpa_M", "Tps_M", "Tbi_F", "Tce_F", "Tcm_F", "Tpa_F", "Tps_F")
 	
-	X_soft_df_mat$Tbi_M <- log2(as.numeric(as.character(X_soft_df_mat$Tbi_M )))
-	X_soft_df_mat$Tce_M <- log2(as.numeric(as.character(X_soft_df_mat$Tce_M )))
-	X_soft_df_mat$Tcm_M <- log2(as.numeric(as.character(X_soft_df_mat$Tcm_M )))
-	X_soft_df_mat$Tpa_M <- log2(as.numeric(as.character(X_soft_df_mat$Tpa_M )))
-	X_soft_df_mat$Tps_M <- log2(as.numeric(as.character(X_soft_df_mat$Tps_M )))
-	X_soft_df_mat$Tbi_F <- log2(as.numeric(as.character(X_soft_df_mat$Tbi_F )))
-	X_soft_df_mat$Tce_F <- log2(as.numeric(as.character(X_soft_df_mat$Tce_F )))
-	X_soft_df_mat$Tcm_F <- log2(as.numeric(as.character(X_soft_df_mat$Tcm_F )))
-	X_soft_df_mat$Tpa_F <- log2(as.numeric(as.character(X_soft_df_mat$Tpa_F )))
-	X_soft_df_mat$Tps_F <- log2(as.numeric(as.character(X_soft_df_mat$Tps_F )))
+	X_soft_df_mat$Tbi_M <- log2(as.numeric(as.character(X_soft_df_mat$Tbi_M )) +1 )
+	X_soft_df_mat$Tce_M <- log2(as.numeric(as.character(X_soft_df_mat$Tce_M )) +1 )
+	X_soft_df_mat$Tcm_M <- log2(as.numeric(as.character(X_soft_df_mat$Tcm_M )) +1 )
+	X_soft_df_mat$Tpa_M <- log2(as.numeric(as.character(X_soft_df_mat$Tpa_M )) +1 )
+	X_soft_df_mat$Tps_M <- log2(as.numeric(as.character(X_soft_df_mat$Tps_M )) +1 )
+	X_soft_df_mat$Tbi_F <- log2(as.numeric(as.character(X_soft_df_mat$Tbi_F )) +1 )
+	X_soft_df_mat$Tce_F <- log2(as.numeric(as.character(X_soft_df_mat$Tce_F )) +1 )
+	X_soft_df_mat$Tcm_F <- log2(as.numeric(as.character(X_soft_df_mat$Tcm_F )) +1 )
+	X_soft_df_mat$Tpa_F <- log2(as.numeric(as.character(X_soft_df_mat$Tpa_F )) +1 )
+	X_soft_df_mat$Tps_F <- log2(as.numeric(as.character(X_soft_df_mat$Tps_F )) +1 )
 		
 	# print(str(X_soft_df_mat))
 	# print(X_soft_df_mat)
-	
-
+	#X_soft_df_mat <- na.omit(X_soft_df_mat)
+	print(X_soft_df_mat)
 	X_soft_heatmap <- pheatmap(X_soft_df_mat , clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean", clustering_method = "ward.D2", show_rownames = F,border_color = NA, main = paste("X | soft | ", tit_txt, sep = ""))
 	return(X_soft_heatmap)
 }
 
 
-plot_orth_heatmaps_A_soft <- function(exp_orth_df, tit_txt ){
+plot_orth_heatmaps_A_soft_exp  <- function(exp_orth_df, tit_txt ){
 	print(length(exp_orth_df[,1]))
 	exp_orth_df_c <- na.omit(exp_orth_df)
 	print(length(exp_orth_df_c[,1]))	
@@ -3226,16 +3041,16 @@ plot_orth_heatmaps_A_soft <- function(exp_orth_df, tit_txt ){
 	rownames(A_soft_df_mat) <- A_soft_df$orth
 	colnames(A_soft_df_mat) <- c("Tbi_M", "Tce_M", "Tcm_M", "Tpa_M", "Tps_M", "Tbi_F", "Tce_F", "Tcm_F", "Tpa_F", "Tps_F")
 	
-	A_soft_df_mat$Tbi_M <- log2(as.numeric(as.character(A_soft_df_mat$Tbi_M )))
-	A_soft_df_mat$Tce_M <- log2(as.numeric(as.character(A_soft_df_mat$Tce_M )))
-	A_soft_df_mat$Tcm_M <- log2(as.numeric(as.character(A_soft_df_mat$Tcm_M )))
-	A_soft_df_mat$Tpa_M <- log2(as.numeric(as.character(A_soft_df_mat$Tpa_M )))
-	A_soft_df_mat$Tps_M <- log2(as.numeric(as.character(A_soft_df_mat$Tps_M )))
-	A_soft_df_mat$Tbi_F <- log2(as.numeric(as.character(A_soft_df_mat$Tbi_F )))
-	A_soft_df_mat$Tce_F <- log2(as.numeric(as.character(A_soft_df_mat$Tce_F )))
-	A_soft_df_mat$Tcm_F <- log2(as.numeric(as.character(A_soft_df_mat$Tcm_F )))
-	A_soft_df_mat$Tpa_F <- log2(as.numeric(as.character(A_soft_df_mat$Tpa_F )))
-	A_soft_df_mat$Tps_F <- log2(as.numeric(as.character(A_soft_df_mat$Tps_F )))
+	A_soft_df_mat$Tbi_M <- log2(as.numeric(as.character(A_soft_df_mat$Tbi_M ))+1 )
+	A_soft_df_mat$Tce_M <- log2(as.numeric(as.character(A_soft_df_mat$Tce_M ))+1 )
+	A_soft_df_mat$Tcm_M <- log2(as.numeric(as.character(A_soft_df_mat$Tcm_M ))+1 )
+	A_soft_df_mat$Tpa_M <- log2(as.numeric(as.character(A_soft_df_mat$Tpa_M ))+1 )
+	A_soft_df_mat$Tps_M <- log2(as.numeric(as.character(A_soft_df_mat$Tps_M ))+1 )
+	A_soft_df_mat$Tbi_F <- log2(as.numeric(as.character(A_soft_df_mat$Tbi_F ))+1 )
+	A_soft_df_mat$Tce_F <- log2(as.numeric(as.character(A_soft_df_mat$Tce_F ))+1 )
+	A_soft_df_mat$Tcm_F <- log2(as.numeric(as.character(A_soft_df_mat$Tcm_F ))+1 )
+	A_soft_df_mat$Tpa_F <- log2(as.numeric(as.character(A_soft_df_mat$Tpa_F ))+1 )
+	A_soft_df_mat$Tps_F <- log2(as.numeric(as.character(A_soft_df_mat$Tps_F ))+1 )
 		
 	# print(str(A_soft_df_mat))
 	# print(A_soft_df_mat)
@@ -3247,546 +3062,27 @@ plot_orth_heatmaps_A_soft <- function(exp_orth_df, tit_txt ){
 }
 
 pdf("heatmap_A_HD_FPKM_allsp_orths.pdf", width = 4, height = 7)
-plot_orth_heatmaps_A_soft(HD_FPKM_allsp_orths, "HD | FPKM")
+plot_orth_heatmaps_A_soft_exp(HD_FPKM_allsp_orths, "HD | FPKM")
 dev.off()
 
 pdf("heatmap_A_LG_FPKM_allsp_orths.pdf", width = 4, height = 7)
-plot_orth_heatmaps_A_soft(LG_FPKM_allsp_orths, "LG | FPKM")
+plot_orth_heatmaps_A_soft_exp(LG_FPKM_allsp_orths, "LG | FPKM")
 dev.off()
 
 pdf("heatmap_A_RT_FPKM_allsp_orths.pdf", width = 4, height = 7)
-plot_orth_heatmaps_A_soft(RT_FPKM_allsp_orths, "RT | FPKM")
+plot_orth_heatmaps_A_soft_exp(RT_FPKM_allsp_orths, "RT | FPKM")
 dev.off()
 
 pdf("heatmap_X_HD_FPKM_allsp_orths.pdf", width = 4, height = 7)
-plot_orth_heatmaps_X_soft(HD_FPKM_allsp_orths, "HD | FPKM")
+plot_orth_heatmaps_X_soft_exp(HD_FPKM_allsp_orths, "HD | FPKM")
 dev.off()
 
 pdf("heatmap_X_LG_FPKM_allsp_orths.pdf", width = 4, height = 7)
-plot_orth_heatmaps_X_soft(LG_FPKM_allsp_orths, "LG | FPKM")
+plot_orth_heatmaps_X_soft_exp(LG_FPKM_allsp_orths, "LG | FPKM")
 dev.off()
 
 pdf("heatmap_X_RT_FPKM_allsp_orths.pdf", width = 4, height = 7)
-plot_orth_heatmaps_X_soft(RT_FPKM_allsp_orths, "RT | FPKM")
-dev.off()
-
-
-
-
-
-
-#########################################################################################################################################
-######## Sex x sp interactions
-
-head(dat1_orth_raw)
-
-
-## filter out genes I did not classify with coverage / classed inconsistently
-
-dat1_orth_raw$orth_soft <- paste(dat1_orth_raw$Tbi_chr_soft, dat1_orth_raw$Tce_chr_soft, dat1_orth_raw$Tcm_chr_soft, dat1_orth_raw$Tpa_chr_soft, dat1_orth_raw$Tps_chr_soft, sep = "")
-dat1_orth <- subset(dat1_orth_raw, dat1_orth_raw$orth_soft == "XXXXX" | dat1_orth_raw$orth_soft == "AAAAA")
-length(dat1_orth_raw[,1])
-length(dat1_orth[,1])
-
-
-Orth_soft_chr_dict <- hash()
-
-for(i in seq(1:length(dat1_orth[,1]))){
-	HOG_n  <- dat1_orth$HOG[i]
-	soft_n <- dat1_orth$orth_soft[i]
-	Orth_soft_chr_dict[[HOG_n]] <- soft_n
-	}
-
-
-
-
-
-
-##########################################################################
-### work out genes to be filtered due to low experssion (have to do sep as diff gene lens)
-
-FPKM_filt_value = 2
-
-## RT
-y_Tbi_RT_o_UF <- DGEList(counts=dat1_orth[,c("Tbi_SF_RT_Md_Re1", "Tbi_SF_RT_Md_Re2", "Tbi_SF_RT_Md_Re3", "Tbi_SM_RT_Md_Re1", "Tbi_SM_RT_Md_Re2", "Tbi_SM_RT_Md_Re3")], genes=dat1_orth$HOG)
-y_Tbi_RT_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tbi_RT_o_UF,FPKM_filt_value, 2, dat1_orth$Tbi_tot_exon_len)
-y_Tce_RT_o_UF <- DGEList(counts=dat1_orth[,c("Tce_SF_RT_Md_Re1", "Tce_SF_RT_Md_Re2", "Tce_SF_RT_Md_Re3", "Tce_SM_RT_Md_Re1", "Tce_SM_RT_Md_Re2", "Tce_SM_RT_Md_Re3")], genes=dat1_orth$HOG)
-y_Tce_RT_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tce_RT_o_UF,FPKM_filt_value, 2, dat1_orth$Tce_tot_exon_len)
-y_Tcm_RT_o_UF <- DGEList(counts=dat1_orth[,c("Tcm_SF_RT_Md_Re1", "Tcm_SF_RT_Md_Re2", "Tcm_SF_RT_Md_Re3", "Tcm_SM_RT_Md_Re1", "Tcm_SM_RT_Md_Re2", "Tcm_SM_RT_Md_Re3")], genes=dat1_orth$HOG)
-y_Tcm_RT_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tcm_RT_o_UF,FPKM_filt_value, 2, dat1_orth$Tcm_tot_exon_len)
-y_Tpa_RT_o_UF <- DGEList(counts=dat1_orth[,c("Tpa_SF_RT_Md_Re1", "Tpa_SF_RT_Md_Re2", "Tpa_SF_RT_Md_Re3", "Tpa_SM_RT_Md_Re1", "Tpa_SM_RT_Md_Re2", "Tpa_SM_RT_Md_Re3")], genes=dat1_orth$HOG)
-y_Tpa_RT_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tpa_RT_o_UF,FPKM_filt_value, 2, dat1_orth$Tpa_tot_exon_len)
-y_Tps_RT_o_UF <- DGEList(counts=dat1_orth[,c("Tps_SF_RT_Md_Re1", "Tps_SF_RT_Md_Re2", "Tps_SF_RT_Md_Re3", "Tps_SM_RT_Md_Re1", "Tps_SM_RT_Md_Re2", "Tps_SM_RT_Md_Re3")], genes=dat1_orth$HOG)
-y_Tps_RT_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tps_RT_o_UF,FPKM_filt_value, 2, dat1_orth$Tps_tot_exon_len)
-
-
-Intersect <- function (x) {  
-  # Multiple set version of intersect
-  # x is a list
-  if (length(x) == 1) {
-    unlist(x)
-  } else if (length(x) == 2) {
-    intersect(x[[1]], x[[2]])
-  } else if (length(x) > 2){
-    intersect(x[[1]], Intersect(x[-1]))
-  }
-}
-
-All_RT_o_F_FPKM_genes <- list("Tbi" = y_Tbi_RT_o_F_FPKM$genes[,1], "Tce" = y_Tcm_RT_o_F_FPKM$genes[,1], "Tcm" = y_Tcm_RT_o_F_FPKM$genes[,1], "Tpa" = y_Tpa_RT_o_F_FPKM$genes[,1], "Tps" = y_Tps_RT_o_F_FPKM$genes[,1])
-All_RT_o_F_FPKM_genes_want <- Intersect(All_RT_o_F_FPKM_genes)
-length(All_RT_o_F_FPKM_genes_want)
-
-dat1_orth_RT_F <- dat1_orth[dat1_orth$HOG %in% All_RT_o_F_FPKM_genes_want,]
-length(dat1_orth_RT_F[,1])
-
-
-####################################
-### read into DGE obj
-
-## RT
-y_orth_RT_F <- DGEList(counts=dat1_orth_RT_F[,c(
-"Tbi_SF_RT_Md_Re1", "Tbi_SF_RT_Md_Re2", "Tbi_SF_RT_Md_Re3",
-"Tbi_SM_RT_Md_Re1", "Tbi_SM_RT_Md_Re2", "Tbi_SM_RT_Md_Re3",
-"Tce_SF_RT_Md_Re1", "Tce_SF_RT_Md_Re2", "Tce_SF_RT_Md_Re3",
-"Tce_SM_RT_Md_Re1", "Tce_SM_RT_Md_Re2", "Tce_SM_RT_Md_Re3",
-"Tcm_SF_RT_Md_Re1", "Tcm_SF_RT_Md_Re2", "Tcm_SF_RT_Md_Re3",
-"Tcm_SM_RT_Md_Re1", "Tcm_SM_RT_Md_Re2", "Tcm_SM_RT_Md_Re3",
-"Tpa_SF_RT_Md_Re1", "Tpa_SF_RT_Md_Re2", "Tpa_SF_RT_Md_Re3",
-"Tpa_SM_RT_Md_Re1", "Tpa_SM_RT_Md_Re2", "Tpa_SM_RT_Md_Re3",
-"Tps_SF_RT_Md_Re1", "Tps_SF_RT_Md_Re2", "Tps_SF_RT_Md_Re3",
-"Tps_SM_RT_Md_Re1", "Tps_SM_RT_Md_Re2", "Tps_SM_RT_Md_Re3"
-)], genes=dat1_orth_RT_F$HOG)
-
-y_orth_RT_F  <- filt_and_norm_maj_FPKM(y_orth_RT_F, -1, -1, dat1_orth_RT_F$Tbi_tot_exon_len) ### just normalise - no exp filter
-
-
-########## genes have different len - adjust
-
-y_orth_RT_FL <- y_orth_RT_F 
-
-geneLength_RT <- as.matrix(cbind(
-dat1_orth_RT_F$Tbi_tot_exon_len, dat1_orth_RT_F$Tbi_tot_exon_len, dat1_orth_RT_F$Tbi_tot_exon_len, dat1_orth_RT_F$Tbi_tot_exon_len, dat1_orth_RT_F$Tbi_tot_exon_len, dat1_orth_RT_F$Tbi_tot_exon_len, 
-dat1_orth_RT_F$Tce_tot_exon_len, dat1_orth_RT_F$Tce_tot_exon_len, dat1_orth_RT_F$Tce_tot_exon_len, dat1_orth_RT_F$Tce_tot_exon_len, dat1_orth_RT_F$Tce_tot_exon_len, dat1_orth_RT_F$Tce_tot_exon_len, 
-dat1_orth_RT_F$Tcm_tot_exon_len, dat1_orth_RT_F$Tcm_tot_exon_len, dat1_orth_RT_F$Tcm_tot_exon_len, dat1_orth_RT_F$Tcm_tot_exon_len, dat1_orth_RT_F$Tcm_tot_exon_len, dat1_orth_RT_F$Tcm_tot_exon_len, 
-dat1_orth_RT_F$Tpa_tot_exon_len, dat1_orth_RT_F$Tpa_tot_exon_len, dat1_orth_RT_F$Tpa_tot_exon_len, dat1_orth_RT_F$Tpa_tot_exon_len, dat1_orth_RT_F$Tpa_tot_exon_len, dat1_orth_RT_F$Tpa_tot_exon_len, 
-dat1_orth_RT_F$Tps_tot_exon_len, dat1_orth_RT_F$Tps_tot_exon_len, dat1_orth_RT_F$Tps_tot_exon_len, dat1_orth_RT_F$Tps_tot_exon_len, dat1_orth_RT_F$Tps_tot_exon_len, dat1_orth_RT_F$Tps_tot_exon_len))
-gl_RT <- log(geneLength_RT)
-gl_RT <- t(t(gl_RT)-colMeans(gl_RT))
-offset_RT <- expandAsMatrix(getOffset(y_orth_RT_FL),dim(y_orth_RT_FL))
-offset_RT <- offset_RT + gl_RT
-y_orth_RT_FL$offset <- offset_RT
-
-
-
-
-## HD
-y_Tbi_HD_o_UF <- DGEList(counts=dat1_orth[,c("Tbi_SF_HD_Md_Re1", "Tbi_SF_HD_Md_Re2", "Tbi_SF_HD_Md_Re3", "Tbi_SM_HD_Md_Re1", "Tbi_SM_HD_Md_Re2", "Tbi_SM_HD_Md_Re3")], genes=dat1_orth$HOG)
-y_Tbi_HD_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tbi_HD_o_UF,FPKM_filt_value, 2, dat1_orth$Tbi_tot_exon_len)
-y_Tce_HD_o_UF <- DGEList(counts=dat1_orth[,c("Tce_SF_HD_Md_Re1", "Tce_SF_HD_Md_Re2", "Tce_SF_HD_Md_Re3", "Tce_SM_HD_Md_Re1", "Tce_SM_HD_Md_Re2", "Tce_SM_HD_Md_Re3")], genes=dat1_orth$HOG)
-y_Tce_HD_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tce_HD_o_UF,FPKM_filt_value, 2, dat1_orth$Tce_tot_exon_len)
-y_Tcm_HD_o_UF <- DGEList(counts=dat1_orth[,c("Tcm_SF_HD_Md_Re1", "Tcm_SF_HD_Md_Re2", "Tcm_SF_HD_Md_Re3", "Tcm_SM_HD_Md_Re1", "Tcm_SM_HD_Md_Re2", "Tcm_SM_HD_Md_Re3")], genes=dat1_orth$HOG)
-y_Tcm_HD_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tcm_HD_o_UF,FPKM_filt_value, 2, dat1_orth$Tcm_tot_exon_len)
-y_Tpa_HD_o_UF <- DGEList(counts=dat1_orth[,c("Tpa_SF_HD_Md_Re1", "Tpa_SF_HD_Md_Re2", "Tpa_SF_HD_Md_Re3", "Tpa_SM_HD_Md_Re1", "Tpa_SM_HD_Md_Re2", "Tpa_SM_HD_Md_Re3")], genes=dat1_orth$HOG)
-y_Tpa_HD_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tpa_HD_o_UF,FPKM_filt_value, 2, dat1_orth$Tpa_tot_exon_len)
-y_Tps_HD_o_UF <- DGEList(counts=dat1_orth[,c("Tps_SF_HD_Md_Re1", "Tps_SF_HD_Md_Re2", "Tps_SF_HD_Md_Re3", "Tps_SM_HD_Md_Re1", "Tps_SM_HD_Md_Re2", "Tps_SM_HD_Md_Re3")], genes=dat1_orth$HOG)
-y_Tps_HD_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tps_HD_o_UF,FPKM_filt_value, 2, dat1_orth$Tps_tot_exon_len)
-
-
-Intersect <- function (x) {  
-  # Multiple set version of intersect
-  # x is a list
-  if (length(x) == 1) {
-    unlist(x)
-  } else if (length(x) == 2) {
-    intersect(x[[1]], x[[2]])
-  } else if (length(x) > 2){
-    intersect(x[[1]], Intersect(x[-1]))
-  }
-}
-
-All_HD_o_F_FPKM_genes <- list("Tbi" = y_Tbi_HD_o_F_FPKM$genes[,1], "Tce" = y_Tcm_HD_o_F_FPKM$genes[,1], "Tcm" = y_Tcm_HD_o_F_FPKM$genes[,1], "Tpa" = y_Tpa_HD_o_F_FPKM$genes[,1], "Tps" = y_Tps_HD_o_F_FPKM$genes[,1])
-All_HD_o_F_FPKM_genes_want <- Intersect(All_HD_o_F_FPKM_genes)
-length(All_HD_o_F_FPKM_genes_want)
-
-dat1_orth_HD_F <- dat1_orth[dat1_orth$HOG %in% All_HD_o_F_FPKM_genes_want,]
-length(dat1_orth_HD_F[,1])
-
-
-####################################
-### read into DGE obj
-
-## HD
-y_orth_HD_F <- DGEList(counts=dat1_orth_HD_F[,c(
-"Tbi_SF_HD_Md_Re1", "Tbi_SF_HD_Md_Re2", "Tbi_SF_HD_Md_Re3",
-"Tbi_SM_HD_Md_Re1", "Tbi_SM_HD_Md_Re2", "Tbi_SM_HD_Md_Re3",
-"Tce_SF_HD_Md_Re1", "Tce_SF_HD_Md_Re2", "Tce_SF_HD_Md_Re3",
-"Tce_SM_HD_Md_Re1", "Tce_SM_HD_Md_Re2", "Tce_SM_HD_Md_Re3",
-"Tcm_SF_HD_Md_Re1", "Tcm_SF_HD_Md_Re2", "Tcm_SF_HD_Md_Re3",
-"Tcm_SM_HD_Md_Re1", "Tcm_SM_HD_Md_Re2", "Tcm_SM_HD_Md_Re3",
-"Tpa_SF_HD_Md_Re1", "Tpa_SF_HD_Md_Re2", "Tpa_SF_HD_Md_Re3",
-"Tpa_SM_HD_Md_Re1", "Tpa_SM_HD_Md_Re2", "Tpa_SM_HD_Md_Re3",
-"Tps_SF_HD_Md_Re1", "Tps_SF_HD_Md_Re2", "Tps_SF_HD_Md_Re3",
-"Tps_SM_HD_Md_Re1", "Tps_SM_HD_Md_Re2", "Tps_SM_HD_Md_Re3"
-)], genes=dat1_orth_HD_F$HOG)
-
-y_orth_HD_F  <- filt_and_norm_maj_FPKM(y_orth_HD_F, -1, -1, dat1_orth_HD_F$Tbi_tot_exon_len) ### just normalise - no exp filter
-
-
-########## genes have different len - adjust
-
-y_orth_HD_FL <- y_orth_HD_F 
-
-geneLength_HD <- as.matrix(cbind(
-dat1_orth_HD_F$Tbi_tot_exon_len, dat1_orth_HD_F$Tbi_tot_exon_len, dat1_orth_HD_F$Tbi_tot_exon_len, dat1_orth_HD_F$Tbi_tot_exon_len, dat1_orth_HD_F$Tbi_tot_exon_len, dat1_orth_HD_F$Tbi_tot_exon_len, 
-dat1_orth_HD_F$Tce_tot_exon_len, dat1_orth_HD_F$Tce_tot_exon_len, dat1_orth_HD_F$Tce_tot_exon_len, dat1_orth_HD_F$Tce_tot_exon_len, dat1_orth_HD_F$Tce_tot_exon_len, dat1_orth_HD_F$Tce_tot_exon_len, 
-dat1_orth_HD_F$Tcm_tot_exon_len, dat1_orth_HD_F$Tcm_tot_exon_len, dat1_orth_HD_F$Tcm_tot_exon_len, dat1_orth_HD_F$Tcm_tot_exon_len, dat1_orth_HD_F$Tcm_tot_exon_len, dat1_orth_HD_F$Tcm_tot_exon_len, 
-dat1_orth_HD_F$Tpa_tot_exon_len, dat1_orth_HD_F$Tpa_tot_exon_len, dat1_orth_HD_F$Tpa_tot_exon_len, dat1_orth_HD_F$Tpa_tot_exon_len, dat1_orth_HD_F$Tpa_tot_exon_len, dat1_orth_HD_F$Tpa_tot_exon_len, 
-dat1_orth_HD_F$Tps_tot_exon_len, dat1_orth_HD_F$Tps_tot_exon_len, dat1_orth_HD_F$Tps_tot_exon_len, dat1_orth_HD_F$Tps_tot_exon_len, dat1_orth_HD_F$Tps_tot_exon_len, dat1_orth_HD_F$Tps_tot_exon_len))
-gl_HD <- log(geneLength_HD)
-gl_HD <- t(t(gl_HD)-colMeans(gl_HD))
-offset_HD <- expandAsMatrix(getOffset(y_orth_HD_FL),dim(y_orth_HD_FL))
-offset_HD <- offset_HD + gl_HD
-y_orth_HD_FL$offset <- offset_HD
-
-
-
-## LG
-y_Tbi_LG_o_UF <- DGEList(counts=dat1_orth[,c("Tbi_SF_LG_Md_Re1", "Tbi_SF_LG_Md_Re2", "Tbi_SF_LG_Md_Re3", "Tbi_SM_LG_Md_Re1", "Tbi_SM_LG_Md_Re2", "Tbi_SM_LG_Md_Re3")], genes=dat1_orth$HOG)
-y_Tbi_LG_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tbi_LG_o_UF,FPKM_filt_value, 2, dat1_orth$Tbi_tot_exon_len)
-y_Tce_LG_o_UF <- DGEList(counts=dat1_orth[,c("Tce_SF_LG_Md_Re1", "Tce_SF_LG_Md_Re2", "Tce_SF_LG_Md_Re3", "Tce_SM_LG_Md_Re1", "Tce_SM_LG_Md_Re2", "Tce_SM_LG_Md_Re3")], genes=dat1_orth$HOG)
-y_Tce_LG_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tce_LG_o_UF,FPKM_filt_value, 2, dat1_orth$Tce_tot_exon_len)
-y_Tcm_LG_o_UF <- DGEList(counts=dat1_orth[,c("Tcm_SF_LG_Md_Re1", "Tcm_SF_LG_Md_Re2", "Tcm_SF_LG_Md_Re3", "Tcm_SM_LG_Md_Re1", "Tcm_SM_LG_Md_Re2", "Tcm_SM_LG_Md_Re3")], genes=dat1_orth$HOG)
-y_Tcm_LG_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tcm_LG_o_UF,FPKM_filt_value, 2, dat1_orth$Tcm_tot_exon_len)
-y_Tpa_LG_o_UF <- DGEList(counts=dat1_orth[,c("Tpa_SF_LG_Md_Re1", "Tpa_SF_LG_Md_Re2", "Tpa_SF_LG_Md_Re3", "Tpa_SM_LG_Md_Re1", "Tpa_SM_LG_Md_Re2", "Tpa_SM_LG_Md_Re3")], genes=dat1_orth$HOG)
-y_Tpa_LG_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tpa_LG_o_UF,FPKM_filt_value, 2, dat1_orth$Tpa_tot_exon_len)
-y_Tps_LG_o_UF <- DGEList(counts=dat1_orth[,c("Tps_SF_LG_Md_Re1", "Tps_SF_LG_Md_Re2", "Tps_SF_LG_Md_Re3", "Tps_SM_LG_Md_Re1", "Tps_SM_LG_Md_Re2", "Tps_SM_LG_Md_Re3")], genes=dat1_orth$HOG)
-y_Tps_LG_o_F_FPKM <- filt_and_norm_maj_FPKM(y_Tps_LG_o_UF,FPKM_filt_value, 2, dat1_orth$Tps_tot_exon_len)
-
-
-Intersect <- function (x) {  
-  # Multiple set version of intersect
-  # x is a list
-  if (length(x) == 1) {
-    unlist(x)
-  } else if (length(x) == 2) {
-    intersect(x[[1]], x[[2]])
-  } else if (length(x) > 2){
-    intersect(x[[1]], Intersect(x[-1]))
-  }
-}
-
-All_LG_o_F_FPKM_genes <- list("Tbi" = y_Tbi_LG_o_F_FPKM$genes[,1], "Tce" = y_Tcm_LG_o_F_FPKM$genes[,1], "Tcm" = y_Tcm_LG_o_F_FPKM$genes[,1], "Tpa" = y_Tpa_LG_o_F_FPKM$genes[,1], "Tps" = y_Tps_LG_o_F_FPKM$genes[,1])
-All_LG_o_F_FPKM_genes_want <- Intersect(All_LG_o_F_FPKM_genes)
-length(All_LG_o_F_FPKM_genes_want)
-
-dat1_orth_LG_F <- dat1_orth[dat1_orth$HOG %in% All_LG_o_F_FPKM_genes_want,]
-length(dat1_orth_LG_F[,1])
-
-
-####################################
-### read into DGE obj
-
-## LG
-y_orth_LG_F <- DGEList(counts=dat1_orth_LG_F[,c(
-"Tbi_SF_LG_Md_Re1", "Tbi_SF_LG_Md_Re2", "Tbi_SF_LG_Md_Re3",
-"Tbi_SM_LG_Md_Re1", "Tbi_SM_LG_Md_Re2", "Tbi_SM_LG_Md_Re3",
-"Tce_SF_LG_Md_Re1", "Tce_SF_LG_Md_Re2", "Tce_SF_LG_Md_Re3",
-"Tce_SM_LG_Md_Re1", "Tce_SM_LG_Md_Re2", "Tce_SM_LG_Md_Re3",
-"Tcm_SF_LG_Md_Re1", "Tcm_SF_LG_Md_Re2", "Tcm_SF_LG_Md_Re3",
-"Tcm_SM_LG_Md_Re1", "Tcm_SM_LG_Md_Re2", "Tcm_SM_LG_Md_Re3",
-"Tpa_SF_LG_Md_Re1", "Tpa_SF_LG_Md_Re2", "Tpa_SF_LG_Md_Re3",
-"Tpa_SM_LG_Md_Re1", "Tpa_SM_LG_Md_Re2", "Tpa_SM_LG_Md_Re3",
-"Tps_SF_LG_Md_Re1", "Tps_SF_LG_Md_Re2", "Tps_SF_LG_Md_Re3",
-"Tps_SM_LG_Md_Re1", "Tps_SM_LG_Md_Re2", "Tps_SM_LG_Md_Re3"
-)], genes=dat1_orth_LG_F$HOG)
-
-y_orth_LG_F  <- filt_and_norm_maj_FPKM(y_orth_LG_F, -1, -1, dat1_orth_LG_F$Tbi_tot_exon_len) ### just normalise - no exp filter
-
-
-########## genes have different len - adjust
-
-y_orth_LG_FL <- y_orth_LG_F 
-
-geneLength_LG <- as.matrix(cbind(
-dat1_orth_LG_F$Tbi_tot_exon_len, dat1_orth_LG_F$Tbi_tot_exon_len, dat1_orth_LG_F$Tbi_tot_exon_len, dat1_orth_LG_F$Tbi_tot_exon_len, dat1_orth_LG_F$Tbi_tot_exon_len, dat1_orth_LG_F$Tbi_tot_exon_len, 
-dat1_orth_LG_F$Tce_tot_exon_len, dat1_orth_LG_F$Tce_tot_exon_len, dat1_orth_LG_F$Tce_tot_exon_len, dat1_orth_LG_F$Tce_tot_exon_len, dat1_orth_LG_F$Tce_tot_exon_len, dat1_orth_LG_F$Tce_tot_exon_len, 
-dat1_orth_LG_F$Tcm_tot_exon_len, dat1_orth_LG_F$Tcm_tot_exon_len, dat1_orth_LG_F$Tcm_tot_exon_len, dat1_orth_LG_F$Tcm_tot_exon_len, dat1_orth_LG_F$Tcm_tot_exon_len, dat1_orth_LG_F$Tcm_tot_exon_len, 
-dat1_orth_LG_F$Tpa_tot_exon_len, dat1_orth_LG_F$Tpa_tot_exon_len, dat1_orth_LG_F$Tpa_tot_exon_len, dat1_orth_LG_F$Tpa_tot_exon_len, dat1_orth_LG_F$Tpa_tot_exon_len, dat1_orth_LG_F$Tpa_tot_exon_len, 
-dat1_orth_LG_F$Tps_tot_exon_len, dat1_orth_LG_F$Tps_tot_exon_len, dat1_orth_LG_F$Tps_tot_exon_len, dat1_orth_LG_F$Tps_tot_exon_len, dat1_orth_LG_F$Tps_tot_exon_len, dat1_orth_LG_F$Tps_tot_exon_len))
-gl_LG <- log(geneLength_LG)
-gl_LG <- t(t(gl_LG)-colMeans(gl_LG))
-offset_LG <- expandAsMatrix(getOffset(y_orth_LG_FL),dim(y_orth_LG_FL))
-offset_LG <- offset_LG + gl_LG
-y_orth_LG_FL$offset <- offset_LG
-
-
-
-
-
-
-
-############# get interactions
-
-sex_SB = factor(c("0F","0F","0F","1M","1M","1M", "0F","0F","0F","1M","1M","1M", "0F","0F","0F","1M","1M","1M", "0F","0F","0F","1M","1M","1M", "0F","0F","0F","1M","1M","1M"))
-sp_SB  = factor(c(
-"Tbi", "Tbi", "Tbi", "Tbi", "Tbi", "Tbi", 
-"Tce", "Tce", "Tce", "Tce", "Tce", "Tce", 
-"Tcm", "Tcm", "Tcm", "Tcm", "Tcm", "Tcm", 
-"Tpa", "Tpa", "Tpa", "Tpa", "Tpa", "Tpa", 
-"Tps", "Tps", "Tps", "Tps", "Tps", "Tps"))
-
-call_spxsex_interactions <- function(y, sig_level){
-	
-	### design matrix
-	design <- model.matrix(~sp_SB * sex_SB) 
-	rownames(design) <- colnames(y)
-	print(design)
-
-	### Est dispersion 
-	y <- estimateDisp(y, design)
-	
-	### Fit model
-	fit_y <- glmFit(y, design,robust=TRUE)
-	
-	### Test
-	print(colnames(fit_y))
-	print(colnames(fit_y)[7:10])
-
-	fit_c <-  glmLRT(fit_y,coef=7:10)
-	
-	### get_SB gene
-	TTT_SB <- get_DE_genes(fit_c, sig_level)
-	
-	return(TTT_SB)
-}
-
-
-
-
-TTT_inter_RT   <- call_spxsex_interactions(y_orth_RT_F, 0.05)
-TTT_inter_RT_L <- call_spxsex_interactions(y_orth_RT_FL, 0.05) ### adjusting for length makes NO diff as I am only interested in the interaction - diffs due to lengths are already accounted for by the species term.
-TTT_inter_HD   <- call_spxsex_interactions(y_orth_HD_F, 0.05)
-TTT_inter_HD_L <- call_spxsex_interactions(y_orth_HD_FL, 0.05) ### adjusting for length makes NO diff as I am only interested in the interaction - diffs due to lengths are already accounted for by the species term.
-TTT_inter_LG   <- call_spxsex_interactions(y_orth_LG_F, 0.05)
-TTT_inter_LG_L <- call_spxsex_interactions(y_orth_LG_FL, 0.05) ### adjusting for length makes NO diff as I am only interested in the interaction - diffs due to lengths are already accounted for by the species term.
-
-
-
-
-##########################################################################
-### get HOGs with SBGE
-
-
-get_HOGs <- function(genes){
-	all_hogs <- c()
-	for(g in genes){
-		Hog_n <- gene_to_orth_dict[[g]]
-        if(length(Hog_n) != 0){
-		all_hogs <- c(all_hogs, Hog_n)
-		}
-	}
-	return(unique(all_hogs))
-}
-
-
-X_A_SB_inter <- function(inter_df, sig_SB){
-	
-	X_A <- c()
-	for(i in seq(1:length(inter_df[,1]))){
-		Hog_n <- inter_df$genes[i]
-		X_A_n <- Orth_soft_chr_dict[[Hog_n]]
-		X_A <- c(X_A, X_A_n)
-		}
-	inter_df$X_A_soft <- X_A
-	inter_df$SB <- ifelse(inter_df$genes %in% sig_SB, "SB", "UB")
-	return(inter_df)
-}
-
-
-
-
-TTT_inter_RT_L_SB_XA <- X_A_SB_inter(TTT_inter_RT_L$table, 
-get_HOGs(
-c(
-subset(TTT_RT_Tbi_sex_bias_FPKM$table, TTT_RT_Tbi_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_RT_Tce_sex_bias_FPKM$table, TTT_RT_Tce_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_RT_Tcm_sex_bias_FPKM$table, TTT_RT_Tcm_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_RT_Tpa_sex_bias_FPKM$table, TTT_RT_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_RT_Tps_sex_bias_FPKM$table, TTT_RT_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
-
-TTT_inter_HD_L_SB_XA <- X_A_SB_inter(TTT_inter_HD_L$table, 
-get_HOGs(
-c(
-subset(TTT_HD_Tbi_sex_bias_FPKM$table, TTT_HD_Tbi_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_HD_Tce_sex_bias_FPKM$table, TTT_HD_Tce_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_HD_Tcm_sex_bias_FPKM$table, TTT_HD_Tcm_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_HD_Tpa_sex_bias_FPKM$table, TTT_HD_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_HD_Tps_sex_bias_FPKM$table, TTT_HD_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
-
-TTT_inter_LG_L_SB_XA <- X_A_SB_inter(TTT_inter_LG_L$table, 
-get_HOGs(
-c(
-subset(TTT_LG_Tbi_sex_bias_FPKM$table, TTT_LG_Tbi_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_LG_Tce_sex_bias_FPKM$table, TTT_LG_Tce_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_LG_Tcm_sex_bias_FPKM$table, TTT_LG_Tcm_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_LG_Tpa_sex_bias_FPKM$table, TTT_LG_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-subset(TTT_LG_Tps_sex_bias_FPKM$table, TTT_LG_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
-
-
-
-### are SB genes on the X underrep for sp * sex inter?
-
-
-test_inter_underrep_X <- function(df, inter_cut_u){
-	df_SB   <- subset(df,    df$SB == "SB")
-	df_SB_X 	<- subset(df_SB, df_SB$X_A_soft == "XXXXX")
-	
-	X_genes_inter      = length(subset(df_SB_X, df_SB_X$FDR  <  inter_cut_u)[,1])
-	X_genes_no_inter   = length(subset(df_SB_X, df_SB_X$FDR  >= inter_cut_u)[,1])
-
-	All_genes_inter    = length(subset(df_SB,   df_SB$FDR  <  inter_cut_u)[,1])
-	All_genes_no_inter = length(subset(df_SB,   df_SB$FDR  >= inter_cut_u)[,1])
-	
-	FT_mat <- matrix(c(X_genes_inter,(All_genes_inter - X_genes_inter), X_genes_no_inter,(All_genes_no_inter - X_genes_no_inter)), nrow = 2)
-	
-	print(fisher.test(FT_mat,alternative="less"))
-	return(c(fisher.test(FT_mat,alternative="less")$estimate, fisher.test(FT_mat,alternative="less")$p))
-}
-
-### use FDR 0.1 as few SB genes in non-RT
-
-underrep_test_inter_X <- as.data.frame(rbind(
-c("RT", test_inter_underrep_X(TTT_inter_RT_L_SB_XA, 0.1)),
-c("HD", test_inter_underrep_X(TTT_inter_HD_L_SB_XA, 0.1)) ,
-c("LG", test_inter_underrep_X(TTT_inter_LG_L_SB_XA, 0.1))))
-colnames(underrep_test_inter_X) <- c("tiss", "OR", "p")
-underrep_test_inter_X 
-
-write.csv(underrep_test_inter_X, "underrep_test_inter_X.csv")
-
-## 0.05 shows same
-as.data.frame(rbind(
-c("RT", test_inter_underrep_X(TTT_inter_RT_L_SB_XA, 0.05)),
-c("HD", test_inter_underrep_X(TTT_inter_HD_L_SB_XA, 0.05)) ,
-c("LG", test_inter_underrep_X(TTT_inter_LG_L_SB_XA, 0.05))))
-
-
-##########################################################
-### heatmaps with only SB genes 
-
-plot_orth_MF_heatmaps_X_soft_clust_SBonly <- function(MF_orth_df, tit_txt, SB_gene_vect){
-  print(length(MF_orth_df[,1]))
-  MF_orth_df_c <- na.omit(MF_orth_df)
-  print(length(MF_orth_df_c[,1]))	
-  
-  # X_soft
-  X_soft_df_a <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "XXXXX")
-  X_soft_df   <- X_soft_df_a[X_soft_df_a$orth %in% SB_gene_vect, ]
- 
-  print(length(X_soft_df[,1]))
-  X_soft_df_mat <- as.data.frame(cbind(X_soft_df$Tps, X_soft_df$Tcm, X_soft_df$Tce,  X_soft_df$Tpa, X_soft_df$Tbi))
-  rownames(X_soft_df_mat) <- X_soft_df$orth
-  colnames(X_soft_df_mat) <- c("Tps", "Tcm", "Tce", "Tpa", "Tbi")
-  
-  X_soft_df_mat$Tbi <- as.numeric(as.character(X_soft_df_mat$Tbi ))
-  X_soft_df_mat$Tce <- as.numeric(as.character(X_soft_df_mat$Tce ))
-  X_soft_df_mat$Tcm <- as.numeric(as.character(X_soft_df_mat$Tcm ))
-  X_soft_df_mat$Tpa <- as.numeric(as.character(X_soft_df_mat$Tpa ))
-  X_soft_df_mat$Tps <- as.numeric(as.character(X_soft_df_mat$Tps ))	
-  
-  # print(str(X_soft_df_mat))
-  # print(X_soft_df_mat)
-  
-  breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
-  
-  X_soft_heatmap <- pheatmap(X_soft_df_mat, cluster_cols = FALSE, color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA, main = tit_txt)
-  
-  return(X_soft_heatmap)
-}
-
-plot_orth_MF_heatmaps_A_soft_clust_SBonly <- function(MF_orth_df, tit_txt, SB_gene_vect){
-  print(length(MF_orth_df[,1]))
-  MF_orth_df_c <- na.omit(MF_orth_df)
-  print(length(MF_orth_df_c[,1]))	
-  
-  # A_soft
-  A_soft_df_a <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "AAAAA")
-  A_soft_df   <- A_soft_df_a[A_soft_df_a$orth %in% SB_gene_vect, ]
-  
-  print(length(A_soft_df[,1]))
-  A_soft_df_mat <- as.data.frame(cbind(A_soft_df$Tps, A_soft_df$Tcm, A_soft_df$Tce,  A_soft_df$Tpa, A_soft_df$Tbi))
-  rownames(A_soft_df_mat) <- A_soft_df$orth
-  colnames(A_soft_df_mat) <- c("Tps", "Tcm", "Tce", "Tpa", "Tbi")
-  
-  A_soft_df_mat$Tbi <- as.numeric(as.character(A_soft_df_mat$Tbi ))
-  A_soft_df_mat$Tce <- as.numeric(as.character(A_soft_df_mat$Tce ))
-  A_soft_df_mat$Tcm <- as.numeric(as.character(A_soft_df_mat$Tcm ))
-  A_soft_df_mat$Tpa <- as.numeric(as.character(A_soft_df_mat$Tpa ))
-  A_soft_df_mat$Tps <- as.numeric(as.character(A_soft_df_mat$Tps ))	
-  
-  # print(str(A_soft_df_mat))
-  # print(A_soft_df_mat)
-  
-  breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
-  
-  A_soft_heatmap <- pheatmap(A_soft_df_mat, cluster_cols = FALSE, color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA, main = tit_txt)
-  
-  return(A_soft_heatmap)
-}
-
-
-pdf("heatmap_X_MF_RT_FPKM_allsp_orths_clust_SBonly.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_X_soft_clust_SBonly(RT_FPKM_log2MF_allsp_orths, "RT", get_HOGs(c(
-  subset(TTT_RT_Tbi_sex_bias_FPKM$table, TTT_RT_Tbi_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_RT_Tce_sex_bias_FPKM$table, TTT_RT_Tce_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_RT_Tcm_sex_bias_FPKM$table, TTT_RT_Tcm_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_RT_Tpa_sex_bias_FPKM$table, TTT_RT_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_RT_Tps_sex_bias_FPKM$table, TTT_RT_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
-dev.off()
-
-pdf("heatmap_X_MF_HD_FPKM_allsp_orths_clust_SBonly.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_X_soft_clust_SBonly(HD_FPKM_log2MF_allsp_orths, "HD", get_HOGs(c(
-  subset(TTT_HD_Tbi_sex_bias_FPKM$table, TTT_HD_Tbi_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_HD_Tce_sex_bias_FPKM$table, TTT_HD_Tce_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_HD_Tcm_sex_bias_FPKM$table, TTT_HD_Tcm_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_HD_Tpa_sex_bias_FPKM$table, TTT_HD_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_HD_Tps_sex_bias_FPKM$table, TTT_HD_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
-dev.off()
-
-pdf("heatmap_X_MF_LG_FPKM_allsp_orths_clust_SBonly.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_X_soft_clust_SBonly(LG_FPKM_log2MF_allsp_orths, "LG", get_HOGs(c(
-  subset(TTT_LG_Tbi_sex_bias_FPKM$table, TTT_LG_Tbi_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_LG_Tce_sex_bias_FPKM$table, TTT_LG_Tce_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_LG_Tcm_sex_bias_FPKM$table, TTT_LG_Tcm_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_LG_Tpa_sex_bias_FPKM$table, TTT_LG_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_LG_Tps_sex_bias_FPKM$table, TTT_LG_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
-dev.off()
-
-pdf("heatmap_A_MF_RT_FPKM_allsp_orths_clust_SBonly.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_A_soft_clust_SBonly(RT_FPKM_log2MF_allsp_orths, "RT", get_HOGs(c(
-  subset(TTT_RT_Tbi_sex_bias_FPKM$table, TTT_RT_Tbi_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_RT_Tce_sex_bias_FPKM$table, TTT_RT_Tce_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_RT_Tcm_sex_bias_FPKM$table, TTT_RT_Tcm_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_RT_Tpa_sex_bias_FPKM$table, TTT_RT_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_RT_Tps_sex_bias_FPKM$table, TTT_RT_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
-dev.off()
-
-pdf("heatmap_A_MF_HD_FPKM_allsp_orths_clust_SBonly.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_A_soft_clust_SBonly(HD_FPKM_log2MF_allsp_orths, "HD", get_HOGs(c(
-  subset(TTT_HD_Tbi_sex_bias_FPKM$table, TTT_HD_Tbi_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_HD_Tce_sex_bias_FPKM$table, TTT_HD_Tce_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_HD_Tcm_sex_bias_FPKM$table, TTT_HD_Tcm_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_HD_Tpa_sex_bias_FPKM$table, TTT_HD_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_HD_Tps_sex_bias_FPKM$table, TTT_HD_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
-dev.off()
-
-pdf("heatmap_A_MF_LG_FPKM_allsp_orths_clust_SBonly.pdf", width = 3, height = 14)
-plot_orth_MF_heatmaps_A_soft_clust_SBonly(LG_FPKM_log2MF_allsp_orths, "LG", get_HOGs(c(
-  subset(TTT_LG_Tbi_sex_bias_FPKM$table, TTT_LG_Tbi_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_LG_Tce_sex_bias_FPKM$table, TTT_LG_Tce_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_LG_Tcm_sex_bias_FPKM$table, TTT_LG_Tcm_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_LG_Tpa_sex_bias_FPKM$table, TTT_LG_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
-  subset(TTT_LG_Tps_sex_bias_FPKM$table, TTT_LG_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
+plot_orth_heatmaps_X_soft_exp(RT_FPKM_allsp_orths, "RT | FPKM")
 dev.off()
 
 

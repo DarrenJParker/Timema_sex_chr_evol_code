@@ -104,3 +104,23 @@ write.csv(SET_wFDR(l_dat_hard_1000, total_N_HOGs_1000), file="SET_orths_X_summar
 write.csv(SET_wFDR(l_dat_hard_1000, total_N_HOGs_1000), file="SET_orths_X_summary_table_hard_5000.csv", row.names=FALSE)
 write.csv(SET_wFDR(l_dat_soft_1000, total_N_HOGs_1000), file="SET_orths_X_summary_table_soft_1000.csv", row.names=FALSE)
 write.csv(SET_wFDR(l_dat_soft_1000, total_N_HOGs_1000), file="SET_orths_X_summary_table_soft_5000.csv", row.names=FALSE)
+
+
+
+### X in all species
+
+
+Intersect <- function (x) {  
+  # Multiple set version of intersect
+  # x is a list
+  if (length(x) == 1) {
+    unlist(x)
+  } else if (length(x) == 2) {
+    intersect(x[[1]], x[[2]])
+  } else if (length(x) > 2){
+    intersect(x[[1]], Intersect(x[-1]))
+  }
+}
+
+X_soft_HOG_list <-  Intersect(l_dat_soft_1000)
+write.table(X_soft_HOG_list, file="X_soft_HOG_list.tsv", row.names = F, col.names = F, sep = "\t")

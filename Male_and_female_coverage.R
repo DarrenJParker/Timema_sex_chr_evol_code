@@ -590,10 +590,11 @@ calc_prop_het <- function(df, samp_names) {
 	out_head_1 <- colnames(df_out )
 	out_head_2 <- c()
 	for(s in samp_names){
-		out_head_2 <- c(out_head_2, paste("Phet_", s, sep = ""))
+		out_head_2 <- c(out_head_2, paste("Phet_", s, sep = ""),  paste("TcovS_", s, sep = ""))
 		print(s)
-		Phet <- eval(parse(text=paste('df_out$hetero_mlest_',s, sep=''))) / (eval(parse(text=paste('df_out$homo_mlest_',s, sep=''))) + eval(parse(text=paste('df_out$hetero_mlest_',s, sep=''))))
-		df_out <- cbind(df_out, Phet)
+		Phet      <- eval(parse(text=paste('df_out$hetero_mlest_',s, sep=''))) / (eval(parse(text=paste('df_out$homo_mlest_',s, sep=''))) + eval(parse(text=paste('df_out$hetero_mlest_',s, sep=''))))
+		TcovSites <- eval(parse(text=paste('df_out$homo_mlest_',s, sep=''))) + eval(parse(text=paste('df_out$hetero_mlest_',s, sep='')))
+		df_out <- cbind(df_out, Phet, TcovSites)
 	}
 	
 	colnames(df_out) <- c(out_head_1, out_head_2)
@@ -623,7 +624,7 @@ Tps_df_filt_het <- calc_prop_het(Tps_df_filt, Tps_samp_names)
 head(Tbi_df_filt_het )
 
 X_A_Phet <-  function(df, samp_names){
-
+	
 	### hard class	
 	
 	df_hard_X  <- subset(df, df$class_hard == "X")
@@ -633,8 +634,8 @@ X_A_Phet <-  function(df, samp_names){
 	out_df_XA_ratio_hard <- c()
 	for(s in samp_names){
 		print(s)
-		wt_med_X <- weighted.median(eval(parse(text=paste('df_hard_X$Phet_',s, sep=''))), eval(parse(text=paste('df_hard_X$',"length", sep=''))))
-		wt_med_A <- weighted.median(eval(parse(text=paste('df_hard_A$Phet_',s, sep=''))), eval(parse(text=paste('df_hard_A$',"length", sep=''))))
+		wt_med_X <- weighted.median(eval(parse(text=paste('df_hard_X$Phet_',s, sep=''))), eval(parse(text=paste('df_hard_X$TcovS_',s, sep=''))))
+		wt_med_A <- weighted.median(eval(parse(text=paste('df_hard_A$Phet_',s, sep=''))), eval(parse(text=paste('df_hard_A$TcovS_',s, sep=''))))
 	
 		out_line <- c(s, "X", wt_med_X)
 		out_df_hard <- rbind(out_df_hard, out_line)
@@ -663,8 +664,8 @@ X_A_Phet <-  function(df, samp_names){
 	out_df_XA_ratio_soft <- c()
 	for(s in samp_names){
 		print(s)
-		wt_med_X <- weighted.median(eval(parse(text=paste('df_soft_X$Phet_',s, sep=''))), eval(parse(text=paste('df_soft_X$',"length", sep=''))))
-		wt_med_A <- weighted.median(eval(parse(text=paste('df_soft_A$Phet_',s, sep=''))), eval(parse(text=paste('df_soft_A$',"length", sep=''))))
+		wt_med_X <- weighted.median(eval(parse(text=paste('df_soft_X$Phet_',s, sep=''))), eval(parse(text=paste('df_soft_X$TcovS_',s, sep=''))))
+		wt_med_A <- weighted.median(eval(parse(text=paste('df_soft_A$Phet_',s, sep=''))), eval(parse(text=paste('df_soft_A$TcovS_',s, sep=''))))
 	
 		out_line <- c(s, "X", wt_med_X)
 		out_df_soft <- rbind(out_df_soft, out_line)
@@ -696,9 +697,9 @@ X_A_Phet <-  function(df, samp_names){
 	out_df3cat <- c()
 	for(s in samp_names){
 		print(s)
-		wt_med_XX <- weighted.median(eval(parse(text=paste('df_XX$Phet_',s, sep=''))), eval(parse(text=paste('df_XX$',"length", sep=''))))
-		wt_med_XA <- weighted.median(eval(parse(text=paste('df_XA$Phet_',s, sep=''))), eval(parse(text=paste('df_XA$',"length", sep=''))))		
-		wt_med_AA <- weighted.median(eval(parse(text=paste('df_AA$Phet_',s, sep=''))), eval(parse(text=paste('df_AA$',"length", sep=''))))
+		wt_med_XX <- weighted.median(eval(parse(text=paste('df_XX$Phet_',s, sep=''))), eval(parse(text=paste('df_XX$TcovS_',s, sep=''))))
+		wt_med_XA <- weighted.median(eval(parse(text=paste('df_XA$Phet_',s, sep=''))), eval(parse(text=paste('df_XA$TcovS_',s, sep=''))))		
+		wt_med_AA <- weighted.median(eval(parse(text=paste('df_AA$Phet_',s, sep=''))), eval(parse(text=paste('df_AA$TcovS_',s, sep=''))))
 	
 		out_line <- c(s, "XX", wt_med_XX)
 		out_df3cat <- rbind(out_df3cat, out_line)
@@ -717,6 +718,8 @@ X_A_Phet <-  function(df, samp_names){
 	return(out_list)	
 	
 }
+
+head(Tbi_df_filt_het)
 
 Tbi_Phet <- X_A_Phet(Tbi_df_filt_het, Tbi_samp_names)
 Tce_Phet <- X_A_Phet(Tce_df_filt_het, Tce_samp_names)
@@ -884,20 +887,20 @@ LG_Phet <-  function(df, samp_names){
 	out_df_LG <- c()
 	for(s in samp_names){
 		print(s)
-		wt_med_lg1  <- weighted.median(eval(parse(text=paste('df_filt_lg1$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg1$',"length", sep=''))))
-		wt_med_lg2  <- weighted.median(eval(parse(text=paste('df_filt_lg2$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg2$',"length", sep=''))))
-		wt_med_lg3  <- weighted.median(eval(parse(text=paste('df_filt_lg3$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg3$',"length", sep=''))))
-		wt_med_lg4  <- weighted.median(eval(parse(text=paste('df_filt_lg4$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg4$',"length", sep=''))))
-		wt_med_lg5  <- weighted.median(eval(parse(text=paste('df_filt_lg5$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg5$',"length", sep=''))))
-		wt_med_lg6  <- weighted.median(eval(parse(text=paste('df_filt_lg6$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg6$',"length", sep=''))))
-		wt_med_lg7  <- weighted.median(eval(parse(text=paste('df_filt_lg7$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg7$',"length", sep=''))))
-		wt_med_lg8  <- weighted.median(eval(parse(text=paste('df_filt_lg8$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg8$',"length", sep=''))))
-		wt_med_lg9  <- weighted.median(eval(parse(text=paste('df_filt_lg9$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg9$',"length", sep=''))))
-		wt_med_lg10 <- weighted.median(eval(parse(text=paste('df_filt_lg10$Phet_',s, sep=''))), eval(parse(text=paste('df_filt_lg10$',"length", sep=''))))
-		wt_med_lg11 <- weighted.median(eval(parse(text=paste('df_filt_lg11$Phet_',s, sep=''))), eval(parse(text=paste('df_filt_lg11$',"length", sep=''))))
-		wt_med_lg12 <- weighted.median(eval(parse(text=paste('df_filt_lg12$Phet_',s, sep=''))), eval(parse(text=paste('df_filt_lg12$',"length", sep=''))))
-		wt_med_lgX  <- weighted.median(eval(parse(text=paste('df_filt_lgX$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lgX$',"length", sep=''))))
-
+		wt_med_lg1  <- weighted.median(eval(parse(text=paste('df_filt_lg1$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg1$TcovS_',s, sep=''))))
+		wt_med_lg2  <- weighted.median(eval(parse(text=paste('df_filt_lg2$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg2$TcovS_',s, sep=''))))
+		wt_med_lg3  <- weighted.median(eval(parse(text=paste('df_filt_lg3$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg3$TcovS_',s, sep=''))))
+		wt_med_lg4  <- weighted.median(eval(parse(text=paste('df_filt_lg4$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg4$TcovS_',s, sep=''))))
+		wt_med_lg5  <- weighted.median(eval(parse(text=paste('df_filt_lg5$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg5$TcovS_',s, sep=''))))
+		wt_med_lg6  <- weighted.median(eval(parse(text=paste('df_filt_lg6$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg6$TcovS_',s, sep=''))))
+		wt_med_lg7  <- weighted.median(eval(parse(text=paste('df_filt_lg7$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg7$TcovS_',s, sep=''))))
+		wt_med_lg8  <- weighted.median(eval(parse(text=paste('df_filt_lg8$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg8$TcovS_',s, sep=''))))
+		wt_med_lg9  <- weighted.median(eval(parse(text=paste('df_filt_lg9$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lg9$TcovS_',s, sep=''))))
+		wt_med_lg10 <- weighted.median(eval(parse(text=paste('df_filt_lg10$Phet_',s, sep=''))), eval(parse(text=paste('df_filt_lg10$TcovS_',s, sep=''))))
+		wt_med_lg11 <- weighted.median(eval(parse(text=paste('df_filt_lg11$Phet_',s, sep=''))), eval(parse(text=paste('df_filt_lg11$TcovS_',s, sep=''))))
+		wt_med_lg12 <- weighted.median(eval(parse(text=paste('df_filt_lg12$Phet_',s, sep=''))), eval(parse(text=paste('df_filt_lg12$TcovS_',s, sep=''))))
+		wt_med_lgX  <- weighted.median(eval(parse(text=paste('df_filt_lgX$Phet_',s, sep=''))),  eval(parse(text=paste('df_filt_lgX$TcovS_',s, sep=''))))
+		
 		out_line <- c(s, "lg1", wt_med_lg1)
 		out_df_LG <- rbind(out_df_LG, out_line)	
 		out_line <- c(s, "lg2", wt_med_lg2)
@@ -968,7 +971,7 @@ getwd() ## where has my plot gone....?
 
 
 ############################################# ############################################# ############################################# 
-############################################# hist
+############################################# hist XA
 
 ### Hard to see much here
 hist_min_len = 20000

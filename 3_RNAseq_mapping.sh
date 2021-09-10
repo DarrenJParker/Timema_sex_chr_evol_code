@@ -313,10 +313,18 @@ done
 done
 
 
+### make orth counts df
+
+python3 accessory_scripts/sex_chr_cov_readcounts_orth_tidier.py -r data/counts/ -e 1000_chr_info_and_counts.csv -o data/counts/TbiTceTcmTpaTps
 
 ### Expression_analyses.R
 
 
 cat FT_MB_FB_X_A_*FPKM* > FT_MB_FB_X_A_ALL_FPKM.csv
 cat FT_MB_FB_X_A_*TPM* > FT_MB_FB_X_A_ALL_TPM.csv
+
+
+### male_biased_genes_function.R
+### positive_selection_on_the_X.R
+
 

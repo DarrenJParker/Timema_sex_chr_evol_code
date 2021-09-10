@@ -5,7 +5,7 @@ import re
 import decimal
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], 'i:s:c:h')
+	opts, args = getopt.getopt(sys.argv[1:], 'i:s:c:n:h')
 																					 	
 except getopt.GetoptError:
 	print('ERROR getting options, please see help by specifing -h')
@@ -23,7 +23,7 @@ in_dir_name = None
 cov_ext = "_est.ml"
 species_want = None
 coverage_with_LG_filename = None
-
+nucl_info_filename = None
 
 #print (opts) ## see args
 for opt, arg in opts:
@@ -40,6 +40,8 @@ for opt, arg in opts:
 		species_want = arg
 	elif opt in ('-c'):
 		coverage_with_LG_filename = arg
+	elif opt in ('-n'):
+		nucl_info_filename = arg	
 	else:
 		print("i dont know")
 		sys.exit(2)
@@ -86,6 +88,28 @@ sample_list_s = sorted(sample_list)
 print("\nSamples:")
 print(sample_list_s)
 
+
+##############################################
+## nucl div
+
+if nucl_info_filename != None: 
+	nucl_div_dict = {}
+	line_N = 0
+	nucl_info_file = open(nucl_info_filename)
+	nucl_head = ""
+	for line in nucl_info_file:
+		line = line.strip().split("\t")
+		line_N = line_N + 1
+		if line_N == 1:
+			nucl_head = line[4] + "," + line[8] + "," + line[13]
+		else:
+			scaf = line[1]
+			tP   = line[4]
+			Tajima = line[8]
+			nSites = line[13]
+			nucl_div_dict[scaf] = line[4] + "," + line[8] + "," + line[13]
+
+
 #######################################################################################################
 ### add to coverage info
 
@@ -96,8 +120,10 @@ coverage_with_LG_file = open(coverage_with_LG_filename)
 
 missing_scafs = set()
 total_scafs = set()
-out_file = open(coverage_with_LG_filename.replace(".csv", "_withangsD.csv"), "w")
-
+if nucl_info_filename == None: 
+	out_file = open(coverage_with_LG_filename.replace(".csv", "_withangsD.csv"), "w")
+else:
+	out_file = open(coverage_with_LG_filename.replace(".csv", "_withangsDnucl.csv"), "w")
 
 line_N = 0
 for line in coverage_with_LG_file:
@@ -109,7 +135,12 @@ for line in coverage_with_LG_file:
 		for el in sample_list:
 			header_bit = "homo_mlest_" + el + ",hetero_mlest_" + el
 			header = header + "," + header_bit
+		if nucl_info_filename != None:
+			header = header + "," + nucl_head
+		
 		out_file.write(header + "\n")
+		
+			
 	else:
 		#print(line)
 		scaf_name = line.split(",")[0]
@@ -124,6 +155,14 @@ for line in coverage_with_LG_file:
 				total_scafs.add(scaf_name)
 			
 			out_line = out_line + "," + het_homo_info
+			
+		if nucl_info_filename != None: 
+			nucl_rec = nucl_div_dict.get(scaf_name)
+			if nucl_rec == None:
+				nucl_rec = "NA,NA,NA"
+			#print(nucl_rec)
+			out_line = out_line + "," + nucl_rec 
+			
 		#print(out_line)		
 		out_file.write(out_line + "\n")
 		
