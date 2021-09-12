@@ -2,6 +2,7 @@
 
 * Need to check all paths are correct!
 * Need to explain all accessory scripts
+* Add Nosil stuff
 
 ## ID X linked scaffolds
 
