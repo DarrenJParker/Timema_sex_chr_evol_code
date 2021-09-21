@@ -615,6 +615,12 @@ Tcm_samp_names <- c("Tcm_F_HM217", "Tcm_F_HM218", "Tcm_F_HM219", "Tcm_F_HM220", 
 Tpa_samp_names <- c("Tpa_F_H54", "Tpa_F_PA_CD", "Tpa_F_PA_E", "Tpa_F_Pa_AB", "Tpa_M_09_Tpa", "Tpa_M_10_Tpa", "Tpa_M_11_Tpa", "Tpa_M_12_Tpa")
 Tps_samp_names <- c("Tps_F_ReSeq_Ps14", "Tps_F_ReSeq_Ps16", "Tps_F_ReSeq_Ps18", "Tps_M_17_HM99", "Tps_M_18_HM100", "Tps_M_19_HM101", "Tps_M_20_15255")
 
+Tbi_F_samp_names <- c("Tbi_F_CC86B", "Tbi_F_CC86C", "Tbi_F_CC87B", "Tbi_F_CC87C", "Tbi_F_CC88B")
+Tce_F_samp_names <- c("Tce_F_CC22B", "Tce_F_CC22C", "Tce_F_CC24B", "Tce_F_CC24C", "Tce_F_CC25B")
+Tcm_F_samp_names <- c("Tcm_F_HM217", "Tcm_F_HM218", "Tcm_F_HM219", "Tcm_F_HM220", "Tcm_F_HM221")
+Tpa_F_samp_names <- c("Tpa_F_H54", "Tpa_F_PA_CD", "Tpa_F_PA_E", "Tpa_F_Pa_AB")
+Tps_F_samp_names <- c("Tps_F_ReSeq_Ps14", "Tps_F_ReSeq_Ps16", "Tps_F_ReSeq_Ps18")
+
 Tbi_df_filt_het <- calc_prop_het(Tbi_df_filt, Tbi_samp_names) 
 Tce_df_filt_het <- calc_prop_het(Tce_df_filt, Tce_samp_names) 
 Tcm_df_filt_het <- calc_prop_het(Tcm_df_filt, Tcm_samp_names) 
@@ -742,16 +748,24 @@ plot_phet_1 <- function(df,tit_text){
 }	
 
 plot_phet_2 <- function(df,tit_text){
+  max_y <- max(df$wt_med_Phet)
+  
+  df$sex <- str_split_fixed(df$samp, "_", 3)[,2]
+  df$class_2 <- paste(df$class, df$sex , sep = "")
+  print(df)
+  
 	p1 <- ggplot(df, aes(samp, wt_med_Phet, fill = class)) + 
 		geom_bar(position="dodge",stat="identity") +
 		theme_bw() +
 		theme(axis.text.x = element_text(angle = 90)) +
 		xlab ("Sample") + 
-		ylab ("Heterozygosity") +
-		scale_fill_manual(values=c("darkgrey", "darkorange2")) + ggtitle(tit_text) 
+		ylab ("Heterozygosity") +  ylim(c(0, max_y * 1.2)) +
+	  scale_fill_manual(values=c("darkgrey", "darkorange2")) + ggtitle(tit_text)  
+		#scale_fill_manual(values=c("darkgrey",  "black", "darkorange2", "yellow")) + ggtitle(tit_text)  
 	return(p1)
 }	
 
+plot_phet_2(Tbi_Phet$out_df_soft, "Tbi")
 
 plot_phet_3 <- function(df,tit_text){
 	p1 <- ggplot(df, aes(samp, wt_med_Phet, fill = class)) + 
@@ -968,6 +982,28 @@ plot_phet_LG_1(Tps_LG_Phet, "Tps"),
 ncol = 1)
 dev.off()
 getwd() ## where has my plot gone....?
+
+
+## F only
+
+Tbi_F_LG_Phet <- LG_Phet(Tbi_df_filt_het, Tbi_F_samp_names)
+Tce_F_LG_Phet <- LG_Phet(Tce_df_filt_het, Tce_F_samp_names)
+Tcm_F_LG_Phet <- LG_Phet(Tcm_df_filt_het, Tcm_F_samp_names)
+Tpa_F_LG_Phet <- LG_Phet(Tpa_df_filt_het, Tpa_F_samp_names)
+Tps_F_LG_Phet <- LG_Phet(Tps_df_filt_het, Tps_F_samp_names)
+
+pdf(paste("Phet_LG_F_", cutoff_len, ".pdf", sep = ""), width = 	8, height = 20)
+plot_grid(
+  plot_phet_LG_1(Tbi_F_LG_Phet, "Tbi"),
+  plot_phet_LG_1(Tce_F_LG_Phet, "Tce"),
+  plot_phet_LG_1(Tcm_F_LG_Phet, "Tcm"),
+  plot_phet_LG_1(Tpa_F_LG_Phet, "Tpa"),
+  plot_phet_LG_1(Tps_F_LG_Phet, "Tps"),
+  ncol = 1)
+dev.off()
+getwd() ## where has my plot gone....?
+
+
 
 
 ############################################# ############################################# ############################################# 
