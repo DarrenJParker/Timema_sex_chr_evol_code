@@ -3,6 +3,14 @@
 * Need to check all paths are correct!
 * Need to explain all accessory scripts
 * Add Nosil stuff
+* Add nucl angsD stuff
+
+## how we get to genes
+select largest alignment block. most have one large block and many little ones.
+If there was > 1 linkage group I make a note
+work out rel position of each gene.
+NOTE I match the midpoint of the largest alignment block to midpoint of the part of UNIL scaf it aligned to.
+
 
 ## ID X linked scaffolds
 
