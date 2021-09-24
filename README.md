@@ -4,6 +4,7 @@
 * Need to explain all accessory scripts
 * Add Nosil stuff
 * Add nucl angsD stuff
+* blast to bacillus
 
 ## how we get to genes
 select largest alignment block. most have one large block and many little ones.
