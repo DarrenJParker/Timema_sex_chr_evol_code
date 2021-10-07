@@ -362,6 +362,28 @@ getwd() ## where has my plot gone....?
 
 
 
+#### as table with Ne
+
+nucl_XA_soft_Ne <- as.data.frame(rbind(
+c(Nucl_plot(Tbi_df_filt)$wt_med_X_nucl_soft, Nucl_plot(Tbi_df_filt)$wt_med_A_nucl_soft, Nucl_plot(Tbi_df_filt)$XA_ratio_soft),
+c(Nucl_plot(Tce_df_filt)$wt_med_X_nucl_soft, Nucl_plot(Tce_df_filt)$wt_med_A_nucl_soft, Nucl_plot(Tce_df_filt)$XA_ratio_soft),
+c(Nucl_plot(Tcm_df_filt)$wt_med_X_nucl_soft, Nucl_plot(Tcm_df_filt)$wt_med_A_nucl_soft, Nucl_plot(Tcm_df_filt)$XA_ratio_soft),
+c(Nucl_plot(Tpa_df_filt)$wt_med_X_nucl_soft, Nucl_plot(Tpa_df_filt)$wt_med_A_nucl_soft, Nucl_plot(Tpa_df_filt)$XA_ratio_soft),
+c(Nucl_plot(Tps_df_filt)$wt_med_X_nucl_soft, Nucl_plot(Tps_df_filt)$wt_med_A_nucl_soft, Nucl_plot(Tps_df_filt)$XA_ratio_soft)))
+
+colnames(nucl_XA_soft_Ne) <- c("wt_med_X_nucl_soft", "wt_med_A_nucl_soft", "XA_ratio_soft")
+nucl_XA_soft_Ne$sp <- c("Tbi", "Tce", "Tcm", "Tpa", "Tps")
+
+mutation_rate_hel = 2.9E-09	## Heliconius Keightley PD, Pinharanda A, Ness RW, Simpson F, Dasmahapatra KK, Mallet J, et al. (2015). Estimation of the spontaneous mutation rate in Heliconius melpomene. Mol Biol Evol 32: 239–243.
+mutation_rate_dro = 2.8E-09 ## Drosophila Keightley PD, Ness RW, Halligan DL, Haddrill PR (2014). Estimation of the spontaneous mutation rate per nucleotide site in a Drosophila melanogaster full-sib family. Genetics 196: 313–320.
+## pi = 4Neu
+nucl_XA_soft_Ne$NeX_hel <- nucl_XA_soft_Ne$wt_med_X_nucl_soft / 4 / mutation_rate_hel
+nucl_XA_soft_Ne$NeA_hel <- nucl_XA_soft_Ne$wt_med_A_nucl_soft / 4 / mutation_rate_hel
+nucl_XA_soft_Ne$NeX_dro <- nucl_XA_soft_Ne$wt_med_X_nucl_soft / 4 / mutation_rate_dro
+nucl_XA_soft_Ne$NeA_dro <- nucl_XA_soft_Ne$wt_med_A_nucl_soft / 4 / mutation_rate_dro
+
+
+write.csv(nucl_XA_soft_Ne, "nucl_XA_soft_Ne.csv")
 
 ##########################################################################################################
 ### by LG  
