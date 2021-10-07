@@ -384,6 +384,11 @@ nucl_XA_soft_Ne$NeA_dro <- nucl_XA_soft_Ne$wt_med_A_nucl_soft / 4 / mutation_rat
 
 
 write.csv(nucl_XA_soft_Ne, "nucl_XA_soft_Ne.csv")
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> b9b2adedede5ac9bffa98e52f5fe62bd5401ffff
 
 ##########################################################################################################
 ### by LG  
