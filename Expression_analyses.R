@@ -893,6 +893,20 @@ HD_TPM_log2MF <- plot_TPM_log2MF(All_HD_F_TPM_log2MF_long, "HD")
 LG_TPM_log2MF <- plot_TPM_log2MF(All_LG_F_TPM_log2MF_long, "LG")
 
 
+### see med ratios 
+median(ddply(subset(All_RT_F_FPKM_log2MF_long,  All_RT_F_FPKM_log2MF_long$chr_soft == "X"), .(group_soft_ord), summarize,  medAvFPKM_log2MF=median(AvFPKM_log2MF))$medAvFPKM_log2MF)
+median(ddply(subset(All_HD_F_FPKM_log2MF_long,  All_HD_F_FPKM_log2MF_long$chr_soft == "X"), .(group_soft_ord), summarize,  medAvFPKM_log2MF=median(AvFPKM_log2MF))$medAvFPKM_log2MF)
+median(ddply(subset(All_LG_F_FPKM_log2MF_long,  All_LG_F_FPKM_log2MF_long$chr_soft == "X"), .(group_soft_ord), summarize,  medAvFPKM_log2MF=median(AvFPKM_log2MF))$medAvFPKM_log2MF)
+median(ddply(subset(All_RT_F_FPKM_log2MF_long,  All_RT_F_FPKM_log2MF_long$chr_soft == "A"), .(group_soft_ord), summarize,  medAvFPKM_log2MF=median(AvFPKM_log2MF))$medAvFPKM_log2MF)
+median(ddply(subset(All_HD_F_FPKM_log2MF_long,  All_HD_F_FPKM_log2MF_long$chr_soft == "A"), .(group_soft_ord), summarize,  medAvFPKM_log2MF=median(AvFPKM_log2MF))$medAvFPKM_log2MF)
+median(ddply(subset(All_LG_F_FPKM_log2MF_long,  All_LG_F_FPKM_log2MF_long$chr_soft == "A"), .(group_soft_ord), summarize,  medAvFPKM_log2MF=median(AvFPKM_log2MF))$medAvFPKM_log2MF)
+
+median(ddply(subset(All_RT_F_TPM_log2MF_long,  All_RT_F_TPM_log2MF_long$chr_soft == "X"), .(group_soft_ord), summarize,  medAvTPM_log2MF=median(AvTPM_log2MF))$medAvTPM_log2MF)
+median(ddply(subset(All_HD_F_TPM_log2MF_long,  All_HD_F_TPM_log2MF_long$chr_soft == "X"), .(group_soft_ord), summarize,  medAvTPM_log2MF=median(AvTPM_log2MF))$medAvTPM_log2MF)
+median(ddply(subset(All_LG_F_TPM_log2MF_long,  All_LG_F_TPM_log2MF_long$chr_soft == "X"), .(group_soft_ord), summarize,  medAvTPM_log2MF=median(AvTPM_log2MF))$medAvTPM_log2MF)
+median(ddply(subset(All_RT_F_TPM_log2MF_long,  All_RT_F_TPM_log2MF_long$chr_soft == "A"), .(group_soft_ord), summarize,  medAvTPM_log2MF=median(AvTPM_log2MF))$medAvTPM_log2MF)
+median(ddply(subset(All_HD_F_TPM_log2MF_long,  All_HD_F_TPM_log2MF_long$chr_soft == "A"), .(group_soft_ord), summarize,  medAvTPM_log2MF=median(AvTPM_log2MF))$medAvTPM_log2MF)
+median(ddply(subset(All_LG_F_TPM_log2MF_long,  All_LG_F_TPM_log2MF_long$chr_soft == "A"), .(group_soft_ord), summarize,  medAvTPM_log2MF=median(AvTPM_log2MF))$medAvTPM_log2MF)
 
 ######## by LG
 
