@@ -42,11 +42,7 @@ mv 5_Tpa_b3v08.max_arth_b2g_droso_b2g.gff Tpa_b3v08.max_arth_b2g_droso_b2g.gff
 
 
 #####################################################################################################################
-### LINKAGE GROUPS
-# from Jaron, K. S*., Parker, D. J*., Anselmetti, Y., Tran Van, P. T., Bast, J., Dumas,  Z., Figuet, E., François, C. M., Hayward, K., Rossier, V., Simion, P., Robinson-Rechavi,  M., Galtier, N., Schwander, T. 2020. Convergent consequences of parthenogenesis on stick insect genomes. bioRxiv. doi: https:// doi.org/10.1101/2020.11.20.391540
-# provided in data/linkage_groups.tar.gz for convenience
-
-# unzip before use
+### # unzip before use linkage group info  from 2a_Nosil_genome_read_mapping.sh
 
 tar -zxf data/linkage_groups.tar.gz
 
