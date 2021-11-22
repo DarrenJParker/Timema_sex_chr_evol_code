@@ -1,9 +1,6 @@
 # Timema_sex_chr_evol
 
-* Need to check all paths are correct!
 * Need to explain all accessory scripts
-* Add Nosil stuff
-* Add nucl angsD stuff
 * blast to bacillus
 
 ## how we get to genes
@@ -24,10 +21,16 @@ NOTE I match the midpoint of the largest alignment block to midpoint of the part
 
 * **3_RNAseq_mapping.sh** | need to add trimming + download reads
 * **Expression_analyses.R** | Dosage compensation and sex-biased genes
- 
+
+
+## Update linkage groups in the Nosil et al genome
+* **2a_Nosil_genome_read_mapping.sh** | map reads 
+* **Nosil_Male_and_female_coverage.R**  | coverage analyses
+
 ## data
 
-* **linkage_groups.tar.gz** | linkage groups for each species inferred from Nosil et al (2018) as described in Jaron et al. (2020).
+* **Nosil_mapping/Tce_Nosil_30aDR_cov.csv** | coverage for each scaffold from Nosil et al (2018).
+* **linkage_groups.tar.gz** | linkage groups for each species inferred from Nosil et al (2018), see 2a_Nosil_genome_read_mapping.sh.
 * **Sample_coverage** | per base coverage for each sample.
 * **coverage_and_heterozygosity** | Contig coverage and heterozygosity estimates for each sample.
 * **TBITCETCMTPATPS_HOG_matrix.txt** | 1-to-1 orthologs for the five species. Orthologs were obtained using OrthoDB standalone pipeline (v. 2.4.4) (Kriventseva et al, 2015) as described in Jaron et al. (2020).
