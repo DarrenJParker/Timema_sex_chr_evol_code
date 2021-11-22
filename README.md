@@ -1,12 +1,11 @@
 # Timema_sex_chr_evol
 
-* Need to explain all accessory scripts
 
-## how we get to genes
-select largest alignment block. most have one large block and many little ones.
-If there was > 1 linkage group I make a note
-work out rel position of each gene.
-NOTE I match the midpoint of the largest alignment block to midpoint of the part of UNIL scaf it aligned to.
+This is the repository for the collected scripts used in the study:
+
+>Parker, D. J., Jaron, K. S., Dumas, Z., Robinson-Rechavi, Schwander, T. 2021. X chromosomes show a faster evolutionary rate and complete somatic dosage compensation across Timema stick insect species. bioRxiv.
+
+Raw sequence reads generated in this project have been deposited in NCBI’s sequence read archive under the bioproject number PRJNA725673. 
 
 
 ## ID X linked scaffolds
