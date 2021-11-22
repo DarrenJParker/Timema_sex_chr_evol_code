@@ -1,7 +1,6 @@
 # Timema_sex_chr_evol
 
 * Need to explain all accessory scripts
-* blast to bacillus
 
 ## how we get to genes
 select largest alignment block. most have one large block and many little ones.
@@ -22,10 +21,12 @@ NOTE I match the midpoint of the largest alignment block to midpoint of the part
 * **3_RNAseq_mapping.sh** | need to add trimming + download reads
 * **Expression_analyses.R** | Dosage compensation and sex-biased genes
 
-
 ## Update linkage groups in the Nosil et al genome
 * **2a_Nosil_genome_read_mapping.sh** | map reads 
 * **Nosil_Male_and_female_coverage.R**  | coverage analyses
+
+## blast to Bacillus
+* **Bacillus_X_blast.sh** | Blast Timema X orthologs to Bacillus genome.
 
 ## data
 
