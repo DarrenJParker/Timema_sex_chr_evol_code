@@ -42,7 +42,7 @@ mv 5_Tpa_b3v08.max_arth_b2g_droso_b2g.gff Tpa_b3v08.max_arth_b2g_droso_b2g.gff
 
 
 #####################################################################################################################
-### # unzip before use linkage group info  from 2a_Nosil_genome_read_mapping.sh
+### # unzip before use linkage group info from Nosil_genome_read_mapping.sh
 
 tar -zxf data/linkage_groups.tar.gz
 

@@ -1,4 +1,4 @@
-## 2_read_mapping_Nosil_Tce.sh
+## Nosil_genome_read_mapping.sh
 
 # get REF
 #Using the 1.3 version (PRJNA417530)
