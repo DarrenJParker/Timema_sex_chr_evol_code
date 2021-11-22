@@ -24,7 +24,7 @@ Raw sequence reads generated in this project have been deposited in NCBI’s seq
 * **Nosil_genome_read_mapping.sh** | map reads 
 * **Nosil_Male_and_female_coverage.R**  | coverage analyses
 
-## blast to Bacillus
+## Blast to Bacillus
 * **Bacillus_X_blast.sh** | Blast Timema X orthologs to Bacillus genome.
 
 ## data
