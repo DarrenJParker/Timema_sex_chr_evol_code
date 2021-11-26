@@ -10,14 +10,14 @@ Raw sequence reads generated in this project have been deposited in NCBI’s seq
 
 ## ID X linked scaffolds
 
-* **1_read_prep.sh**
-* **2_genome_read_mapping.sh**
+* **1_read_prep.sh** | Female genome reads bioproject accession number: PRJNA670663;  Male genome reads bioproject accession number: PRJNA725673
+* **2_genome_read_mapping.sh** | mapping to version 8 genomes (bioproject accession number: PRJEB31411, fasta and gff also here: https://doi.org/10.5281/zenodo.5636226).
 * **Male_and_female_coverage.R**
 * **Orthologs_on_the_X.R** | looking if X linked genes are the same in each species
 
 ## Gene expression analysis
 
-* **3_RNAseq_mapping.sh** | need to add trimming + download reads
+* **3_RNAseq_mapping.sh** | need to add trimming + download reads (RNA-seq reads Bioproject accession number: PRJNA392384)
 * **Expression_analyses.R** | Dosage compensation and sex-biased genes
 
 ## Update linkage groups in the Nosil et al genome
