@@ -331,15 +331,23 @@ done
 ### make orth counts df
 
 python3 ~/Timema_sex_chr_evol_code/accessory_scripts/sex_chr_cov_readcounts_orth_tidier.py -r data/counts/ -e 1000_chr_info_and_counts.csv -o data/counts/TbiTceTcmTpaTps
+## Output here data/counts/TbiTceTcmTpaTps_orth_1000_chr_info_and_counts.csv
 
+
+#########################################################################################################################################################
+### then do expression analyses 
 ### Expression_analyses.R
+### Expression_analyses_keep_sex_specific_genes.R
 
-cat FT_MB_FB_X_A_*FPKM* > FT_MB_FB_X_A_ALL_FPKM.csv
-cat FT_MB_FB_X_A_*TPM* > FT_MB_FB_X_A_ALL_TPM.csv
+#########################################################################################################################################################
+### and selection analyses
 
+## data from Jaron, K. S*., Parker, D. J*., Anselmetti, Y., Tran Van, P. T., Bast, J., Dumas, Z., Figuet, E., François, C. M., Hayward, K., Rossier, V., Simion, P., Robinson-Rechavi, M., Galtier, N., Schwander, T. 2021. Convergent consequences of parthenogenesis on stick insect genomes. bioRxiv. doi: https:// doi.org/10.1101/2020.11.20.391540
+## stored here: data/selection/
 
-### positive_selection_on_the_X.R
+## add gene name
+python3 accessory_scripts/add_gene_name_to_sel_data.py -i data/selection/Jaron_SM_Table_4.tsv -s data/selection/timema_543_branches_with-ncat-codon-rate_sites_with_h0.tsv 
 
-
+# selection_on_the_X.R
 
 
