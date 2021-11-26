@@ -34,8 +34,8 @@ dat1_Tpa_raw$lg <- str_split_fixed(as.character(dat1_Tpa_raw$lg_pos), "_",2)[,1]
 dat1_Tps_raw$lg <- str_split_fixed(as.character(dat1_Tps_raw$lg_pos), "_",2)[,1]
 
 #### change wd to output folder
-dir.create("../Exp_out_wSS")
-setwd("../Exp_out_wSS")
+dir.create("../output/Exp_out_wSS")
+setwd("../output/Exp_out_wSS")
 
 
 #########################################################################################################################
@@ -1211,7 +1211,7 @@ TPM_log2MF_hist_Tbi_LG <- TPM_MF_hists(All_LG_F_TPM_log2MF_long,"Tbi","LG")
 TPM_log2MF_hist_Tce_RT <- TPM_MF_hists(All_RT_F_TPM_log2MF_long,"Tce","RT")
 TPM_log2MF_hist_Tce_HD <- TPM_MF_hists(All_HD_F_TPM_log2MF_long,"Tce","HD")
 TPM_log2MF_hist_Tce_LG <- TPM_MF_hists(All_LG_F_TPM_log2MF_long,"Tce","LG")
-)
+
 TPM_log2MF_hist_Tcm_RT <- TPM_MF_hists(All_RT_F_TPM_log2MF_long,"Tcm","RT")
 TPM_log2MF_hist_Tcm_HD <- TPM_MF_hists(All_HD_F_TPM_log2MF_long,"Tcm","HD")
 TPM_log2MF_hist_Tcm_LG <- TPM_MF_hists(All_LG_F_TPM_log2MF_long,"Tcm","LG")
@@ -3086,4 +3086,31 @@ plot_orth_heatmaps_X_soft_exp(RT_FPKM_allsp_orths, "RT | FPKM")
 dev.off()
 
 
+print (sessionInfo())
 
+# R version 4.0.3 (2020-10-10)
+# Platform: x86_64-apple-darwin17.0 (64-bit)
+# Running under: macOS Big Sur 10.16
+# 
+# Matrix products: default
+# LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+# 
+# locale:
+#   [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+# 
+# attached base packages:
+#   [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+#   [1] pheatmap_1.0.12 hash_2.2.6.1    edgeR_3.32.1    limma_3.46.0    cowplot_1.1.1   Rtsne_0.15      plyr_1.8.6      modeest_2.4.0   stringr_1.4.0   ggplot2_3.3.5  
+# 
+# loaded via a namespace (and not attached):
+#   [1] Rcpp_1.0.6          RColorBrewer_1.1-2  pillar_1.4.7        compiler_4.0.3      tools_4.0.3         timeSeries_3062.100 digest_0.6.27       rpart_4.1-15       
+# [9] lattice_0.20-41     lifecycle_0.2.0     tibble_3.0.6        gtable_0.3.0        stable_1.1.4        clue_0.3-58         pkgconfig_2.0.3     rlang_0.4.10       
+# [17] rmutil_1.1.5        statip_0.2.3        withr_2.4.1         dplyr_1.0.3         cluster_2.1.0       generics_0.1.0      vctrs_0.3.6         locfit_1.5-9.4     
+# [25] grid_4.0.3          tidyselect_1.1.0    glue_1.4.2          R6_2.5.0            spatial_7.3-13      farver_2.0.3        purrr_0.3.4         magrittr_2.0.1     
+# [33] splines_4.0.3       fBasics_3042.89.1   scales_1.1.1        ellipsis_0.3.1      stabledist_0.7-1    timeDate_3043.102   colorspace_2.0-0    labeling_0.4.2     
+# [41] stringi_1.5.3       munsell_0.5.0       crayon_1.4.0       
+# > 
+
+writeLines(capture.output(sessionInfo()), "Exp_analy_sess_wSS_info.txt")

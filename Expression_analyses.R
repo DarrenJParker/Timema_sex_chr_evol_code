@@ -3781,7 +3781,7 @@ print (sessionInfo())
 # [36] ellipsis_0.3.1      stabledist_0.7-1    timeDate_3043.102   colorspace_2.0-0    labeling_0.4.2      stringi_1.5.3       munsell_0.5.0      
 # [43] crayon_1.4.0  
 
-writeLines(capture.output(sessionInfo()), "Exp_analy_sess_info")
+writeLines(capture.output(sessionInfo()), "Exp_analy_sess_info.txt")
 
 
 
