@@ -1,4 +1,4 @@
-# positive_selection_on_the_X.R
+# selection_on_the_X.R
 
 ### libs
 
@@ -33,31 +33,31 @@ dat1_Tcm_raw$lg <- str_split_fixed(as.character(dat1_Tcm_raw$lg_pos), "_",2)[,1]
 dat1_Tpa_raw$lg <- str_split_fixed(as.character(dat1_Tpa_raw$lg_pos), "_",2)[,1]
 dat1_Tps_raw$lg <- str_split_fixed(as.character(dat1_Tps_raw$lg_pos), "_",2)[,1]
 
-Tbi_RT <- read.table ("../Exp_out/TTT_RT_Tbi_sex_bias_FPKM.csv", header = T, sep = ',')
-Tce_RT <- read.table ("../Exp_out/TTT_RT_Tce_sex_bias_FPKM.csv", header = T, sep = ',')
-Tcm_RT <- read.table ("../Exp_out/TTT_RT_Tcm_sex_bias_FPKM.csv", header = T, sep = ',')
-Tpa_RT <- read.table ("../Exp_out/TTT_RT_Tpa_sex_bias_FPKM.csv", header = T, sep = ',')
-Tps_RT <- read.table ("../Exp_out/TTT_RT_Tps_sex_bias_FPKM.csv", header = T, sep = ',')
 
-Tbi_HD <- read.table ("../Exp_out/TTT_HD_Tbi_sex_bias_FPKM.csv", header = T, sep = ',')
-Tce_HD <- read.table ("../Exp_out/TTT_HD_Tce_sex_bias_FPKM.csv", header = T, sep = ',')
-Tcm_HD <- read.table ("../Exp_out/TTT_HD_Tcm_sex_bias_FPKM.csv", header = T, sep = ',')
-Tpa_HD <- read.table ("../Exp_out/TTT_HD_Tpa_sex_bias_FPKM.csv", header = T, sep = ',')
-Tps_HD <- read.table ("../Exp_out/TTT_HD_Tps_sex_bias_FPKM.csv", header = T, sep = ',')
+## from Expression_analyses.R
+Tbi_RT <- read.table ("../output/Exp_out/TTT_RT_Tbi_sex_bias_FPKM.csv", header = T, sep = ',')
+Tce_RT <- read.table ("../output/Exp_out/TTT_RT_Tce_sex_bias_FPKM.csv", header = T, sep = ',')
+Tcm_RT <- read.table ("../output/Exp_out/TTT_RT_Tcm_sex_bias_FPKM.csv", header = T, sep = ',')
+Tpa_RT <- read.table ("../output/Exp_out/TTT_RT_Tpa_sex_bias_FPKM.csv", header = T, sep = ',')
+Tps_RT <- read.table ("../output/Exp_out/TTT_RT_Tps_sex_bias_FPKM.csv", header = T, sep = ',')
 
-Tbi_LG <- read.table ("../Exp_out/TTT_LG_Tbi_sex_bias_FPKM.csv", header = T, sep = ',')
-Tce_LG <- read.table ("../Exp_out/TTT_LG_Tce_sex_bias_FPKM.csv", header = T, sep = ',')
-Tcm_LG <- read.table ("../Exp_out/TTT_LG_Tcm_sex_bias_FPKM.csv", header = T, sep = ',')
-Tpa_LG <- read.table ("../Exp_out/TTT_LG_Tpa_sex_bias_FPKM.csv", header = T, sep = ',')
-Tps_LG <- read.table ("../Exp_out/TTT_LG_Tps_sex_bias_FPKM.csv", header = T, sep = ',')
+Tbi_HD <- read.table ("../output/Exp_out/TTT_HD_Tbi_sex_bias_FPKM.csv", header = T, sep = ',')
+Tce_HD <- read.table ("../output/Exp_out/TTT_HD_Tce_sex_bias_FPKM.csv", header = T, sep = ',')
+Tcm_HD <- read.table ("../output/Exp_out/TTT_HD_Tcm_sex_bias_FPKM.csv", header = T, sep = ',')
+Tpa_HD <- read.table ("../output/Exp_out/TTT_HD_Tpa_sex_bias_FPKM.csv", header = T, sep = ',')
+Tps_HD <- read.table ("../output/Exp_out/TTT_HD_Tps_sex_bias_FPKM.csv", header = T, sep = ',')
 
-head(Tps_HD)
+Tbi_LG <- read.table ("../output/Exp_out/TTT_LG_Tbi_sex_bias_FPKM.csv", header = T, sep = ',')
+Tce_LG <- read.table ("../output/Exp_out/TTT_LG_Tce_sex_bias_FPKM.csv", header = T, sep = ',')
+Tcm_LG <- read.table ("../output/Exp_out/TTT_LG_Tcm_sex_bias_FPKM.csv", header = T, sep = ',')
+Tpa_LG <- read.table ("../output/Exp_out/TTT_LG_Tpa_sex_bias_FPKM.csv", header = T, sep = ',')
+Tps_LG <- read.table ("../output/Exp_out/TTT_LG_Tps_sex_bias_FPKM.csv", header = T, sep = ',')
 
 dat1_orth_raw <- read.table ("TbiTceTcmTpaTps_orth_1000_chr_info_and_counts.csv", header = T, sep = ',')
 
 #### change wd to output folder
-dir.create("../sel_out")
-setwd("../sel_out")
+dir.create("../output/sel_out")
+setwd("../output/sel_out")
 
 
 #########################################################################################################################
@@ -193,7 +193,7 @@ RT_SB_logFC_dict[["TPA_06181"]]
 ######################################################################################################
 ### positive selection data
 
-pos_sel_dat <- read.table("../selection/timema_543_branches_with-ncat-codon-rate_sites_with_h0_wgenename.tsv", sep = "\t", header = T)
+pos_sel_dat <- read.table("../../selection/timema_543_branches_with-ncat-codon-rate_sites_with_h0_wgenename.tsv", sep = "\t", header = T)
 pos_sel_dat$gene_name<- as.character(pos_sel_dat$gene_name )
 
 head(pos_sel_dat)
@@ -347,36 +347,6 @@ pdf(paste("prop_possel_hard" ,".pdf", sep = ""), width = 6, height = 8)
 test_possel_overrep_X(pos_sel_dat_2, 0.05, "hard")
 dev.off()
 getwd() ## where has my plot gone....
-
-
-
-
-
-################ N pos sel 
-
-
-head(pos_sel_dat_2)
-
-pos_sel_dat_2_pos_only <- subset(pos_sel_dat_2, pos_sel_dat_2$qvalue < 0.05)
-
-pos_sel_dat_2_pos_only_counts <- as.data.frame(table(pos_sel_dat_2_pos_only$sp_soft))
-pos_sel_dat_2_pos_only_counts$chr <-  str_split_fixed(pos_sel_dat_2_pos_only_counts$Var1, "_", 2)[,2]
-pos_sel_dat_2_pos_only_counts$sp  <-  str_split_fixed(pos_sel_dat_2_pos_only_counts$Var1, "_", 2)[,1]
-
-N_possel_soft <- ggplot(pos_sel_dat_2_pos_only_counts, aes(x = factor(sp), y = Freq, fill = chr)) + 
-  geom_col(width = 0.5, colour="black", position=position_dodge(width=0.6)) + 
-  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + 
-  scale_fill_manual(values = c("darkgrey", "darkorange2")) + 
-  xlab ("Species pair") + 
-  ylab ("Number of positive selected genes")  + 
-  ggtitle(paste("soft, qval thresh = 0.05"))
-
-
-pdf(paste("N_possel_soft" ,".pdf", sep = ""), width = 6, height = 8)
-N_possel_soft
-dev.off()
-getwd() ## where has my plot gone....
-
 
 
 ##########################################################################################################
@@ -775,4 +745,32 @@ pdf(paste("N_pos_HDLGRT" ,".pdf", sep = ""), width = 8, height = 16)
 plot_grid(N_pos_HD, N_pos_LG ,N_pos_RT, ncol = 1 )
 dev.off()
 getwd() ## where has my plot gone....
+
+print (sessionInfo())
+# 
+# R version 4.0.3 (2020-10-10)
+# Platform: x86_64-apple-darwin17.0 (64-bit)
+# Running under: macOS Big Sur 10.16
+# 
+# Matrix products: default
+# LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+# 
+# locale:
+#   [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+# 
+# attached base packages:
+#   [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+#   [1] pheatmap_1.0.12 hash_2.2.6.1    edgeR_3.32.1    limma_3.46.0    cowplot_1.1.1   Rtsne_0.15      plyr_1.8.6      modeest_2.4.0   stringr_1.4.0   ggplot2_3.3.5  
+# 
+# loaded via a namespace (and not attached):
+#   [1] Rcpp_1.0.6          RColorBrewer_1.1-2  pillar_1.4.7        compiler_4.0.3      tools_4.0.3         timeSeries_3062.100 digest_0.6.27       rpart_4.1-15       
+# [9] lattice_0.20-41     lifecycle_0.2.0     tibble_3.0.6        gtable_0.3.0        stable_1.1.4        clue_0.3-58         pkgconfig_2.0.3     rlang_0.4.10       
+# [17] rmutil_1.1.5        statip_0.2.3        withr_2.4.1         dplyr_1.0.3         cluster_2.1.0       generics_0.1.0      vctrs_0.3.6         locfit_1.5-9.4     
+# [25] grid_4.0.3          tidyselect_1.1.0    glue_1.4.2          R6_2.5.0            spatial_7.3-13      farver_2.0.3        purrr_0.3.4         magrittr_2.0.1     
+# [33] fBasics_3042.89.1   scales_1.1.1        ellipsis_0.3.1      stabledist_0.7-1    timeDate_3043.102   colorspace_2.0-0    labeling_0.4.2      stringi_1.5.3      
+# [41] munsell_0.5.0       crayon_1.4.0  
+
+writeLines(capture.output(sessionInfo()), "sel_analy_sess_info.txt")
 
