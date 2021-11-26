@@ -13,7 +13,7 @@ Raw sequence reads generated in this project have been deposited in NCBI’s seq
 * **1_read_prep.sh** | Female genome reads bioproject accession number: PRJNA670663;  Male genome reads bioproject accession number: PRJNA725673
 * **2_genome_read_mapping.sh** | mapping to version 8 genomes (bioproject accession number: PRJEB31411, fasta and gff also here: https://doi.org/10.5281/zenodo.5636226).
 * **Male_and_female_coverage.R** | Coverage analyses, heterozygosity.
-* **Male_and_female_coverage_nucla.R** | Nucleotide diversity analyses
+* **Male_and_female_coverage_nucla.R** | Nucleotide diversity analyses, Ne.
 * **Orthologs_on_the_X.R** | looking if X linked genes are the same in each species
 
 ## Gene expression analysis
