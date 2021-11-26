@@ -1,4 +1,4 @@
-## Male_and_female_coverage.R
+## Male_and_female_coverage_Nosil.R
 
 ### libs
 
@@ -34,8 +34,9 @@ subset(dat1_Tce_Nosil_raw, dat1_Tce_Nosil_raw$lg == "lg13")
 
 ### output
 
-dir.create("data/Nosil_mapping/plots")
-setwd("data/Nosil_mapping/plots")
+dir.create("data/output/Nosil_mapping/")
+dir.create("data/output/Nosil_mapping/plots")
+setwd("data/output/Nosil_mapping/plots")
 
 ########################################################################################################################################################################
 ### Functions
@@ -336,35 +337,35 @@ tapply(Tce_Nosil_out_nolgNA$df_filt$M_F_mode, Tce_Nosil_out_nolgNA$df_filt$lg, m
 ########################################################################################################################################################################
 ####### output session info
 print (sessionInfo())
-writeLines(capture.output(sessionInfo()), paste("Male_and_female_coverage.R_sessionInfo_len_", cutoff_len, ".txt"), sep = "")
 
+# R version 4.0.3 (2020-10-10)
+# Platform: x86_64-apple-darwin17.0 (64-bit)
+# Running under: macOS Big Sur 10.16
+# 
+# Matrix products: default
+# LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+# 
+# locale:
+#   [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+# 
+# attached base packages:
+#   [1] grid      stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+#   [1] RColorBrewer_1.1-2  spatstat_1.64-1     rpart_4.1-15        nlme_3.1-151        spatstat.data_1.7-0 matrixStats_0.58.0  cowplot_1.1.1      
+# [8] plyr_1.8.6          modeest_2.4.0       stringr_1.4.0       ggplot2_3.3.5      
+# 
+# loaded via a namespace (and not attached):
+#   [1] Rcpp_1.0.6           pillar_1.4.7         compiler_4.0.3       tools_4.0.3          timeSeries_3062.100  digest_0.6.27       
+# [7] goftest_1.2-2        lattice_0.20-41      lifecycle_0.2.0      tibble_3.0.6         gtable_0.3.0         stable_1.1.4        
+# [13] clue_0.3-58          mgcv_1.8-33          pkgconfig_2.0.3      rlang_0.4.10         Matrix_1.3-2         rmutil_1.1.5        
+# [19] statip_0.2.3         withr_2.4.1          dplyr_1.0.3          cluster_2.1.0        spatstat.utils_2.0-0 generics_0.1.0      
+# [25] vctrs_0.3.6          tidyselect_1.1.0     glue_1.4.2           R6_2.5.0             spatial_7.3-13       polyclip_1.10-0     
+# [31] farver_2.0.3         tensor_1.5           deldir_0.2-9         purrr_0.3.4          magrittr_2.0.1       splines_4.0.3       
+# [37] fBasics_3042.89.1    scales_1.1.1         ellipsis_0.3.1       abind_1.4-5          stabledist_0.7-1     timeDate_3043.102   
+# [43] colorspace_2.0-0     labeling_0.4.2       stringi_1.5.3        munsell_0.5.0        crayon_1.4.0   
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+writeLines(capture.output(sessionInfo()), paste("Male_and_female_coverage_Nosil.R_sessionInfo_len_", cutoff_len, ".txt"), sep = "")
 
 
 
