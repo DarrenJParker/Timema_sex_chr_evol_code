@@ -5,12 +5,15 @@
 ## STRAT
 # I will map with STAR - get read counts with HTseq
 
-cd /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker
-mkdir mapping_RNAseq_v8
-mkdir mapping_RNAseq_v8/REFS
-mkdir mapping_RNAseq_v8/gffs
 
-### get ref genomes - put each in a sep dir for making STAR indexes in
+### get references and gff files
+### version 8 genomes (bioproject accession number: PRJEB31411, fasta and gff also here: https://doi.org/10.5281/zenodo.5636226).
+
+mkdir mapping_RNAseq_v8
+mkdir mapping_RNAseq_v8/REFS  ## fasta files here
+mkdir mapping_RNAseq_v8/gffs  ## gff files here
+
+### put each  ref genomes in a sep dir for making STAR indexes in
 
 mkdir mapping_RNAseq_v8/REFS/Tbi
 mkdir mapping_RNAseq_v8/REFS/Tce
@@ -18,15 +21,11 @@ mkdir mapping_RNAseq_v8/REFS/Tcm
 mkdir mapping_RNAseq_v8/REFS/Tpa
 mkdir mapping_RNAseq_v8/REFS/Tps
 
-cp Genomes/REFS/Tbi_b3v08.fasta  mapping_RNAseq_v8/REFS/Tbi
-cp Genomes/REFS/Tce_b3v08.fasta  mapping_RNAseq_v8/REFS/Tce
-cp Genomes/REFS/Tcm_b3v08.fasta  mapping_RNAseq_v8/REFS/Tcm
-cp Genomes/REFS/Tpa_b3v08.fasta  mapping_RNAseq_v8/REFS/Tpa
-cp Genomes/REFS/Tps_b3v08.fasta  mapping_RNAseq_v8/REFS/Tps
-
-### get gffs
-
-cp  Genomes/gffs/*.gff mapping_RNAseq_v8/gffs
+mv REFS/Tbi_b3v08.fasta  mapping_RNAseq_v8/REFS/Tbi
+mv REFS/Tce_b3v08.fasta  mapping_RNAseq_v8/REFS/Tce
+mv REFS/Tcm_b3v08.fasta  mapping_RNAseq_v8/REFS/Tcm
+mv REFS/Tpa_b3v08.fasta  mapping_RNAseq_v8/REFS/Tpa
+mv REFS/Tps_b3v08.fasta  mapping_RNAseq_v8/REFS/Tps
 
 ## Use STAR
 
@@ -78,15 +77,32 @@ STAR --runThreadN 12 --runMode genomeGenerate \
 
 
 ########################################################################################################################
-##### Download RNAseq Reads
+##### Download RNAseq Reads (Bioproject accession number: PRJNA392384) into READS/RAW_reads
+
+
+#####################################################################################################################################
+########## Remove reads that failed Casava from files
+
+#### explination - so reads that failed basic tests at the seq centre were not removed
+##### but insteads just flagged with a 'Y' for failed and an 'N' for passed: e.g.
+
+# @WINDU:16:C5UFBANXX:7:1310:11475:72909 1:N:0:GAGTGG ## passed
+# @WINDU:16:C5UFBANXX:7:1310:11694:72820 1:Y:0:GAGTGG ## failed
+
+mkdir ./READS/cat_and_clean
+
+## NOTE cats files together as it removes failed reads
+for i in ./fastq_files/RAW_reads/*fastq.gz; do
+        foo1=`echo $i`
+        foo2=`echo $i | sed 's/.*\///' | sed 's/_LIB/LIB/' | sed 's/_.*//'`
+        echo $foo1
+        echo $foo2
+        zcat ./READS/RAW_reads/$foo2* | grep -A 3 '^@.* [^:]*:N:[^:]*:' | grep -v "^--$" > ~READS/cat_and_clean/"$foo2""_S1e_rep_CC.fq"
+done
+
 
 ########################################################################################################################
 ##### Trim RNAseq Reads
-
-      
-#####################################################################################################################################
-#############################################################################################################################################################################################################################################################################
-#### adapators
 
 ###  cutadapt v. 2.3 
 
@@ -181,7 +197,7 @@ for i in Genomes/gffs/*.gff; do
 	echo $i
 	out_pre=`echo $i | sed 's/_droso_b2g.gff/_droso_b2g/'`
 	echo $out_pre
-	python3 ./accessory_scripts/Maker_gff_to_HTseq_gff.py -i $i -o $out_pre
+	python3 ~/Timema_sex_chr_evol_code/accessory_scripts/Maker_gff_to_HTseq_gff.py -i $i -o $out_pre
 done
 
 ## run HTseq-count
@@ -192,7 +208,7 @@ mkdir mapping_RNAseq_v8/HTseq_out
 module add Bioinformatics/Software/vital-it
 module load UHTS/Analysis/HTSeq/0.9.1
 
-### exon (proper way) (reads in exons)
+### exon (count reads in exons)
 
 for f in mapping_RNAseq_v8/STAR_sorted_bams/*.bam ; do
         sample_name=`echo $f | sed 's/.*\///' | sed 's/_sorted.bam//'`
@@ -237,11 +253,11 @@ cp HTseq_out/Tps* HTseq_out_ALL/Tps
 
 cd data/output/HTseq_out_ALL
 
-python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tbi -o Tbi_WBHDLGRT_v8
-python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tce -o Tce_WBHDLGRT_v8
-python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tcm -o Tcm_WBHDLGRT_v8
-python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tpa -o Tpa_WBHDLGRT_v8
-python3 ../../../accessory_scripts/HTSeq_to_edgeR.py -i Tps -o Tps_WBHDLGRT_v8
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/HTSeq_to_edgeR.py -i Tbi -o Tbi_WBHDLGRT_v8
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/HTSeq_to_edgeR.py -i Tce -o Tce_WBHDLGRT_v8
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/HTSeq_to_edgeR.py -i Tcm -o Tcm_WBHDLGRT_v8
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/HTSeq_to_edgeR.py -i Tpa -o Tpa_WBHDLGRT_v8
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/HTSeq_to_edgeR.py -i Tps -o Tps_WBHDLGRT_v8
 
 
 ###################################################################################################################################
@@ -254,9 +270,8 @@ cd    data/output/gene_lens
 for f in ../../Genomes/gffs/*_b2g_forHTSeq.gff ; do
 	sp=`echo $f | sed 's/.*\///' | sed 's/_.*//'`
 	echo $sp
-	python3 ../../../accessory_scripts/gff_feature_lengths.py -i $f -o $sp
+	python3 ~/Timema_sex_chr_evol_code/accessory_scripts/gff_feature_lengths.py -i $f -o $sp
 done
-
 
 	
 ###################################################################################################################################
@@ -268,23 +283,23 @@ done
 
 mkdir data/output/LG_pos
 
-python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tbi_scf_block_alignment.tsv \
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tbi_scf_block_alignment.tsv \
                                                -g Tbi_b3v08.max_arth_b2g_droso_b2g.gff \
                                                -o data/output/LG_pos/Tbi
 
-python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tce_scf_block_alignment.tsv \
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tce_scf_block_alignment.tsv \
                                                -g Tce_b3v08.max_arth_b2g_droso_b2g.gff \
                                                -o data/output/LG_pos/Tce
 
-python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tcm_scf_block_alignment.tsv \
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tcm_scf_block_alignment.tsv \
                                                -g Tcm_b3v08.max_arth_b2g_droso_b2g.gff \
                                                -o data/output/LG_pos/Tcm
 
-python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tpa_scf_block_alignment.tsv \
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/lass_genes_to_lg.py -l data/linkage_groups/Tpa_scf_block_alignment.tsv \
                                                -g Tpa_b3v08.max_arth_b2g_droso_b2g.gff \
                                                -o data/output/LG_pos/Tpa
 
-python3 accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tps_scf_block_alignment.tsv \
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/class_genes_to_lg.py -l data/linkage_groups/Tps_scf_block_alignment.tsv \
                                                -g Tps_b3v08.max_arth_b2g_droso_b2g.gff \
                                                -o data/output/LG_pos/Tps
 
@@ -300,7 +315,7 @@ echo $sp
 for scaf_len in 1000 5000; do
 echo $scaf_len        
 
-python3 accessory_scripts/sex_chr_cov_readcounts_tidier.py \
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/sex_chr_cov_readcounts_tidier.py \
 -c "data/output/MF_cov/"$sp"_MFcov_filt_"$scaf_len".csv"  \
 -g "data/gffs/"$sp"_b3v08.max_arth_b2g_droso_b2g_forHTSeq.gff" \
 -l "data/output/gene_lens/"$sp"_exon_by_gene_id_lengths.csv" \
@@ -315,16 +330,16 @@ done
 
 ### make orth counts df
 
-python3 accessory_scripts/sex_chr_cov_readcounts_orth_tidier.py -r data/counts/ -e 1000_chr_info_and_counts.csv -o data/counts/TbiTceTcmTpaTps
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/sex_chr_cov_readcounts_orth_tidier.py -r data/counts/ -e 1000_chr_info_and_counts.csv -o data/counts/TbiTceTcmTpaTps
 
 ### Expression_analyses.R
-
 
 cat FT_MB_FB_X_A_*FPKM* > FT_MB_FB_X_A_ALL_FPKM.csv
 cat FT_MB_FB_X_A_*TPM* > FT_MB_FB_X_A_ALL_TPM.csv
 
 
-### male_biased_genes_function.R
 ### positive_selection_on_the_X.R
+
+
 
 
