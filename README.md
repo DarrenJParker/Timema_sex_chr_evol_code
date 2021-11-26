@@ -24,7 +24,7 @@ Raw sequence reads generated in this project have been deposited in NCBI’s seq
 
 ## Selection analyses
 
-positive_selection_on_the_X.R
+* **selection_on_the_X.R** | looking at selection on the X
 
 
 ## Update linkage groups in the Nosil et al genome
