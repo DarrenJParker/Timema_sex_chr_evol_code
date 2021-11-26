@@ -2,43 +2,13 @@
 
 #####################################################################################################
 
-### get references
+### get references and gff files
+### version 8 genomes (bioproject accession number: PRJEB31411, fasta and gff also here: https://doi.org/10.5281/zenodo.5636226).
 
-cd /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/Genomes
 mkdir Genomes
 cd Genomes/
-wget ftp://ftpmrr.unil.ch/AsexGenomeEvol/timema/final_references/*
-gzip -d *
-
-mkdir REFS
-mkdir gffs
-mv *gff gffs/
-mv *fasta REFS/
-
-cd REFS
-mv 1_Tdi_b3v08.fasta Tdi_b3v08.fasta
-mv 1_Tps_b3v08.fasta Tps_b3v08.fasta
-mv 2_Tcm_b3v08.fasta Tcm_b3v08.fasta
-mv 2_Tsi_b3v08.fasta Tsi_b3v08.fasta
-mv 3_Tce_b3v08.fasta Tce_b3v08.fasta
-mv 3_Tms_b3v08.fasta Tms_b3v08.fasta
-mv 4_Tbi_b3v08.fasta Tbi_b3v08.fasta
-mv 4_Tte_b3v08.fasta Tte_b3v08.fasta
-mv 5_Tge_b3v08.fasta Tge_b3v08.fasta
-mv 5_Tpa_b3v08.fasta Tpa_b3v08.fasta
-
-cd ../gffs/
-mv 1_Tdi_b3v08.max_arth_b2g_droso_b2g.gff Tdi_b3v08.max_arth_b2g_droso_b2g.gff
-mv 1_Tps_b3v08.max_arth_b2g_droso_b2g.gff Tps_b3v08.max_arth_b2g_droso_b2g.gff
-mv 2_Tcm_b3v08.max_arth_b2g_droso_b2g.gff Tcm_b3v08.max_arth_b2g_droso_b2g.gff
-mv 2_Tsi_b3v08.max_arth_b2g_droso_b2g.gff Tsi_b3v08.max_arth_b2g_droso_b2g.gff
-mv 3_Tce_b3v08.max_arth_b2g_droso_b2g.gff Tce_b3v08.max_arth_b2g_droso_b2g.gff
-mv 3_Tms_b3v08.max_arth_b2g_droso_b2g.gff Tms_b3v08.max_arth_b2g_droso_b2g.gff
-mv 4_Tbi_b3v08.max_arth_b2g_droso_b2g.gff Tbi_b3v08.max_arth_b2g_droso_b2g.gff
-mv 4_Tte_b3v08.max_arth_b2g_droso_b2g.gff Tte_b3v08.max_arth_b2g_droso_b2g.gff
-mv 5_Tge_b3v08.max_arth_b2g_droso_b2g.gff Tge_b3v08.max_arth_b2g_droso_b2g.gff
-mv 5_Tpa_b3v08.max_arth_b2g_droso_b2g.gff Tpa_b3v08.max_arth_b2g_droso_b2g.gff
-
+mkdir REFS  ## fasta files here
+mkdir gffs  ## gff files here
 
 
 #####################################################################################################################
@@ -50,7 +20,6 @@ tar -zxf data/linkage_groups.tar.gz
 #####################################################################################################
 ## mapping with BWA
 
-cd /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker
 mkdir mapping_v8
 
 ### prep refs
@@ -109,8 +78,6 @@ done
  ## then use angsD on these bams to get heterozyg: http://popgen.dk/angsd/index.php/Heterozygosity
 
 
-
-
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 ### map reads as paired reads with BWA
 
@@ -122,8 +89,8 @@ module add Bioinformatics/Software/vital-it
 module load UHTS/Aligner/bwa/0.7.15
 module load UHTS/Analysis/samtools/1.3
 
-read_dir="/scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/READS/trimmed_reads_by_RG"
-ref_dir="/scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/Genomes/REFS"
+read_dir="../READS/trimmed_reads_by_RG"
+ref_dir="REFS"
 map_out_dir="./mapping_v8/BWA_out/mapped_as_paired"
 flag_out_dir="./mapping_v8/BWA_out/flagstat_out_paired"
 mapqfilt="30"
@@ -345,7 +312,7 @@ mv mapping_v8/BWA_out/*_merged*/*_coverage.out ./mapping_v8/mappingcoverage_ests
 
 for i in ./mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/*_coverage.out; do
 	echo $i
-	python3 ~/Gen_BioInf/genomeCoverageBed_tidier_wholegenomecov.py -i $i
+	python3 ~/Timema_sex_chr_evol_code/accessory_scripts/genomeCoverageBed_tidier_wholegenomecov.py -i $i
 done
 
 mkdir ./mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/for_plotting
@@ -358,7 +325,7 @@ for i in mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/*_coverage.o
 	want_file=`echo "Genomes/REFS/"$sp"_b3v08_1000.names"`
 	echo $i
 	echo $want_file
-	python3 ~/Gen_BioInf/genomeCoverageBed_tidier_select_scafs.py -i $i -w $want_file -e _1000_
+	python3 ~/Timema_sex_chr_evol_code/accessory_scripts/genomeCoverageBed_tidier_select_scafs.py -i $i -w $want_file -e _1000_
 done
 
 mv ./mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/*_coverage_1000_cov.txt ./mapping_v8/mappingcoverage_ests_BWA_out_merged_perscaf_aDR/for_plotting
@@ -369,12 +336,12 @@ cd /Users/dparker/Documents/University/Lausanne/Sex_chromosomes/mapping_v8/mappi
 
 for i in ./*_genomecov.txt; do
 	echo $i
-	Rscript ~/Documents/Gen_BioInf/plot_genome_cov.R $i
+	Rscript ~/Timema_sex_chr_evol_code/accessory_scripts/plot_genome_cov.R $i
 done
 
 for i in ./*_coverage_1000_cov.txt; do
 	echo $i
-	Rscript ~/Documents/Gen_BioInf/plot_genome_cov.R $i
+	Rscript ~/Timema_sex_chr_evol_code/accessory_scripts/plot_genome_cov.R $i
 done
 
 ### this gives cov ests for angsD cutoffs.
@@ -397,7 +364,7 @@ for i in ./mapping_v8/mappingcoverage_ests_BWA_out_aDR/*_coverage.out; do
     basename=`echo $i | sed 's/_coverage.out//'`	
 	echo $in_name
     echo $basename
-	python ~/Gen_BioInf/genomeCoverageBed_tidier.py $in_name max $basename
+	python ~/Timema_sex_chr_evol_code/accessory_scripts/genomeCoverageBed_tidier.py $in_name max $basename
 done
 
     
@@ -411,36 +378,20 @@ mkdir Tce_cont_cov
 mkdir Tcm_cont_cov
 mkdir Tpa_cont_cov
 mkdir Tps_cont_cov
-mkdir Tms_cont_cov
-mkdir Tge_cont_cov
-mkdir Tdi_cont_cov
-mkdir Tsi_cont_cov
-mkdir Tte_cont_cov
 
 mv Tbi_*_contig_cov.txt Tbi_cont_cov
 mv Tce_*_contig_cov.txt Tce_cont_cov
 mv Tcm_*_contig_cov.txt Tcm_cont_cov
 mv Tpa_*_contig_cov.txt Tpa_cont_cov
 mv Tps_*_contig_cov.txt Tps_cont_cov
-mv Tms_*_contig_cov.txt Tms_cont_cov
-mv Tge_*_contig_cov.txt Tge_cont_cov
-mv Tdi_*_contig_cov.txt Tdi_cont_cov
-mv Tsi_*_contig_cov.txt Tsi_cont_cov
-mv Tte_*_contig_cov.txt Tte_cont_cov
 
-cd /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/
 
 ## Filter down to smallest contig being 1000 bp 
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tbi_cont_cov -f Genomes/REFS/Tbi_b3v08.fasta -m 1000 -o Tbi -e 30aDR_contig_cov.txt -P
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tce_cont_cov -f Genomes/REFS/Tce_b3v08.fasta -m 1000 -o Tce -e 30aDR_contig_cov.txt -P
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tcm_cont_cov -f Genomes/REFS/Tcm_b3v08.fasta -m 1000 -o Tcm -e 30aDR_contig_cov.txt -P
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tpa_cont_cov -f Genomes/REFS/Tpa_b3v08.fasta -m 1000 -o Tpa -e 30aDR_contig_cov.txt -P
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tps_cont_cov -f Genomes/REFS/Tps_b3v08.fasta -m 1000 -o Tps -e 30aDR_contig_cov.txt -P
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tge_cont_cov -f Genomes/REFS/Tge_b3v08.fasta -m 1000 -o Tge -e 30aDR_contig_cov.txt -P
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tms_cont_cov -f Genomes/REFS/Tms_b3v08.fasta -m 1000 -o Tms -e 30aDR_contig_cov.txt -P
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tdi_cont_cov -f Genomes/REFS/Tdi_b3v08.fasta -m 1000 -o Tdi -e 30aDR_contig_cov.txt -P
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tsi_cont_cov -f Genomes/REFS/Tsi_b3v08.fasta -m 1000 -o Tsi -e 30aDR_contig_cov.txt -P
-python3 sex_chr_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tte_cont_cov -f Genomes/REFS/Tte_b3v08.fasta -m 1000 -o Tte -e 30aDR_contig_cov.txt -P
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tbi_cont_cov -f Genomes/REFS/Tbi_b3v08.fasta -m 1000 -o Tbi -e 30aDR_contig_cov.txt -P
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tce_cont_cov -f Genomes/REFS/Tce_b3v08.fasta -m 1000 -o Tce -e 30aDR_contig_cov.txt -P
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tcm_cont_cov -f Genomes/REFS/Tcm_b3v08.fasta -m 1000 -o Tcm -e 30aDR_contig_cov.txt -P
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tpa_cont_cov -f Genomes/REFS/Tpa_b3v08.fasta -m 1000 -o Tpa -e 30aDR_contig_cov.txt -P
+python3 ~/Timema_sex_chr_evol_code/accessory_scripts/Timema_cov_tidier.py -i mapping_v8/mappingcoverage_ests_BWA_out_aDR/Tps_cont_cov -f Genomes/REFS/Tps_b3v08.fasta -m 1000 -o Tps -e 30aDR_contig_cov.txt -P
 
 mkdir mapping_v8/v8aDR_cov_contig
 mv *_contig_cov.txt mapping_v8/v8aDR_cov_contig
@@ -455,7 +406,7 @@ for i in ./mapping_v8/v8aDR_cov_contig/*_contig_cov.txt; do
 	echo $i
     echo $basename
     echo $link_file
-	python3 ./sex_chr_scripts/class_scafs_to_lg.py -c $i -l $link_file -o $basename"_KF2"
+	python3 ~/Timema_sex_chr_evol_code/accessory_scripts/class_scafs_to_lg.py -c $i -l $link_file -o $basename"_KF2"
 done
 
 
@@ -530,9 +481,6 @@ module load UHTS/Analysis/ANGSD/0.921
 module load UHTS/Analysis/samtools/1.3
 module load UHTS/Aligner/bwa/0.7.15
 
-# mkdir -p mapping_v8/v8_angsD_out/mapped_as_single
-# mkdir -p mapping_v8/v8_angsD_out/mapped_as_paired
-
 version="v8aDRra"
 out_dir=`echo "mapping_v8/"$version"_angsD_out/mapped_as_paired"`
 mkdir -p $out_dir
@@ -545,29 +493,19 @@ for i in ./mapping_v8/BWA_out/mapped_as_paired_merged/*_sorted.bam; do
 	samtools index $in_name
 done
 
-# first
-# Need to pick a sensible read MAX depth. Maybe calc mean cov and go 2x higher?
 
 ## calculated with plot_genome_cov.R (above)
 ## WILL use 2x med cov after 0s filtered out.
 
-## add to here (axiom)
+## HERE for convenience data/Sample_coverage/All_v8_BWA_mapqfilt_30aDR_coverage_1000_cov.txtcovest.csv
 
-mkdir -p mapping_v8/v8_angsD_out/
-mkdir -p mapping_v8/v8aDR_angsD_out/
-## for v8aDRra - just use same file as v8aDR
-cp mapping_v8/v8aDR_angsD_out/All_v8_BWA_mapqfilt_30aDR_coverage_1000_cov.txtcovest.csv mapping_v8/v8aDRra_angsD_out/
-cd mapping_v8/v8aDRra_angsD_outv8aDRra_angsD_out/
-mv All_v8_BWA_mapqfilt_30aDR_coverage_1000_cov.txtcovest.csv All_v8_BWA_mapqfilt_30aDRra_coverage_1000_cov.txtcovest.csv
-sed -i 's/30aDR/30aDRra/g' All_v8_BWA_mapqfilt_30aDRra_coverage_1000_cov.txtcovest.csv
- 
 ### scaf by scaf for scafs >= 1000 bp
 
 ### first get scafs I want.
 
 for i in ./Genomes/REFS/*fasta; do
 	out_fa=`echo $i | sed 's/.fasta/_1000.fasta/'`
-	python3 ~/fasta_tools/fasta_select_by_len.py $i max 1000 $out_fa
+	python3 ~/Timema_sex_chr_evol_code/accessory_scripts/fasta_select_by_len.py $i max 1000 $out_fa
 done
 
 for i in ./Genomes/REFS/*_1000.fasta; do
@@ -669,52 +607,391 @@ echo ""
 
 done
 
+
+
+###########################################################################################################################
+#### calculate nucl diversity
+
+module add Bioinformatics/Software/vital-it
+module load UHTS/Analysis/ANGSD/0.921
+module load UHTS/Analysis/samtools/1.3
+module load UHTS/Aligner/bwa/0.7.15
+
+cd mapped_as_paired_merged
+
+## rm T. podura (H56) ReSeq Ps08 and Reseq_Ps12, Fig. S5). as these samples failed
+
+rm Tpa_F_H56_to_Tpa_v8_pe_BWA_mapqfilt_30aDRra_sorted.bam
+rm Tps_F_ReSeq_Ps08_to_Tps_v8_pe_BWA_mapqfilt_30aDRra_sorted.bam 
+rm Tps_F_ReSeq_Ps12_to_Tps_v8_pe_BWA_mapqfilt_30aDRra_sorted.bam 
+
+### index bams
+for b in ./*bam; do
+echo $b
+samtools index $b
+done
+
+
+### scaf by scaf for scafs >= 1000 bp
+
+cd /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker
+### first get scafs I want.
+
+for i in ./Genomes/REFS/*fasta; do
+	out_fa=`echo $i | sed 's/.fasta/_1000.fasta/'`
+	python3 ~/Timema_sex_chr_evol_code/accessory_scripts/fasta_select_by_len.py $i max 1000 $out_fa
+done
+
+for i in ./Genomes/REFS/*_1000.fasta; do
+	out_file=`echo $i | sed 's/.fasta/.names/'`
+	grep ">" $i > $out_file
+done
+
+#### index fastas 
+
+for i in ./Genomes/REFS/*_1000.fasta; do
+	samtools faidx $i
+done
+
+
+mkdir -p mapping_v8/v8aDRra_angsD_out_nucldiv
+cd       mapping_v8/v8aDRra_angsD_out_nucldiv
+
+
+#### RUN these sep for each species as need to set nind and max cov sep.
+### SETTING MAX COV by hand as angsD looks at the BAMS together - SO need to set it to overall x2 med coverage
+###
+
+###################################################################################################################
+### run angsD Tbi
+
+version="v8aDRra"
+out_dir=`echo "mapping_v8/"$version"_angsD_out_nucldiv/mapped_as_paired"`
+mkdir -p $out_dir
+
+for i in "./mapping_v8/BWA_out/mapped_as_paired_merged/Tbi"*"bam_list.txt" ; do
+	
+sp=`echo $i | sed 's/.*\///' | sed  's/_.*//' `
+wanted_seq_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.names"`
+genome_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.fasta"`
+out_file_name_a=`echo $i | sed 's/.*\///' | sed 's/_sorted.bam//'`
+	
+echo $i
+echo $wanted_seq_name
+echo $genome_name
+
+
+echo -e "(indexStart,indexStop)(firstPos_withData,lastPos_withData)(WinStart,WinStop)\tChr\tWinCenter\ttW\ttP\ttF\ttH\ttL\tTajima\tfuf\tfud\tfayh\tzeng\tnSites" > $out_dir"/"$out_file_name_a"_nucldiv_2.txt"	
+
+max_cov=176  ## 26 + 32 +  56 + 34 + 28
+echo $max_cov
+
+while read line; do
+		
+	want_seq=`echo $line | sed 's/>//'`
+	echo $want_seq
+	want_bam=`echo $i`
+	bam_name=` echo $want_bam | sed 's/.*\///' | sed 's/_sorted.bam//' `
+	
+	echo $bam_name
+	# angsd
+	angsd -bam $want_bam \
+	-anc $genome_name -P 8 -r $want_seq \
+	-doSaf 1 -gl 1 -minQ 20 -minMapQ 40 -fold 1 -doCounts 1 -setMinDepth 5 -setMaxDepth $max_cov \
+	-out $out_dir"/"$bam_name"_"$want_seq -nind 5 -minind 5 
+	
+	realSFS $out_dir"/"$bam_name"_"$want_seq".saf.idx" -fold 1 > $out_dir"/"$bam_name"_"$want_seq".out.sfs"		
+	realSFS saf2theta $out_dir"/"$bam_name"_"$want_seq".saf.idx" -outname $out_dir"/"$bam_name"_"$want_seq -sfs $out_dir"/"$bam_name"_"$want_seq".out.sfs" -fold 1
+	#thetaStat print $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	thetaStat do_stat $out_dir"/"$bam_name"_"$want_seq".thetas.idx" 
+	cat $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG" | sed '1d' >> $out_dir"/"$out_file_name_a"_nucldiv_2.txt"
+	
+	wait
+	
+	rm $out_dir"/"$bam_name"_"$want_seq".arg"
+	rm $out_dir"/"$bam_name"_"$want_seq".out.sfs"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.pos.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG"
+	
+	
+done <$wanted_seq_name
+
+echo ""
+
+done
+
+
+###################################################################################################################
+### run angsD Tce
+
+version="v8aDRra"
+out_dir=`echo "mapping_v8/"$version"_angsD_out_nucldiv/mapped_as_paired"`
+mkdir -p $out_dir
+
+for i in "./mapping_v8/BWA_out/mapped_as_paired_merged/Tce"*"bam_list.txt" ; do
+	
+sp=`echo $i | sed 's/.*\///' | sed  's/_.*//' `
+wanted_seq_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.names"`
+genome_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.fasta"`
+out_file_name_a=`echo $i | sed 's/.*\///' | sed 's/_sorted.bam//'`
+	
+echo $i
+echo $wanted_seq_name
+echo $genome_name
+
+
+echo -e "(indexStart,indexStop)(firstPos_withData,lastPos_withData)(WinStart,WinStop)\tChr\tWinCenter\ttW\ttP\ttF\ttH\ttL\tTajima\tfuf\tfud\tfayh\tzeng\tnSites" > $out_dir"/"$out_file_name_a"_nucldiv_2.txt"	
+
+max_cov=160  ## 42 + 30 + 32 + 26 + 30
+echo $max_cov
+
+while read line; do
+		
+	want_seq=`echo $line | sed 's/>//'`
+	echo $want_seq
+	want_bam=`echo $i`
+	bam_name=` echo $want_bam | sed 's/.*\///' | sed 's/_sorted.bam//' `
+	
+	echo $bam_name
+	# angsd
+	angsd -bam $want_bam \
+	-anc $genome_name -P 8 -r $want_seq \
+	-doSaf 1 -gl 1 -minQ 20 -minMapQ 40 -fold 1 -doCounts 1 -setMinDepth 5 -setMaxDepth $max_cov \
+	-out $out_dir"/"$bam_name"_"$want_seq -nind 5 -minind 5 
+	
+	realSFS $out_dir"/"$bam_name"_"$want_seq".saf.idx" -fold 1 > $out_dir"/"$bam_name"_"$want_seq".out.sfs"		
+	realSFS saf2theta $out_dir"/"$bam_name"_"$want_seq".saf.idx" -outname $out_dir"/"$bam_name"_"$want_seq -sfs $out_dir"/"$bam_name"_"$want_seq".out.sfs" -fold 1
+	#thetaStat print $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	thetaStat do_stat $out_dir"/"$bam_name"_"$want_seq".thetas.idx" 
+	cat $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG" | sed '1d' >> $out_dir"/"$out_file_name_a"_nucldiv_2.txt"
+	
+	wait
+	
+	rm $out_dir"/"$bam_name"_"$want_seq".arg"
+	rm $out_dir"/"$bam_name"_"$want_seq".out.sfs"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.pos.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG"
+	
+	
+done <$wanted_seq_name
+
+echo ""
+
+done
+
+
+###################################################################################################################
+### run angsD Tcm
+
+version="v8aDRra"
+out_dir=`echo "mapping_v8/"$version"_angsD_out_nucldiv/mapped_as_paired"`
+mkdir -p $out_dir
+
+for i in "./mapping_v8/BWA_out/mapped_as_paired_merged/Tcm"*"bam_list.txt" ; do
+	
+sp=`echo $i | sed 's/.*\///' | sed  's/_.*//' `
+wanted_seq_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.names"`
+genome_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.fasta"`
+out_file_name_a=`echo $i | sed 's/.*\///' | sed 's/_sorted.bam//'`
+	
+echo $i
+echo $wanted_seq_name
+echo $genome_name
+
+
+echo -e "(indexStart,indexStop)(firstPos_withData,lastPos_withData)(WinStart,WinStop)\tChr\tWinCenter\ttW\ttP\ttF\ttH\ttL\tTajima\tfuf\tfud\tfayh\tzeng\tnSites" > $out_dir"/"$out_file_name_a"_nucldiv_2.txt"	
+
+max_cov=132  ## 26 + 28 + 30 + 24 + 24
+echo $max_cov
+
+while read line; do
+		
+	want_seq=`echo $line | sed 's/>//'`
+	echo $want_seq
+	want_bam=`echo $i`
+	bam_name=` echo $want_bam | sed 's/.*\///' | sed 's/_sorted.bam//' `
+	
+	echo $bam_name
+	# angsd
+	angsd -bam $want_bam \
+	-anc $genome_name -P 8 -r $want_seq \
+	-doSaf 1 -gl 1 -minQ 20 -minMapQ 40 -fold 1 -doCounts 1 -setMinDepth 5 -setMaxDepth $max_cov \
+	-out $out_dir"/"$bam_name"_"$want_seq -nind 5 -minind 5 
+	
+	realSFS $out_dir"/"$bam_name"_"$want_seq".saf.idx" -fold 1 > $out_dir"/"$bam_name"_"$want_seq".out.sfs"		
+	realSFS saf2theta $out_dir"/"$bam_name"_"$want_seq".saf.idx" -outname $out_dir"/"$bam_name"_"$want_seq -sfs $out_dir"/"$bam_name"_"$want_seq".out.sfs" -fold 1
+	#thetaStat print $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	thetaStat do_stat $out_dir"/"$bam_name"_"$want_seq".thetas.idx" 
+	cat $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG" | sed '1d' >> $out_dir"/"$out_file_name_a"_nucldiv_2.txt"
+	
+	wait
+	
+	rm $out_dir"/"$bam_name"_"$want_seq".arg"
+	rm $out_dir"/"$bam_name"_"$want_seq".out.sfs"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.pos.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG"
+	
+	
+done <$wanted_seq_name
+
+echo ""
+
+done
+
+###################################################################################################################
+### run angsD Tpa
+
+version="v8aDRra"
+out_dir=`echo "mapping_v8/"$version"_angsD_out_nucldiv/mapped_as_paired"`
+mkdir -p $out_dir
+
+for i in "./mapping_v8/BWA_out/mapped_as_paired_merged/Tpa"*"bam_list.txt" ; do
+	
+sp=`echo $i | sed 's/.*\///' | sed  's/_.*//' `
+wanted_seq_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.names"`
+genome_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.fasta"`
+out_file_name_a=`echo $i | sed 's/.*\///' | sed 's/_sorted.bam//'`
+	
+echo $i
+echo $wanted_seq_name
+echo $genome_name
+
+
+echo -e "(indexStart,indexStop)(firstPos_withData,lastPos_withData)(WinStart,WinStop)\tChr\tWinCenter\ttW\ttP\ttF\ttH\ttL\tTajima\tfuf\tfud\tfayh\tzeng\tnSites" > $out_dir"/"$out_file_name_a"_nucldiv_2.txt"	
+
+max_cov=96  ## 22 + 26 + 24 + 24
+echo $max_cov
+
+while read line; do
+		
+	want_seq=`echo $line | sed 's/>//'`
+	echo $want_seq
+	want_bam=`echo $i`
+	bam_name=` echo $want_bam | sed 's/.*\///' | sed 's/_sorted.bam//' `
+	
+	echo $bam_name
+	# angsd
+	angsd -bam $want_bam \
+	-anc $genome_name -P 8 -r $want_seq \
+	-doSaf 1 -gl 1 -minQ 20 -minMapQ 40 -fold 1 -doCounts 1 -setMinDepth 5 -setMaxDepth $max_cov \
+	-out $out_dir"/"$bam_name"_"$want_seq -nind 4 -minind 4 
+	
+	realSFS $out_dir"/"$bam_name"_"$want_seq".saf.idx" -fold 1 > $out_dir"/"$bam_name"_"$want_seq".out.sfs"		
+	realSFS saf2theta $out_dir"/"$bam_name"_"$want_seq".saf.idx" -outname $out_dir"/"$bam_name"_"$want_seq -sfs $out_dir"/"$bam_name"_"$want_seq".out.sfs" -fold 1
+	#thetaStat print $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	thetaStat do_stat $out_dir"/"$bam_name"_"$want_seq".thetas.idx" 
+	cat $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG" | sed '1d' >> $out_dir"/"$out_file_name_a"_nucldiv_2.txt"
+	
+	wait
+	
+	rm $out_dir"/"$bam_name"_"$want_seq".arg"
+	rm $out_dir"/"$bam_name"_"$want_seq".out.sfs"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.pos.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG"
+	
+	
+done <$wanted_seq_name
+
+echo ""
+
+done
+
+###################################################################################################################
+### run angsD Tps
+
+version="v8aDRra"
+out_dir=`echo "mapping_v8/"$version"_angsD_out_nucldiv/mapped_as_paired"`
+mkdir -p $out_dir
+
+for i in "./mapping_v8/BWA_out/mapped_as_paired_merged/Tps"*"bam_list.txt" ; do
+	
+sp=`echo $i | sed 's/.*\///' | sed  's/_.*//' `
+wanted_seq_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.names"`
+genome_name=`echo "Genomes/REFS/"$sp"_b3v08_1000.fasta"`
+out_file_name_a=`echo $i | sed 's/.*\///' | sed 's/_sorted.bam//'`
+	
+echo $i
+echo $wanted_seq_name
+echo $genome_name
+
+
+echo -e "(indexStart,indexStop)(firstPos_withData,lastPos_withData)(WinStart,WinStop)\tChr\tWinCenter\ttW\ttP\ttF\ttH\ttL\tTajima\tfuf\tfud\tfayh\tzeng\tnSites" > $out_dir"/"$out_file_name_a"_nucldiv_2.txt"	
+
+max_cov=92  ## 32 + 26 + 34
+echo $max_cov
+
+while read line; do
+		
+	want_seq=`echo $line | sed 's/>//'`
+	echo $want_seq
+	want_bam=`echo $i`
+	bam_name=` echo $want_bam | sed 's/.*\///' | sed 's/_sorted.bam//' `
+	
+	echo $bam_name
+	# angsd
+	angsd -bam $want_bam \
+	-anc $genome_name -P 8 -r $want_seq \
+	-doSaf 1 -gl 1 -minQ 20 -minMapQ 40 -fold 1 -doCounts 1 -setMinDepth 5 -setMaxDepth $max_cov \
+	-out $out_dir"/"$bam_name"_"$want_seq -nind 3 -minind 3 
+	
+	realSFS $out_dir"/"$bam_name"_"$want_seq".saf.idx" -fold 1 > $out_dir"/"$bam_name"_"$want_seq".out.sfs"		
+	realSFS saf2theta $out_dir"/"$bam_name"_"$want_seq".saf.idx" -outname $out_dir"/"$bam_name"_"$want_seq -sfs $out_dir"/"$bam_name"_"$want_seq".out.sfs" -fold 1
+	#thetaStat print $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	thetaStat do_stat $out_dir"/"$bam_name"_"$want_seq".thetas.idx" 
+	cat $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG" | sed '1d' >> $out_dir"/"$out_file_name_a"_nucldiv_2.txt"
+	
+	wait
+	
+	rm $out_dir"/"$bam_name"_"$want_seq".arg"
+	rm $out_dir"/"$bam_name"_"$want_seq".out.sfs"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".saf.pos.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.gz"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx"
+	rm $out_dir"/"$bam_name"_"$want_seq".thetas.idx.pestPG"
+	
+	
+done <$wanted_seq_name
+
+echo ""
+
+done
+
+
+## Output in the pestPG file are the sum of the per site estimates for a region
+## so to get pairwise theta divide tP by nsites
+
+
+
 ############################################################################################
-# join together with cov and linkage info
+# add all together into one table
 
 
 for sp in Tbi Tce Tcm Tpa Tps; do 
 	echo $sp
-	python3 accessory_scripts/add_hetero_info.py \
-	-i /Users/dparker/Documents/University/Lausanne/Sex_chromosomes/v8aDRra_angsD_out/mapped_as_paired/ \
+	python3 ~/Timema_sex_chr_evol_code/accessory_scripts/add_hetero_info.py \
+	-i v8aDRra_angsD_out/mapped_as_paired/ \
 	-s $sp \
-	-c "/Users/dparker/Documents/University/Lausanne/Sex_chromosomes/v8aDR_cov_contig/"$sp"_pairedcov_minlen=1000_contig_cov_KF2_wLGinfopos.csv"
+	-c "v8aDR_cov_contig/"$sp"_pairedcov_minlen=1000_contig_cov_KF2_wLGinfopos.csv" \
+	-n "v8aDRra_angsD_out_nucldiv/mapped_as_paired/"$sp"_bam_list.txt_nucldiv_2.txt"
 done
-
-#Samples:
-#['Tbi_F_CC86B', 'Tbi_F_CC86C', 'Tbi_F_CC87B', 'Tbi_F_CC87C', 'Tbi_F_CC88B', 'Tbi_M_13_Tbi', 'Tbi_M_14_Tbi', 'Tbi_M_15_Tbi', 'Tbi_M_16_Tbi']
-#
-#Total number of scafs: 53814
-#Total number where ansgD did not calc ests for ANY sites for at least 1 sample: 3348
-#Number of scafs with missing angsD ests (i.e. in cov file but not angsD file): 0
-
-#Samples:
-#['Tce_F_CC22B', 'Tce_F_CC22C', 'Tce_F_CC24B', 'Tce_F_CC24C', 'Tce_F_CC25B', 'Tce_M_05_HM15', 'Tce_M_06_HM16', 'Tce_M_07_HM33', 'Tce_M_08_HM61']
-#
-#Total number of scafs: 47657
-#Total number where ansgD did not calc ests for ANY sites for at least 1 sample: 6610
-#Number of scafs with missing angsD ests (i.e. in cov file but not angsD file): 0
-
-#Samples:
-#['Tcm_F_HM217', 'Tcm_F_HM218', 'Tcm_F_HM219', 'Tcm_F_HM220', 'Tcm_F_HM221', 'Tcm_M_01_HM148', 'Tcm_M_02_HM149', 'Tcm_M_03_HM150', 'Tcm_M_04_HM151']
-#
-#Total number of scafs: 71329
-#Total number where ansgD did not calc ests for ANY sites for at least 1 sample: 10371
-#Number of scafs with missing angsD ests (i.e. in cov file but not angsD file): 0
-
-#Samples:
-#['Tpa_F_H54', 'Tpa_F_H56', 'Tpa_F_PA_CD', 'Tpa_F_PA_E', 'Tpa_F_Pa_AB', 'Tpa_M_09_Tpa', 'Tpa_M_10_Tpa', 'Tpa_M_11_Tpa', 'Tpa_M_12_Tpa']
-#
-#Total number of scafs: 155674
-#Total number where ansgD did not calc ests for ANY sites for at least 1 sample: 19451
-#Number of scafs with missing angsD ests (i.e. in cov file but not angsD file): 0
-
-#Samples:
-#['Tps_F_ReSeq_Ps08', 'Tps_F_ReSeq_Ps12', 'Tps_F_ReSeq_Ps14', 'Tps_F_ReSeq_Ps16', 'Tps_F_ReSeq_Ps18', 'Tps_M_17_HM99', 'Tps_M_18_HM100', 'Tps_M_19_HM101', 'Tps_M_20_15255']
-#
-#Total number of scafs: 90454
-#Total number where ansgD did not calc ests for ANY sites for at least 1 sample: 12117
-#Number of scafs with missing angsD ests (i.e. in cov file but not angsD file): 0
 
 
 
