@@ -10,11 +10,11 @@
 * **add_hetero_info.py** | add angsD outputs to coverage info - see *2_genome_read_mapping.sh*
 
 
+* **Maker_gff_to_HTseq_gff.py** | Convert downloaded gff from maker to a form HTseq-count can use - see *3_RNAseq_mapping.sh*
+* **HTSeq_to_edgeR.py** | Join read counts from HTseq-count for each sample together - see *3_RNAseq_mapping.sh*
+* **gff_feature_lengths.py**  | get feature lengths from a gff - see *3_RNAseq_mapping.sh*
+* **class_genes_to_lg.py**  | add linkage group infomation to read count table - see see *3_RNAseq_mapping.sh*
+* **sex_chr_cov_readcounts_tidier.py** | add ortholog infomation to read count table - see see *3_RNAseq_mapping.sh*
+* **sex_chr_cov_readcounts_orth_tidier.py** | get read counts for orthologs in each species - see see *3_RNAseq_mapping.sh*
 
-HTSeq_to_edgeR.py
-Maker_gff_to_HTseq_gff.py
-add_gene_name_to_positive_sel_data.py
-class_genes_to_lg.py
-gff_feature_lengths.py
-sex_chr_cov_readcounts_orth_tidier.py
-sex_chr_cov_readcounts_tidier.py
+add_gene_name_to_positive_sel_data.py 
