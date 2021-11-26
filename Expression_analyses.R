@@ -36,8 +36,8 @@ dat1_Tps_raw$lg <- str_split_fixed(as.character(dat1_Tps_raw$lg_pos), "_",2)[,1]
 dat1_orth_raw <- read.table ("TbiTceTcmTpaTps_orth_1000_chr_info_and_counts.csv", header = T, sep = ',')
 
 #### change wd to output folder
-dir.create("../Exp_out")
-setwd("../Exp_out")
+dir.create("../output/Exp_out")
+setwd("../output/Exp_out")
 
 
 #########################################################################################################################
@@ -2963,57 +2963,6 @@ LG_FPKM_log2MF_allsp_orths <- get_log2MF_vals_per_orth("LG_FPKM_log2MF_dict", "L
 
 head(LG_FPKM_log2MF_allsp_orths)
 
-# plot_orth_heatmaps <- function(MF_orth_df){
-	# print(length(MF_orth_df[,1]))
-	# MF_orth_df_c <- na.omit(MF_orth_df)
-	# print(length(MF_orth_df_c[,1]))	
-	
-	
-	# # X_soft
-	# X_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "XXXXX")
-	# print(length(X_soft_df[,1]))
-	# X_soft_df_mat <- as.data.frame(cbind(X_soft_df$Tbi, X_soft_df$Tce, X_soft_df$Tcm, X_soft_df$Tpa, X_soft_df$Tps))
-	# rownames(X_soft_df_mat) <- X_soft_df$orth
-	# colnames(X_soft_df_mat) <- c("Tbi", "Tce", "Tcm", "Tpa", "Tps")
-	
-	# X_soft_df_mat$Tbi <- as.numeric(as.character(X_soft_df_mat$Tbi ))
-	# X_soft_df_mat$Tce <- as.numeric(as.character(X_soft_df_mat$Tce ))
-	# X_soft_df_mat$Tcm <- as.numeric(as.character(X_soft_df_mat$Tcm ))
-	# X_soft_df_mat$Tpa <- as.numeric(as.character(X_soft_df_mat$Tpa ))
-	# X_soft_df_mat$Tps <- as.numeric(as.character(X_soft_df_mat$Tps ))	
-	
-	# print(str(X_soft_df_mat))
-	# print(X_soft_df_mat)
-	
-	# breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
-
-	# X_soft_heatmap <- pheatmap(X_soft_df_mat , clustering_distance_rows = "euclidean", cluster_cols = FALSE, 
-	# clustering_method = "ward.D2", color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA)
-	
-	# # A_soft
-	# A_soft_df <- subset(MF_orth_df_c, MF_orth_df_c$soft_chr == "AAAAA")
-	# print(length(A_soft_df[,1]))
-	# A_soft_df_mat <- as.data.frame(cbind(A_soft_df$Tbi, A_soft_df$Tce, A_soft_df$Tcm, A_soft_df$Tpa, A_soft_df$Tps))
-	# rownames(A_soft_df_mat) <- A_soft_df$orth
-	# colnames(A_soft_df_mat) <- c("Tbi", "Tce", "Tcm", "Tpa", "Tps")
-	
-	# A_soft_df_mat$Tbi <- as.numeric(as.character(A_soft_df_mat$Tbi ))
-	# A_soft_df_mat$Tce <- as.numeric(as.character(A_soft_df_mat$Tce ))
-	# A_soft_df_mat$Tcm <- as.numeric(as.character(A_soft_df_mat$Tcm ))
-	# A_soft_df_mat$Tpa <- as.numeric(as.character(A_soft_df_mat$Tpa ))
-	# A_soft_df_mat$Tps <- as.numeric(as.character(A_soft_df_mat$Tps ))	
-	
-	# # print(str(A_soft_df_mat))
-	# # print(A_soft_df_mat)
-	
-	# breaksList = c(-14.25, -3.75, -3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25,  0.75,  1.25, 1.75, 2.25, 2.75,3.25,3.75,14.25) 
-
-	# A_soft_heatmap <- pheatmap(A_soft_df_mat , clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean",, 
-	# clustering_method = "ward.D2", color = colorRampPalette(c("#08103A","#08306B","#08417C", "#08519C", "#2171B5", "#4292C6", "#6BAED6" ,"#9DCBE1","#9ECAE1", "#FFFFFF", 	"#FFFFFF"  ,"#FCBBA1","#FCBBA1" ,"#FC9272" ,"#FB6A4A" ,"#EF3B2C" ,"#CB181D" ,"#A50F15" ,"#67000D","#67000D","#67000D"))(length(breaksList)), breaks = breaksList, show_rownames = T,border_color = NA)
-	
-	# return(A_soft_heatmap)
-# }
-
 
 
 plot_orth_MF_heatmaps_X_soft <- function(MF_orth_df, tit_txt){
@@ -3802,6 +3751,39 @@ plot_orth_MF_heatmaps_A_soft_clust_SBonly(LG_FPKM_log2MF_allsp_orths, "LG", get_
   subset(TTT_LG_Tpa_sex_bias_FPKM$table, TTT_LG_Tpa_sex_bias_FPKM$table$FDR < 0.05)$genes, 
   subset(TTT_LG_Tps_sex_bias_FPKM$table, TTT_LG_Tps_sex_bias_FPKM$table$FDR < 0.05)$genes)))
 dev.off()
+
+
+
+print (sessionInfo())
+# version 4.0.3 (2020-10-10)
+# Platform: x86_64-apple-darwin17.0 (64-bit)
+# Running under: macOS Big Sur 10.16
+# 
+# Matrix products: default
+# LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+# 
+# locale:
+#   [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+# 
+# attached base packages:
+#   [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+#   [1] pheatmap_1.0.12 hash_2.2.6.1    edgeR_3.32.1    limma_3.46.0    cowplot_1.1.1   Rtsne_0.15      plyr_1.8.6      modeest_2.4.0   stringr_1.4.0  
+# [10] ggplot2_3.3.5  
+# 
+# loaded via a namespace (and not attached):
+#   [1] Rcpp_1.0.6          RColorBrewer_1.1-2  pillar_1.4.7        compiler_4.0.3      tools_4.0.3         timeSeries_3062.100 digest_0.6.27      
+# [8] rpart_4.1-15        lattice_0.20-41     lifecycle_0.2.0     tibble_3.0.6        gtable_0.3.0        stable_1.1.4        clue_0.3-58        
+# [15] pkgconfig_2.0.3     rlang_0.4.10        rmutil_1.1.5        statip_0.2.3        withr_2.4.1         dplyr_1.0.3         cluster_2.1.0      
+# [22] generics_0.1.0      vctrs_0.3.6         locfit_1.5-9.4      grid_4.0.3          tidyselect_1.1.0    glue_1.4.2          R6_2.5.0           
+# [29] spatial_7.3-13      farver_2.0.3        purrr_0.3.4         magrittr_2.0.1      splines_4.0.3       fBasics_3042.89.1   scales_1.1.1       
+# [36] ellipsis_0.3.1      stabledist_0.7-1    timeDate_3043.102   colorspace_2.0-0    labeling_0.4.2      stringi_1.5.3       munsell_0.5.0      
+# [43] crayon_1.4.0  
+
+writeLines(capture.output(sessionInfo()), "Exp_analy_sess_info")
+
+
 
 
 
