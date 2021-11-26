@@ -999,7 +999,9 @@ done
 #### OUTPUT is stored here: data/coverage_and_heterozygosity 
 
 
-
+### analyse
+#Male_and_female_coverage.R
+#Male_and_female_coverage_nucla.R
 
 
 
