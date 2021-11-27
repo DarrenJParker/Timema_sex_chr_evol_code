@@ -1,4 +1,4 @@
-# Timema_sex_chr_evol
+# Timema_sex_chr_evol_code
 
 
 This is the repository for the collected scripts used in the study:
