@@ -45,6 +45,7 @@ Raw sequence reads generated in this project have been deposited in NCBI’s seq
 * **counts** | RNAseq read counts with sex chromosome information
 * **AllIllumina-PEadapters.fa** | Illumina adapter sequence
 * **Timema_X_soft_HOG_longest_aa.fa** | amino acid sequence for _Timema_ X orthologs 
+* **Selectome_v07_Timema-nt_masked.zip** | Masked alignments from selectome (See [Selectome](https://selectome.org/timema) and Jaron et al. (2021) for more details)
 
 
 ## References
