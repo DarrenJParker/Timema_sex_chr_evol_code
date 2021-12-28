@@ -447,6 +447,49 @@ Tpa_LG_F_TPM <- get_TPM(y_Tpa_LG_F_TPM, dat1_Tpa, "Tpa_SF_LG", "Tpa_SM_LG")
 Tps_LG_F_TPM <- get_TPM(y_Tps_LG_F_TPM, dat1_Tps, "Tps_SF_LG", "Tps_SM_LG")
 
 head(Tps_LG_F_TPM) 
+
+
+write.csv(Tbi_RT_F_FPKM, "Tbi_RT_F_FPKM.csv", row.names = F)
+write.csv(Tce_RT_F_FPKM, "Tce_RT_F_FPKM.csv", row.names = F)
+write.csv(Tcm_RT_F_FPKM, "Tcm_RT_F_FPKM.csv", row.names = F)
+write.csv(Tpa_RT_F_FPKM, "Tpa_RT_F_FPKM.csv", row.names = F)
+write.csv(Tps_RT_F_FPKM, "Tps_RT_F_FPKM.csv", row.names = F)
+
+write.csv(Tbi_HD_F_FPKM, "Tbi_HD_F_FPKM.csv", row.names = F)
+write.csv(Tce_HD_F_FPKM, "Tce_HD_F_FPKM.csv", row.names = F)
+write.csv(Tcm_HD_F_FPKM, "Tcm_HD_F_FPKM.csv", row.names = F)
+write.csv(Tpa_HD_F_FPKM, "Tpa_HD_F_FPKM.csv", row.names = F)
+write.csv(Tps_HD_F_FPKM, "Tps_HD_F_FPKM.csv", row.names = F)
+
+write.csv(Tbi_LG_F_FPKM, "Tbi_LG_F_FPKM.csv", row.names = F)
+write.csv(Tce_LG_F_FPKM, "Tce_LG_F_FPKM.csv", row.names = F)
+write.csv(Tcm_LG_F_FPKM, "Tcm_LG_F_FPKM.csv", row.names = F)
+write.csv(Tpa_LG_F_FPKM, "Tpa_LG_F_FPKM.csv", row.names = F)
+write.csv(Tps_LG_F_FPKM, "Tps_LG_F_FPKM.csv", row.names = F)
+
+write.csv(Tbi_RT_F_TPM, "Tbi_RT_F_TPM.csv", row.names = F)
+write.csv(Tce_RT_F_TPM, "Tce_RT_F_TPM.csv", row.names = F)
+write.csv(Tcm_RT_F_TPM, "Tcm_RT_F_TPM.csv", row.names = F)
+write.csv(Tpa_RT_F_TPM, "Tpa_RT_F_TPM.csv", row.names = F)
+write.csv(Tps_RT_F_TPM, "Tps_RT_F_TPM.csv", row.names = F)
+
+write.csv(Tbi_HD_F_TPM, "Tbi_HD_F_TPM.csv", row.names = F)
+write.csv(Tce_HD_F_TPM, "Tce_HD_F_TPM.csv", row.names = F)
+write.csv(Tcm_HD_F_TPM, "Tcm_HD_F_TPM.csv", row.names = F)
+write.csv(Tpa_HD_F_TPM, "Tpa_HD_F_TPM.csv", row.names = F)
+write.csv(Tps_HD_F_TPM, "Tps_HD_F_TPM.csv", row.names = F)
+
+write.csv(Tbi_LG_F_TPM, "Tbi_LG_F_TPM.csv", row.names = F)
+write.csv(Tce_LG_F_TPM, "Tce_LG_F_TPM.csv", row.names = F)
+write.csv(Tcm_LG_F_TPM, "Tcm_LG_F_TPM.csv", row.names = F)
+write.csv(Tpa_LG_F_TPM, "Tpa_LG_F_TPM.csv", row.names = F)
+write.csv(Tps_LG_F_TPM, "Tps_LG_F_TPM.csv", row.names = F)
+
+
+
+
+
+
 ###################################################################################
 ### Dosage comp
 
@@ -578,6 +621,8 @@ All_LG_F_FPKM_long <- make_long_table_avEXP("Tbi_LG_F_FPKM", "Tce_LG_F_FPKM", "T
 All_RT_F_TPM_long <- make_long_table_avEXP("Tbi_RT_F_TPM", "Tce_RT_F_TPM", "Tcm_RT_F_TPM", "Tpa_RT_F_TPM", "Tps_RT_F_TPM",  "RT", "TPM")
 All_HD_F_TPM_long <- make_long_table_avEXP("Tbi_HD_F_TPM", "Tce_HD_F_TPM", "Tcm_HD_F_TPM", "Tpa_HD_F_TPM", "Tps_HD_F_TPM",  "HD", "TPM")
 All_LG_F_TPM_long <- make_long_table_avEXP("Tbi_LG_F_TPM", "Tce_LG_F_TPM", "Tcm_LG_F_TPM", "Tpa_LG_F_TPM", "Tps_LG_F_TPM",  "LG", "TPM")
+
+head(All_RT_F_FPKM_long )
 
 ###############################################################################################################################
 ##### box plots
