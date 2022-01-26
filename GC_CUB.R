@@ -273,11 +273,9 @@ Tps_aa <- get_all_codon_counts(Tps_ct)
 
 
 
-
-
-
-
 ## output
 write.csv(as.data.frame(rbind(Tbi_ENC, Tce_ENC, Tcm_ENC, Tpa_ENC, Tps_ENC)), "data/output/sel_out/ENC.csv", row.names = F, quote = F)
+
+### 
 writeLines(capture.output(sessionInfo()), "GC_CUB_sess_info.txt")
 
