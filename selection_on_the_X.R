@@ -33,8 +33,14 @@ dat1_Tcm_raw$lg <- str_split_fixed(as.character(dat1_Tcm_raw$lg_pos), "_",2)[,1]
 dat1_Tpa_raw$lg <- str_split_fixed(as.character(dat1_Tpa_raw$lg_pos), "_",2)[,1]
 dat1_Tps_raw$lg <- str_split_fixed(as.character(dat1_Tps_raw$lg_pos), "_",2)[,1]
 
+dat1_Tbi_raw$lg <- ifelse(dat1_Tbi_raw$lg == "", NA, dat1_Tbi_raw$lg)
+dat1_Tce_raw$lg <- ifelse(dat1_Tce_raw$lg == "", NA, dat1_Tce_raw$lg)
+dat1_Tcm_raw$lg <- ifelse(dat1_Tcm_raw$lg == "", NA, dat1_Tcm_raw$lg)
+dat1_Tpa_raw$lg <- ifelse(dat1_Tpa_raw$lg == "", NA, dat1_Tpa_raw$lg)
+dat1_Tps_raw$lg <- ifelse(dat1_Tps_raw$lg == "", NA, dat1_Tps_raw$lg)
 
 ## from Expression_analyses.R
+## sex-bias
 Tbi_RT <- read.table ("../output/Exp_out/TTT_RT_Tbi_sex_bias_FPKM.csv", header = T, sep = ',')
 Tce_RT <- read.table ("../output/Exp_out/TTT_RT_Tce_sex_bias_FPKM.csv", header = T, sep = ',')
 Tcm_RT <- read.table ("../output/Exp_out/TTT_RT_Tcm_sex_bias_FPKM.csv", header = T, sep = ',')
@@ -53,6 +59,34 @@ Tcm_LG <- read.table ("../output/Exp_out/TTT_LG_Tcm_sex_bias_FPKM.csv", header =
 Tpa_LG <- read.table ("../output/Exp_out/TTT_LG_Tpa_sex_bias_FPKM.csv", header = T, sep = ',')
 Tps_LG <- read.table ("../output/Exp_out/TTT_LG_Tps_sex_bias_FPKM.csv", header = T, sep = ',')
 
+## average exp
+Tbi_RT_FKPM <- read.table ("../output/Exp_out/Tbi_RT_F_FPKM.csv", header = T, sep = ',')
+Tce_RT_FKPM <- read.table ("../output/Exp_out/Tce_RT_F_FPKM.csv", header = T, sep = ',')
+Tcm_RT_FKPM <- read.table ("../output/Exp_out/Tcm_RT_F_FPKM.csv", header = T, sep = ',')
+Tpa_RT_FKPM <- read.table ("../output/Exp_out/Tpa_RT_F_FPKM.csv", header = T, sep = ',')
+Tps_RT_FKPM <- read.table ("../output/Exp_out/Tps_RT_F_FPKM.csv", header = T, sep = ',')
+
+Tbi_HD_FKPM <- read.table ("../output/Exp_out/Tbi_HD_F_FPKM.csv", header = T, sep = ',')
+Tce_HD_FKPM <- read.table ("../output/Exp_out/Tce_HD_F_FPKM.csv", header = T, sep = ',')
+Tcm_HD_FKPM <- read.table ("../output/Exp_out/Tcm_HD_F_FPKM.csv", header = T, sep = ',')
+Tpa_HD_FKPM <- read.table ("../output/Exp_out/Tpa_HD_F_FPKM.csv", header = T, sep = ',')
+Tps_HD_FKPM <- read.table ("../output/Exp_out/Tps_HD_F_FPKM.csv", header = T, sep = ',')
+
+Tbi_LG_FKPM <- read.table ("../output/Exp_out/Tbi_LG_F_FPKM.csv", header = T, sep = ',')
+Tce_LG_FKPM <- read.table ("../output/Exp_out/Tce_LG_F_FPKM.csv", header = T, sep = ',')
+Tcm_LG_FKPM <- read.table ("../output/Exp_out/Tcm_LG_F_FPKM.csv", header = T, sep = ',')
+Tpa_LG_FKPM <- read.table ("../output/Exp_out/Tpa_LG_F_FPKM.csv", header = T, sep = ',')
+Tps_LG_FKPM <- read.table ("../output/Exp_out/Tps_LG_F_FPKM.csv", header = T, sep = ',')
+
+
+#### GC and CUB from GC_CUB.R
+GC_all  <- read.table ("../output/sel_out/GC.csv", header = T, sep = ',')
+ENC_all <- read.table ("../output/sel_out/ENC.csv", header = T, sep = ',')
+
+head(GC_all)
+head(ENC_all)
+
+
 dat1_orth_raw <- read.table ("TbiTceTcmTpaTps_orth_1000_chr_info_and_counts.csv", header = T, sep = ',')
 
 #### change wd to output folder
@@ -67,13 +101,19 @@ setwd("../output/sel_out")
 # Error: no more error handlers available (recursive errors?); invoking 'abort' restart
 # this is a bug https://github.com/rstudio/rstudio/issues/5546
 
+
 all_raw_dfs <- c("dat1_Tbi_raw", "dat1_Tce_raw", "dat1_Tcm_raw", "dat1_Tpa_raw", "dat1_Tps_raw")
+
+levels(as.factor(dat1_Tbi_raw$lg))
+
+
 
 Orth_dict <- hash()
 hard_chr_dict <- hash()
 soft_chr_dict <- hash()
 all_orths = c()
 gene_to_orth_dict <- hash()
+gene_to_lg_dict <- hash()
 
 for(d in all_raw_dfs){
 	sp <- strsplit(d, "_")[[1]][2]
@@ -84,6 +124,7 @@ for(d in all_raw_dfs){
 		HOG_n  <- test_df$HOG[i]
 		hard_n <- test_df$chr_hard[i]
 		soft_n <- test_df$chr_soft[i]
+		lg_n   <- test_df$lg[i]
 		if(! is.na(HOG_n)){
 			Orth_dict[[paste(sp, HOG_n, sep = "___")]] <- gene_n
 			all_orths = c(all_orths, HOG_n)
@@ -98,13 +139,16 @@ for(d in all_raw_dfs){
 		if(! is.na(soft_n)){
 			soft_chr_dict[[gene_n]] <- soft_n
 		}
+		if(! is.na(lg_n)){
+		  gene_to_lg_dict[[gene_n]] <- lg_n
+		}
 	}
 }
 
 all_orths <- unique(all_orths)
 
 soft_chr_dict[["TBI_07206"]]
-
+Orth_dict[["Tpa___HOG_17469"]]
 length(Orth_dict)
 length(hard_chr_dict)
 length(soft_chr_dict)
@@ -189,6 +233,137 @@ RT_SB_FDR_dict[["TPS_13859"]]
 RT_SB_logFC_dict[["TPA_06181"]]
 
 
+##### exp lev
+
+all_RT_FKPM_dict_dfs <- c("Tbi_RT_FKPM ", "Tce_RT_FKPM ", "Tcm_RT_FKPM ", "Tpa_RT_FKPM ", "Tps_RT_FKPM ")
+
+RT_SF_FKPM_dict <- hash()
+RT_SM_FKPM_dict <- hash()
+
+for(d in all_RT_FKPM_dict_dfs ){
+  test_df <- eval(parse(text=paste(d,sep='')))
+  colnames(test_df) <- gsub("T.._", "", colnames(test_df))
+  print(head(test_df))
+  
+  for(i in seq(1:length(test_df[,1]))){
+    gene_n   <- test_df$gene_id[i]
+    SF_n     <- test_df$SF_RT_meanFPKM[i]
+    SM_n     <- test_df$SM_RT_meanFPKM[i]
+    
+    if(! is.na(SF_n)){
+      RT_SF_FKPM_dict[[gene_n]] <- SF_n
+    }
+    
+    if(! is.na(SM_n)){
+      RT_SM_FKPM_dict[[gene_n]] <- SM_n
+    }
+    
+  }
+}
+
+
+
+all_HD_FKPM_dict_dfs <- c("Tbi_HD_FKPM ", "Tce_HD_FKPM ", "Tcm_HD_FKPM ", "Tpa_HD_FKPM ", "Tps_HD_FKPM ")
+
+HD_SF_FKPM_dict <- hash()
+HD_SM_FKPM_dict <- hash()
+
+for(d in all_HD_FKPM_dict_dfs ){
+  test_df <- eval(parse(text=paste(d,sep='')))
+  colnames(test_df) <- gsub("T.._", "", colnames(test_df))
+  print(head(test_df))
+  
+  for(i in seq(1:length(test_df[,1]))){
+    gene_n   <- test_df$gene_id[i]
+    SF_n     <- test_df$SF_HD_meanFPKM[i]
+    SM_n     <- test_df$SM_HD_meanFPKM[i]
+    
+    if(! is.na(SF_n)){
+      HD_SF_FKPM_dict[[gene_n]] <- SF_n
+    }
+    
+    if(! is.na(SM_n)){
+      HD_SM_FKPM_dict[[gene_n]] <- SM_n
+    }
+    
+  }
+}
+
+all_LG_FKPM_dict_dfs <- c("Tbi_LG_FKPM ", "Tce_LG_FKPM ", "Tcm_LG_FKPM ", "Tpa_LG_FKPM ", "Tps_LG_FKPM ")
+
+LG_SF_FKPM_dict <- hash()
+LG_SM_FKPM_dict <- hash()
+
+for(d in all_LG_FKPM_dict_dfs ){
+  test_df <- eval(parse(text=paste(d,sep='')))
+  colnames(test_df) <- gsub("T.._", "", colnames(test_df))
+  print(head(test_df))
+  
+  for(i in seq(1:length(test_df[,1]))){
+    gene_n   <- test_df$gene_id[i]
+    SF_n     <- test_df$SF_LG_meanFPKM[i]
+    SM_n     <- test_df$SM_LG_meanFPKM[i]
+    
+    if(! is.na(SF_n)){
+      LG_SF_FKPM_dict[[gene_n]] <- SF_n
+    }
+    
+    if(! is.na(SM_n)){
+      LG_SM_FKPM_dict[[gene_n]] <- SM_n
+    }
+    
+  }
+}
+
+
+
+RT_SF_FKPM_dict[["TPS_13859"]]
+RT_SM_FKPM_dict[["TPS_13859"]]
+RT_SF_FKPM_dict[["TPS_00008"]]
+RT_SM_FKPM_dict[["TPS_00008"]]
+
+HD_SM_FKPM_dict[["TPS_00008"]]
+LG_SM_FKPM_dict[["TPS_00008"]]
+
+
+
+#### GC data
+GC_dict <- hash()
+
+head(GC_all )
+
+for(i in seq(1:length(GC_all[,1]))){
+    gene_n   <- GC_all$g_name[i]
+    GC_n     <- GC_all$GC_all[i]
+    
+    if(! is.na(GC_n)){
+      GC_dict[[gene_n]] <- GC_n
+    }
+}
+
+
+GC_dict[["Tbi_HOG_746"]]
+
+#### CUB (ENC) data
+
+ENC_dict <- hash()
+for(i in seq(1:length(ENC_all[,1]))){
+  gene_n   <- ENC_all$Gene[i]
+  ENC_n   <- ENC_all$ENC[i]
+  
+  if(! is.na(ENC_n)){
+    ENC_dict[[gene_n]] <- ENC_n
+  }
+}
+
+ENC_dict[["Tbi_HOG_746"]]
+
+
+
+
+
+
+
 
 ######################################################################################################
 ### positive selection data
@@ -211,10 +386,19 @@ positive_sel_by_chr <- function(pos_sel_df){
   HD_FDR         <- c()
   LG_logFC       <- c()
   LG_FDR         <- c()
-  
-  test <- c()
+  RT_SF_FKPM     <- c()
+  RT_SM_FKPM     <- c()  
+  HD_SF_FKPM     <- c()
+  HD_SM_FKPM     <- c()  
+  LG_SF_FKPM     <- c()
+  LG_SM_FKPM     <- c()  
+  GC             <- c()   
+  ENC            <- c()
+  lg             <- c()
+
   for(i in seq(1, length(pos_sel_df[,1]))){
     gene_n <- pos_sel_df$gene_name[i]
+    hog_name <- paste(pos_sel_df$branch_name[i], pos_sel_df$gene[i], sep = "_")
     chr_class_s <- soft_chr_dict[[gene_n]]
     if(length(chr_class_s) == 0){chr_class_s = NA}   
     chr_soft_class <- c(chr_soft_class, chr_class_s)
@@ -246,6 +430,42 @@ positive_sel_by_chr <- function(pos_sel_df){
     LG_FDR_n <- LG_SB_FDR_dict[[gene_n]]
     if(length(LG_FDR_n) == 0){LG_FDR_n = NA}   
     LG_FDR <- c(LG_FDR, LG_FDR_n)
+    
+    RT_SF_FKPM_n <- RT_SF_FKPM_dict[[gene_n]]
+    if(length(RT_SF_FKPM_n) == 0){RT_SF_FKPM_n = NA}   
+    RT_SF_FKPM <- c(RT_SF_FKPM, RT_SF_FKPM_n)
+    
+    RT_SM_FKPM_n <- RT_SM_FKPM_dict[[gene_n]]
+    if(length(RT_SM_FKPM_n) == 0){RT_SM_FKPM_n = NA}   
+    RT_SM_FKPM <- c(RT_SM_FKPM, RT_SM_FKPM_n)
+
+    HD_SF_FKPM_n <- HD_SF_FKPM_dict[[gene_n]]
+    if(length(HD_SF_FKPM_n) == 0){HD_SF_FKPM_n = NA}   
+    HD_SF_FKPM <- c(HD_SF_FKPM, HD_SF_FKPM_n)
+    
+    HD_SM_FKPM_n <- HD_SM_FKPM_dict[[gene_n]]
+    if(length(HD_SM_FKPM_n) == 0){HD_SM_FKPM_n = NA}   
+    HD_SM_FKPM <- c(HD_SM_FKPM, HD_SM_FKPM_n)    
+    
+    LG_SF_FKPM_n <- LG_SF_FKPM_dict[[gene_n]]
+    if(length(LG_SF_FKPM_n) == 0){LG_SF_FKPM_n = NA}   
+    LG_SF_FKPM <- c(LG_SF_FKPM, LG_SF_FKPM_n)
+    
+    LG_SM_FKPM_n <- LG_SM_FKPM_dict[[gene_n]]
+    if(length(LG_SM_FKPM_n) == 0){LG_SM_FKPM_n = NA}   
+    LG_SM_FKPM <- c(LG_SM_FKPM, LG_SM_FKPM_n)
+    
+    GC_n <- GC_dict[[hog_name]]
+    if(length(GC_n) == 0){GC_n = NA}   
+    GC <- c(GC, GC_n)   
+    
+    ENC_n <- ENC_dict[[hog_name]]
+    if(length(ENC_n) == 0){ENC_n = NA}   
+    ENC <- c(ENC, ENC_n)    
+    
+    lg_n <- gene_to_lg_dict[[gene_n]]
+    if(length(lg_n) == 0){lg_n = NA}   
+    lg <- c(lg, lg_n) 
   }
 
   pos_sel_df$chr_soft_class <- chr_soft_class
@@ -256,6 +476,15 @@ positive_sel_by_chr <- function(pos_sel_df){
   pos_sel_df$HD_FDR   <- HD_FDR 
   pos_sel_df$LG_logFC <- LG_logFC
   pos_sel_df$LG_FDR   <- LG_FDR 
+  pos_sel_df$RT_SF_FKPM <- RT_SF_FKPM  
+  pos_sel_df$RT_SM_FKPM <- RT_SM_FKPM  
+  pos_sel_df$HD_SF_FKPM <- HD_SF_FKPM  
+  pos_sel_df$HD_SM_FKPM <- HD_SM_FKPM  
+  pos_sel_df$LG_SF_FKPM <- LG_SF_FKPM  
+  pos_sel_df$LG_SM_FKPM <- LG_SM_FKPM  
+  pos_sel_df$GC         <- GC
+  pos_sel_df$ENC        <- ENC
+  pos_sel_df$lg         <- lg 
   pos_sel_df <- subset(pos_sel_df, !is.na(pos_sel_df$chr_soft_class))
   
   print(length(pos_sel_df[,1]))  
@@ -263,9 +492,7 @@ positive_sel_by_chr <- function(pos_sel_df){
 }
 
 pos_sel_dat_2 <- positive_sel_by_chr(pos_sel_dat)
-
-
-
+head(pos_sel_dat_2)
 
 ##### are genes showing +ve sel overrep on the X?
 
@@ -335,7 +562,7 @@ test_possel_overrep_X <- function(df_all, pos_q_threh, chr_type){
 }
 
 
-test_possel_overrep_X(pos_sel_dat_2, 0.05, "hard")
+test_possel_overrep_X(pos_sel_dat_2, 0.05, "soft")
 
 
 pdf(paste("prop_possel_soft" ,".pdf", sep = ""), width = 6, height = 8)
@@ -421,6 +648,7 @@ P_mean_omega0_1_soft
 dev.off()
 getwd() ## where has my plot gone....
 
+
 ## test wilcox
 
 wilcox_omega0_1_soft <- as.data.frame(cbind(
@@ -475,6 +703,415 @@ colnames(wilcox_omega0_1_hard) <- c("sp", "wilcox_p")
 wilcox_omega0_1_hard$wilcox_p <- as.numeric(wilcox_omega0_1_hard$wilcox_p)
 wilcox_omega0_1_hard$wilcox_FDR <- p.adjust(wilcox_omega0_1_hard$wilcox_p, method = "BH")
 write.csv(wilcox_omega0_1_hard, "wilcox_omega0_1_hard.csv", row.names = FALSE)
+
+write.csv(pos_sel_dat_2, "pos_sel_dat_2_ttt.csv")
+
+
+
+#################################################################################
+## LG
+
+pos_sel_dat_2$sp_lg  <- paste(pos_sel_dat_2$branch_name, pos_sel_dat_2$lg, sep = "_") 
+pos_sel_dat_2$sp_lg  <- ordered(pos_sel_dat_2$sp_lg, levels=c(
+  "Tbi_lg1", "Tbi_lg2", "Tbi_lg3", "Tbi_lg4", "Tbi_lg5", "Tbi_lg6", "Tbi_lg7", "Tbi_lg8", "Tbi_lg9", "Tbi_lg10", "Tbi_lg11", "Tbi_lg12", "Tbi_lgX", 
+  "Tce_lg1", "Tce_lg2", "Tce_lg3", "Tce_lg4", "Tce_lg5", "Tce_lg6", "Tce_lg7", "Tce_lg8", "Tce_lg9", "Tce_lg10", "Tce_lg11", "Tce_lg12", "Tce_lgX",        
+  "Tcm_lg1", "Tcm_lg2", "Tcm_lg3", "Tcm_lg4", "Tcm_lg5", "Tcm_lg6", "Tcm_lg7", "Tcm_lg8", "Tcm_lg9", "Tcm_lg10", "Tcm_lg11", "Tcm_lg12", "Tcm_lgX", 
+  "Tpa_lg1", "Tpa_lg2", "Tpa_lg3", "Tpa_lg4", "Tpa_lg5", "Tpa_lg6", "Tpa_lg7", "Tpa_lg8", "Tpa_lg9", "Tpa_lg10", "Tpa_lg11", "Tpa_lg12", "Tpa_lgX", 
+  "Tps_lg1", "Tps_lg2", "Tps_lg3", "Tps_lg4", "Tps_lg5", "Tps_lg6", "Tps_lg7", "Tps_lg8", "Tps_lg9", "Tps_lg10", "Tps_lg11", "Tps_lg12", "Tps_lgX" ))
+
+## get means
+omega0_1_means_lg  <- summarySE(subset(pos_sel_dat_2, ! is.na(pos_sel_dat_2$lg)), measurevar="omega0_1", groupvars=c("sp_lg"))
+omega0_1_means_lg$upper <- omega0_1_means_lg$omega0_1 +  omega0_1_means_lg$se
+omega0_1_means_lg$lower <- omega0_1_means_lg$omega0_1 -  omega0_1_means_lg$se
+omega0_1_means_lg$lg <- str_split_fixed(omega0_1_means_lg$sp_lg, "_", 2)[,2]
+
+### exclude lgs with <X genes
+min_genes = 50
+omega0_1_means_lg <- subset(omega0_1_means_lg, omega0_1_means_lg$N > min_genes )
+
+## plot
+P_mean_omega0_1_lg <- ggplot() + 
+  geom_errorbar(data=omega0_1_means_lg, mapping=aes(x=sp_lg, ymin=upper, ymax=lower,  color= lg), width=0.2, size=1) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  geom_point(data=omega0_1_means_lg, mapping=aes(x = sp_lg, y=omega0_1,  fill=lg), size=4, shape=21) + 
+  scale_color_manual(values=c("A" = "darkgrey", "lgX" = "darkorange2")) +
+  scale_fill_manual(values=c("A" = "darkgrey", "lgX" = "darkorange2")) + ggtitle(paste("lg, mean +/- SE, min gene N = ", min_genes))
+
+pdf(paste("P_mean_omega0_1_lg_mingeneN", min_genes ,".pdf", sep = ""), width = 12, height = 5)
+P_mean_omega0_1_lg
+dev.off()
+getwd() ## where has my plot gone....
+
+
+
+length(subset(pos_sel_dat_2, pos_sel_dat_2$sp_lg == "Tbi_lg12")[,1])
+length(subset(pos_sel_dat_2, pos_sel_dat_2$sp_lg == "Tpa_lgX")[,1])
+
+######################################################################################################################################################
+### what about dN, dS, branch lens?
+
+head(pos_sel_dat_2)
+
+
+##################### Branch lengths first (this is all sites )
+## get means
+branch_length_means_soft  <- summarySE(pos_sel_dat_2, measurevar="branch_length", groupvars=c("sp_soft"))
+branch_length_means_soft$upper <- branch_length_means_soft$branch_length +  branch_length_means_soft$se
+branch_length_means_soft$lower <- branch_length_means_soft$branch_length -  branch_length_means_soft$se
+branch_length_means_soft$chr_soft <- str_split_fixed(branch_length_means_soft$sp_soft, "_", 2)[,2]
+
+## plot
+P_mean_branch_length_soft <- ggplot() + 
+  geom_errorbar(data=branch_length_means_soft, mapping=aes(x=sp_soft, ymin=upper, ymax=lower,  color= chr_soft), width=0.2, size=1) + 
+  theme_bw() +
+  geom_point(data=branch_length_means_soft, mapping=aes(x = sp_soft, y=branch_length,  fill=chr_soft), size=4, shape=21) + 
+  scale_color_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE") +
+  scale_fill_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE")
+
+pdf(paste("P_mean_branch_length_soft" ,".pdf", sep = ""), width = 6, height = 8)
+P_mean_branch_length_soft
+dev.off()
+getwd() ## where has my plot gone....
+
+
+wilcox_branch_length_soft <- as.data.frame(cbind(
+  c("Tbi", "Tce", "Tcm", "Tpa", "Tps"),
+  c(
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tbi_X")$branch_length, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tbi_A")$branch_length, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tce_X")$branch_length, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tce_A")$branch_length, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tcm_X")$branch_length, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tcm_A")$branch_length, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tpa_X")$branch_length, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tpa_A")$branch_length, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tps_X")$branch_length, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tps_A")$branch_length, paired = FALSE)$p.value
+  )))
+colnames(wilcox_branch_length_soft) <- c("sp", "wilcox_p")
+wilcox_branch_length_soft$wilcox_p <- as.numeric(wilcox_branch_length_soft$wilcox_p)
+wilcox_branch_length_soft$wilcox_FDR <- p.adjust(wilcox_branch_length_soft$wilcox_p, method = "BH")
+write.csv(wilcox_branch_length_soft, "wilcox_branch_length_soft.csv", row.names = FALSE)
+
+
+
+############## dN and dS sep (excludes +ve sites as want to decompose my dN/dS to look which of these drives it)
+
+get_dn_and_ds <- function(branch_len, dnds){
+  options(scipen = 999)
+  dnds = noquote(format(dnds , digits=10, nsmall=10))
+  int_bit <- strsplit(as.character(dnds), "\\.")[[1]][1]
+  dec_bit <- strsplit(as.character(dnds), "\\.")[[1]][2]
+  denom = 10 ^ nchar(dec_bit)
+  numer = as.numeric(int_bit) *  denom + as.numeric(dec_bit)
+  # 
+  # print(dnds)
+  # print( dec_bit )
+  # 
+  # print( denom)
+  # print( numer)  
+  
+  dN = (branch_len / (numer + denom)) * numer 
+  dS = (branch_len / (numer + denom)) * denom  
+  # print(dN)
+  # print(dS) 
+  output = list("dN" = dN, "dS" = dS)
+  return(output)
+}
+
+dN_all <- c()
+dS_all <- c()
+for(i in 1:length(pos_sel_dat_2[,1])){
+  branch_val <- pos_sel_dat_2$branch_length[i]
+  dnds_val   <- pos_sel_dat_2$omega0_1[i]
+  dn_val <- get_dn_and_ds (branch_val, dnds_val)$dN
+  ds_val <- get_dn_and_ds (branch_val, dnds_val)$dS
+  dN_all <- c(dN_all, dn_val)
+  dS_all <- c(dS_all, ds_val)
+}
+
+pos_sel_dat_2$dN <- dN_all
+pos_sel_dat_2$dS <- dS_all
+
+# pos_sel_dat_2$dNdS_check <- pos_sel_dat_2$dN / pos_sel_dat_2$dS 
+# plot (pos_sel_dat_2$dNdS_check, pos_sel_dat_2$omega0_1 )
+head(pos_sel_dat_2, n = 30)
+
+#### plot dN
+## get means
+dN_means_soft  <- summarySE(pos_sel_dat_2, measurevar="dN", groupvars=c("sp_soft"))
+dN_means_soft$upper <- dN_means_soft$dN +  dN_means_soft$se
+dN_means_soft$lower <- dN_means_soft$dN -  dN_means_soft$se
+dN_means_soft$chr_soft <- str_split_fixed(dN_means_soft$sp_soft, "_", 2)[,2]
+
+## plot
+P_mean_dN_soft <- ggplot() + 
+  geom_errorbar(data=dN_means_soft, mapping=aes(x=sp_soft, ymin=upper, ymax=lower,  color= chr_soft), width=0.2, size=1) + 
+  theme_bw() +
+  geom_point(data=dN_means_soft, mapping=aes(x = sp_soft, y=dN,  fill=chr_soft), size=4, shape=21) + 
+  scale_color_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE") +
+  scale_fill_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE")
+
+pdf(paste("P_mean_dN_soft" ,".pdf", sep = ""), width = 6, height = 8)
+P_mean_dN_soft
+dev.off()
+getwd() ## where has my plot gone....
+
+wilcox_dN_soft <- as.data.frame(cbind(
+  c("Tbi", "Tce", "Tcm", "Tpa", "Tps"),
+  c(
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tbi_X")$dN, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tbi_A")$dN, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tce_X")$dN, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tce_A")$dN, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tcm_X")$dN, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tcm_A")$dN, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tpa_X")$dN, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tpa_A")$dN, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tps_X")$dN, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tps_A")$dN, paired = FALSE)$p.value
+  )))
+colnames(wilcox_dN_soft) <- c("sp", "wilcox_p")
+wilcox_dN_soft$wilcox_p <- as.numeric(wilcox_dN_soft$wilcox_p)
+wilcox_dN_soft$wilcox_FDR <- p.adjust(wilcox_dN_soft$wilcox_p, method = "BH")
+write.csv(wilcox_dN_soft, "wilcox_dN_soft.csv", row.names = FALSE)
+
+#################################################################################
+## LG
+
+## get means
+branch_length_means_lg  <- summarySE(subset(pos_sel_dat_2, ! is.na(pos_sel_dat_2$lg)), measurevar="branch_length", groupvars=c("sp_lg"))
+branch_length_means_lg$upper <- branch_length_means_lg$branch_length +  branch_length_means_lg$se
+branch_length_means_lg$lower <- branch_length_means_lg$branch_length -  branch_length_means_lg$se
+branch_length_means_lg$lg <- str_split_fixed(branch_length_means_lg$sp_lg, "_", 2)[,2]
+
+### exclude lgs with <X genes
+min_genes = 50
+branch_length_means_lg <- subset(branch_length_means_lg, branch_length_means_lg$N > min_genes )
+
+## plot
+P_mean_branch_length_lg <- ggplot() + 
+  geom_errorbar(data=branch_length_means_lg, mapping=aes(x=sp_lg, ymin=upper, ymax=lower,  color= lg), width=0.2, size=1) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  geom_point(data=branch_length_means_lg, mapping=aes(x = sp_lg, y=branch_length,  fill=lg), size=4, shape=21) + 
+  scale_color_manual(values=c("A" = "darkgrey", "lgX" = "darkorange2")) +
+  scale_fill_manual(values=c("A" = "darkgrey", "lgX" = "darkorange2")) + ggtitle(paste("lg, mean +/- SE, min gene N = ", min_genes))
+
+pdf(paste("P_mean_branch_length_lg_mingeneN", min_genes ,".pdf", sep = ""), width = 12, height = 5)
+P_mean_branch_length_lg
+dev.off()
+getwd() ## where has my plot gone....
+
+
+
+
+
+
+
+
+
+
+
+#### plot ds
+## get means
+dS_means_soft  <- summarySE(pos_sel_dat_2, measurevar="dS", groupvars=c("sp_soft") , na.rm = T)
+dS_means_soft$upper <- dS_means_soft$dS +  dS_means_soft$se
+dS_means_soft$lower <- dS_means_soft$dS -  dS_means_soft$se
+dS_means_soft$chr_soft <- str_split_fixed(dS_means_soft$sp_soft, "_", 2)[,2]
+
+## plot
+P_mean_dS_soft <- ggplot() + 
+  geom_errorbar(data=dS_means_soft, mapping=aes(x=sp_soft, ymin=upper, ymax=lower,  color= chr_soft), width=0.2, size=1) + 
+  theme_bw() +
+  geom_point(data=dS_means_soft, mapping=aes(x = sp_soft, y=dS,  fill=chr_soft), size=4, shape=21) + 
+  scale_color_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE") +
+  scale_fill_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE")
+
+pdf(paste("P_mean_dS_soft" ,".pdf", sep = ""), width = 6, height = 8)
+P_mean_dS_soft
+dev.off()
+getwd() ## where has my plot gone....
+
+wilcox_dS_soft <- as.data.frame(cbind(
+  c("Tbi", "Tce", "Tcm", "Tpa", "Tps"),
+  c(
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tbi_X")$dS, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tbi_A")$dS, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tce_X")$dS, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tce_A")$dS, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tcm_X")$dS, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tcm_A")$dS, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tpa_X")$dS, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tpa_A")$dS, paired = FALSE)$p.value,
+    wilcox.test(subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tps_X")$dS, subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tps_A")$dS, paired = FALSE)$p.value
+  )))
+colnames(wilcox_dS_soft) <- c("sp", "wilcox_p")
+wilcox_dS_soft$wilcox_p <- as.numeric(wilcox_dS_soft$wilcox_p)
+wilcox_dS_soft$wilcox_FDR <- p.adjust(wilcox_dS_soft$wilcox_p, method = "BH")
+write.csv(wilcox_dS_soft, "wilcox_dS_soft.csv", row.names = FALSE)
+
+
+
+#### ratio of dNA to dNX
+
+subset(dN_means_soft, dN_means_soft$sp_soft == "Tbi_A")$dN / subset(dN_means_soft, dN_means_soft$sp_soft == "Tbi_X")$dN
+subset(dN_means_soft, dN_means_soft$sp_soft == "Tce_A")$dN / subset(dN_means_soft, dN_means_soft$sp_soft == "Tce_X")$dN
+subset(dN_means_soft, dN_means_soft$sp_soft == "Tcm_A")$dN / subset(dN_means_soft, dN_means_soft$sp_soft == "Tcm_X")$dN
+subset(dN_means_soft, dN_means_soft$sp_soft == "Tpa_A")$dN / subset(dN_means_soft, dN_means_soft$sp_soft == "Tpa_X")$dN
+subset(dN_means_soft, dN_means_soft$sp_soft == "Tps_A")$dN / subset(dN_means_soft, dN_means_soft$sp_soft == "Tps_X")$dN
+
+#### ratio of dSA to dSX
+
+subset(dS_means_soft, dS_means_soft$sp_soft == "Tbi_A")$dS / subset(dS_means_soft, dS_means_soft$sp_soft == "Tbi_X")$dS
+subset(dS_means_soft, dS_means_soft$sp_soft == "Tce_A")$dS / subset(dS_means_soft, dS_means_soft$sp_soft == "Tce_X")$dS
+subset(dS_means_soft, dS_means_soft$sp_soft == "Tcm_A")$dS / subset(dS_means_soft, dS_means_soft$sp_soft == "Tcm_X")$dS
+subset(dS_means_soft, dS_means_soft$sp_soft == "Tpa_A")$dS / subset(dS_means_soft, dS_means_soft$sp_soft == "Tpa_X")$dS
+subset(dS_means_soft, dS_means_soft$sp_soft == "Tps_A")$dS / subset(dS_means_soft, dS_means_soft$sp_soft == "Tps_X")$dS
+
+
+
+
+
+####################################################################################################
+#### GC
+
+## get means
+GC_means_soft  <- summarySE(pos_sel_dat_2, measurevar="GC", groupvars=c("sp_soft"))
+GC_means_soft$upper <- GC_means_soft$GC +  GC_means_soft$se
+GC_means_soft$lower <- GC_means_soft$GC -  GC_means_soft$se
+GC_means_soft$chr_soft <- str_split_fixed(GC_means_soft$sp_soft, "_", 2)[,2]
+
+## plot
+P_mean_GC_soft <- ggplot() + 
+  geom_errorbar(data=GC_means_soft, mapping=aes(x=sp_soft, ymin=upper, ymax=lower,  color= chr_soft), width=0.2, size=1) + 
+  theme_bw() +
+  geom_point(data=GC_means_soft, mapping=aes(x = sp_soft, y=GC,  fill=chr_soft), size=4, shape=21) + 
+  scale_color_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE") +
+  scale_fill_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE")
+
+pdf(paste("P_mean_GC_soft" ,".pdf", sep = ""), width = 6, height = 8)
+P_mean_GC_soft
+dev.off()
+getwd() ## where has my plot gone....
+
+
+
+#################################################################################
+## LG
+
+## get means
+GC_means_lg  <- summarySE(subset(pos_sel_dat_2, ! is.na(pos_sel_dat_2$lg)), measurevar="GC", groupvars=c("sp_lg"))
+GC_means_lg$upper <- GC_means_lg$GC +  GC_means_lg$se
+GC_means_lg$lower <- GC_means_lg$GC -  GC_means_lg$se
+GC_means_lg$lg <- str_split_fixed(GC_means_lg$sp_lg, "_", 2)[,2]
+
+### exclude lgs with <X genes
+min_genes = 50
+GC_means_lg <- subset(GC_means_lg, GC_means_lg$N > min_genes )
+
+## plot
+P_mean_GC_lg <- ggplot() + 
+  geom_errorbar(data=GC_means_lg, mapping=aes(x=sp_lg, ymin=upper, ymax=lower,  color= lg), width=0.2, size=1) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  geom_point(data=GC_means_lg, mapping=aes(x = sp_lg, y=GC,  fill=lg), size=4, shape=21) + 
+  scale_color_manual(values=c("A" = "darkgrey", "lgX" = "darkorange2")) +
+  scale_fill_manual(values=c("A" = "darkgrey", "lgX" = "darkorange2")) + ggtitle(paste("lg, mean +/- SE, min gene N = ", min_genes))
+
+pdf(paste("P_mean_GC_lg_mingeneN", min_genes ,".pdf", sep = ""), width = 12, height = 5)
+P_mean_GC_lg
+dev.off()
+getwd() ## where has my plot gone....
+
+
+
+#############################################
+### ENC
+
+## get means
+ENC_means_soft  <- summarySE(pos_sel_dat_2, measurevar="ENC", groupvars=c("sp_soft"))
+ENC_means_soft$upper <- ENC_means_soft$ENC +  ENC_means_soft$se
+ENC_means_soft$lower <- ENC_means_soft$ENC -  ENC_means_soft$se
+ENC_means_soft$chr_soft <- str_split_fixed(ENC_means_soft$sp_soft, "_", 2)[,2]
+
+## plot
+P_mean_ENC_soft <- ggplot() + 
+  geom_errorbar(data=ENC_means_soft, mapping=aes(x=sp_soft, ymin=upper, ymax=lower,  color= chr_soft), width=0.2, size=1) + 
+  theme_bw() +
+  geom_point(data=ENC_means_soft, mapping=aes(x = sp_soft, y=ENC,  fill=chr_soft), size=4, shape=21) + 
+  scale_color_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE") +
+  scale_fill_manual(values=c("darkgrey", "darkorange2")) + ggtitle("soft chr, mean +/- SE")
+
+pdf(paste("P_mean_ENC_soft" ,".pdf", sep = ""), width = 6, height = 8)
+P_mean_ENC_soft
+dev.off()
+getwd() ## where has my plot gone....
+
+
+
+## LG
+
+## get means
+ENC_means_lg  <- summarySE(subset(pos_sel_dat_2, ! is.na(pos_sel_dat_2$lg)), measurevar="ENC", groupvars=c("sp_lg"))
+ENC_means_lg$upper <- ENC_means_lg$ENC +  ENC_means_lg$se
+ENC_means_lg$lower <- ENC_means_lg$ENC -  ENC_means_lg$se
+ENC_means_lg$lg <- str_split_fixed(ENC_means_lg$sp_lg, "_", 2)[,2]
+
+### exclude lgs with <X genes
+min_genes = 50
+ENC_means_lg <- subset(ENC_means_lg, ENC_means_lg$N > min_genes )
+
+## plot
+P_mean_ENC_lg <- ggplot() + 
+  geom_errorbar(data=ENC_means_lg, mapping=aes(x=sp_lg, ymin=upper, ymax=lower,  color= lg), width=0.2, size=1) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  geom_point(data=ENC_means_lg, mapping=aes(x = sp_lg, y=ENC,  fill=lg), size=4, shape=21) + 
+  scale_color_manual(values=c("A" = "darkgrey", "lgX" = "darkorange2")) +
+  scale_fill_manual(values=c("A" = "darkgrey", "lgX" = "darkorange2")) + ggtitle(paste("lg, mean +/- SE, min gene N = ", min_genes))
+
+pdf(paste("P_mean_ENC_lg_mingeneN", min_genes ,".pdf", sep = ""), width = 12, height = 5)
+P_mean_ENC_lg
+dev.off()
+getwd() ## where has my plot gone....
+
+
+
+
+
+head(pos_sel_dat_2)
+library(car)
+m1 <- glm(pos_sel_dat_2$ENC ~ pos_sel_dat_2$GC + pos_sel_dat_2$RT_SF_FKPM + pos_sel_dat_2$chr_soft_class + pos_sel_dat_2$branch_name)
+summary(m1)
+
+
+m1 <- glm(pos_sel_dat_2$omega0_1 ~  pos_sel_dat_2$GC + pos_sel_dat_2$RT_SF_FKPM + pos_sel_dat_2$chr_soft_class + pos_sel_dat_2$branch_name)
+summary(m1)
+
+Anova(m1, type = 3)
+
+m1 <- glm(pos_sel_dat_2$omega0_1 ~  pos_sel_dat_2$GC +pos_sel_dat_2$ENC + pos_sel_dat_2$RT_SF_FKPM + pos_sel_dat_2$chr_soft_class + pos_sel_dat_2$branch_name)
+summary(m1)
+Anova(m1, type = 3)
+
+m1 <- glm(pos_sel_dat_2$dN~  pos_sel_dat_2$GC +pos_sel_dat_2$ENC + pos_sel_dat_2$RT_SF_FKPM + pos_sel_dat_2$chr_soft_class + pos_sel_dat_2$branch_name)
+summary(m1)
+Anova(m1, type = 3)
+
+m1 <- glm(pos_sel_dat_2$dS~  pos_sel_dat_2$GC +pos_sel_dat_2$ENC + pos_sel_dat_2$RT_SF_FKPM + pos_sel_dat_2$chr_soft_class + pos_sel_dat_2$branch_name)
+summary(m1)
+Anova(m1, type = 3)
+
+### par cor
+
+### data
+
+
+ 
+
+library(ppcor)
+pcor.test(X1, X2, X3, method = c("spearman")) ## partial corr of prop_off_sire and inv_rel_order accounting for spd_size  (corr of X1 and X2 accounting for X3)
+
+### this only works for 3 vars - what if I want more?
+## do this: 
+
+q1 = as.data.frame(cbind(X1,X2,X3,X4,X5))
+colnames(q1) <- c("X1", "X2", "X3", "X4", "X5")
+pcor(q1,method = c("spearman"))
+
+## can plot with added variable plots
+
+library(car)
+o8 <- glm(X1 ~ X2 + X3)
+avPlots(o8)
 
 
 
@@ -745,6 +1382,27 @@ pdf(paste("N_pos_HDLGRT" ,".pdf", sep = ""), width = 8, height = 16)
 plot_grid(N_pos_HD, N_pos_LG ,N_pos_RT, ncol = 1 )
 dev.off()
 getwd() ## where has my plot gone....
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 print (sessionInfo())
 # 

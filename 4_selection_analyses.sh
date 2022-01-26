@@ -52,6 +52,3 @@ python3 accessory_scripts/add_GC_contigs.py -g data/output/sel_out/GC_g.csv -c d
 
 
 ### Then selection_on_the_X.R to look at selection on the X
-
-
-
