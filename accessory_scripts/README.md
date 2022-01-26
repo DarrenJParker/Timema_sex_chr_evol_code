@@ -11,7 +11,8 @@
 * **Maker_gff_to_HTseq_gff.py** | Convert downloaded gff from maker to a form HTseq-count can use - see *3_RNAseq_mapping.sh*
 * **HTSeq_to_edgeR.py** | Join read counts from HTseq-count for each sample together - see *3_RNAseq_mapping.sh*
 * **gff_feature_lengths.py**  | get feature lengths from a gff - see *3_RNAseq_mapping.sh*
-* **class_genes_to_lg.py**  | add linkage group infomation to read count table - see see *3_RNAseq_mapping.sh*
-* **sex_chr_cov_readcounts_tidier.py** | add ortholog infomation to read count table - see see *3_RNAseq_mapping.sh*
-* **sex_chr_cov_readcounts_orth_tidier.py** | get read counts for orthologs in each species - see see *3_RNAseq_mapping.sh*
-* **add_gene_name_to_sel_data.py** | add gene name to selection data - see see *3_RNAseq_mapping.sh*
+* **class_genes_to_lg.py**  | add linkage group infomation to read count table - see *3_RNAseq_mapping.sh*
+* **sex_chr_cov_readcounts_tidier.py** | add ortholog infomation to read count table - see *3_RNAseq_mapping.sh*
+* **sex_chr_cov_readcounts_orth_tidier.py** | get read counts for orthologs in each species - see *3_RNAseq_mapping.sh*
+* **add_gene_name_to_sel_data.py** | add gene name to selection data - see *3_RNAseq_mapping.sh*
+* **alignments_to_seq.py** | turn alignments into sequences - see  *4_selection_analyses.sh*
