@@ -26,6 +26,7 @@ Raw sequence reads generated in this project have been deposited in NCBI’s seq
 
 * **4_selection_analyses.sh** | Calc GC, look at selection on the X 
 * **GC_CUB.R** | Calc GC
+* **GC_genomic.R** | plot GC for contigs
 * **selection_on_the_X.R** | looking at selection on the X
 
 
