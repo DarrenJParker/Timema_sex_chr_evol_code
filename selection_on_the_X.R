@@ -708,6 +708,329 @@ write.csv(pos_sel_dat_2, "pos_sel_dat_2_ttt.csv")
 
 
 
+
+
+##################################################################################################################
+###
+
+
+### get mean expersion
+
+## make missing expression 0
+GE_all <- as.data.frame(cbind(pos_sel_dat_2$RT_SF_FKPM, pos_sel_dat_2$RT_SM_FKPM, pos_sel_dat_2$HD_SF_FKPM, pos_sel_dat_2$HD_SM_FKPM, pos_sel_dat_2$LG_SF_FKPM, pos_sel_dat_2$LG_SM_FKPM ))
+GE_all[is.na(GE_all )] <- 0
+pos_sel_dat_2$mean_FKPM <- rowMeans(GE_all)
+head(pos_sel_dat_2)
+
+
+
+pos_sel_dat_2_A <- subset(pos_sel_dat_2, pos_sel_dat_2$chr_soft_class == "A")
+pos_sel_dat_2_X <- subset(pos_sel_dat_2, pos_sel_dat_2$chr_soft_class == "X")
+
+cor.test(pos_sel_dat_2_A$omega0_1, pos_sel_dat_2_A$GC, method = "spearman") ### neg corr - rho -0.2580059  p-value < 2.2e-16
+cor.test(pos_sel_dat_2_X$omega0_1, pos_sel_dat_2_X$GC, method = "spearman") ### neg corr - but much weaker rho -0.04380179 p-value = 0.05062
+
+pos_sel_dat_2_Tbi_X <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tbi_X")
+pos_sel_dat_2_Tce_X <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tce_X")
+pos_sel_dat_2_Tcm_X <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tcm_X")
+pos_sel_dat_2_Tpa_X <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tpa_X")
+pos_sel_dat_2_Tps_X <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tps_X")
+pos_sel_dat_2_Tbi_A <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tbi_A")
+pos_sel_dat_2_Tce_A <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tce_A")
+pos_sel_dat_2_Tcm_A <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tcm_A")
+pos_sel_dat_2_Tpa_A <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tpa_A")
+pos_sel_dat_2_Tps_A <- subset(pos_sel_dat_2, pos_sel_dat_2$sp_soft == "Tps_A")
+
+cor.test(pos_sel_dat_2_Tbi_X$omega0_1, pos_sel_dat_2_Tbi_X$GC, method = "spearman")
+cor.test(pos_sel_dat_2_Tce_X$omega0_1, pos_sel_dat_2_Tce_X$GC, method = "spearman")
+cor.test(pos_sel_dat_2_Tcm_X$omega0_1, pos_sel_dat_2_Tcm_X$GC, method = "spearman")
+cor.test(pos_sel_dat_2_Tpa_X$omega0_1, pos_sel_dat_2_Tpa_X$GC, method = "spearman")
+cor.test(pos_sel_dat_2_Tps_X$omega0_1, pos_sel_dat_2_Tps_X$GC, method = "spearman")
+cor.test(pos_sel_dat_2_Tbi_A$omega0_1, pos_sel_dat_2_Tbi_A$GC, method = "spearman")
+cor.test(pos_sel_dat_2_Tce_A$omega0_1, pos_sel_dat_2_Tce_A$GC, method = "spearman")
+cor.test(pos_sel_dat_2_Tcm_A$omega0_1, pos_sel_dat_2_Tcm_A$GC, method = "spearman")
+cor.test(pos_sel_dat_2_Tpa_A$omega0_1, pos_sel_dat_2_Tpa_A$GC, method = "spearman")
+cor.test(pos_sel_dat_2_Tps_A$omega0_1, pos_sel_dat_2_Tps_A$GC, method = "spearman")
+
+
+
+
+head(pos_sel_dat_2)
+
+#### perm anova
+
+m1_omega0_1 <- glm(pos_sel_dat_2$omega0_1 ~ pos_sel_dat_2$mean_FKPM + pos_sel_dat_2$GC * pos_sel_dat_2$chr_soft_class)
+m1_omega0_1_out <- drop1(m1_omega0_1,~.,test="F") 
+m1_omega0_1_out
+
+pos_sel_dat_2_Tbi <- subset(pos_sel_dat_2, pos_sel_dat_2$branch_name == "Tbi")
+pos_sel_dat_2_Tce <- subset(pos_sel_dat_2, pos_sel_dat_2$branch_name == "Tce")
+pos_sel_dat_2_Tcm <- subset(pos_sel_dat_2, pos_sel_dat_2$branch_name == "Tcm")
+pos_sel_dat_2_Tpa <- subset(pos_sel_dat_2, pos_sel_dat_2$branch_name == "Tpa")
+pos_sel_dat_2_Tps <- subset(pos_sel_dat_2, pos_sel_dat_2$branch_name == "Tps")
+
+m1_omega0_1_Tbi <- glm(pos_sel_dat_2_Tbi$omega0_1 ~ pos_sel_dat_2_Tbi$mean_FKPM + pos_sel_dat_2_Tbi$GC * pos_sel_dat_2_Tbi$chr_soft_class)
+m1_omega0_1_Tbi_out <- drop1(m1_omega0_1_Tbi,~.,test="F") 
+m1_omega0_1_Tbi_out
+
+m1_omega0_1_Tce <- glm(pos_sel_dat_2_Tce$omega0_1 ~ pos_sel_dat_2_Tce$mean_FKPM + pos_sel_dat_2_Tce$GC * pos_sel_dat_2_Tce$chr_soft_class)
+m1_omega0_1_Tce_out <- drop1(m1_omega0_1_Tce,~.,test="F") 
+m1_omega0_1_Tce_out
+
+m1_omega0_1_Tcm <- glm(pos_sel_dat_2_Tcm$omega0_1 ~ pos_sel_dat_2_Tcm$mean_FKPM + pos_sel_dat_2_Tcm$GC * pos_sel_dat_2_Tcm$chr_soft_class)
+m1_omega0_1_Tcm_out <- drop1(m1_omega0_1_Tcm,~.,test="F") 
+m1_omega0_1_Tcm_out
+
+m1_omega0_1_Tpa <- glm(pos_sel_dat_2_Tpa$omega0_1 ~ pos_sel_dat_2_Tpa$mean_FKPM + pos_sel_dat_2_Tpa$GC * pos_sel_dat_2_Tpa$chr_soft_class)
+m1_omega0_1_Tpa_out <- drop1(m1_omega0_1_Tpa,~.,test="F") 
+m1_omega0_1_Tpa_out
+
+m1_omega0_1_Tps <- glm(pos_sel_dat_2_Tps$omega0_1 ~ pos_sel_dat_2_Tps$mean_FKPM + pos_sel_dat_2_Tps$GC * pos_sel_dat_2_Tps$chr_soft_class)
+m1_omega0_1_Tps_out <- drop1(m1_omega0_1_Tps,~.,test="F") 
+m1_omega0_1_Tps_out
+
+### overall test
+## permutes all vals
+perm_all_glm <- function(df){
+  
+ as.character(df$chr_soft_class)
+  
+  dd <- as.data.frame(cbind(
+    sample(as.character(df$omega0_1)),
+    as.character(df$chr_soft_class),
+    as.character(df$GC),
+    as.character(df$mean_FKPM)    
+  ))
+  
+  colnames(dd) <- c("omega0_1 ", "chr_soft_class", "GC", "mean_FKPM")
+  
+  dd$omega0_1          <- as.numeric(as.character(dd$omega0_1))
+  dd$chr_soft_class    <- as.factor(as.character(dd$chr_soft_class))
+  dd$GC                <- as.numeric(as.character(dd$GC))
+  dd$mean_FKPM         <- as.numeric(as.character(dd$mean_FKPM))
+
+  model_1 <- glm(dd$omega0_1 ~ dd$mean_FKPM + dd$GC * dd$chr_soft_class)
+  out <- drop1(model_1,~.,test="F") 
+
+  F_mean_FKPM = out$F[2]  
+  F_GC = out$F[3]
+  F_chr_soft_class = out$F[4]
+  F_int = out$F[5]
+  
+  P_mean_FKPM = out$P[2]  
+  P_GC = out$P[3]
+  P_chr_soft_class = out$P[4]
+  P_int = out$P[5]
+  
+  out_vals <- c(F_mean_FKPM, F_GC, F_chr_soft_class, F_int, P_mean_FKPM, P_GC, P_chr_soft_class, P_int)
+  return(out_vals)
+
+}
+
+N_perm = 20000
+
+Tbi_all_perm_out <- data.frame()
+Tce_all_perm_out <- data.frame()
+Tcm_all_perm_out <- data.frame()
+Tpa_all_perm_out <- data.frame()
+Tps_all_perm_out <- data.frame()
+
+for(i in seq(1:N_perm)){
+  run_all_Tbi <- perm_all_glm(pos_sel_dat_2_Tbi)	
+  Tbi_all_perm_out <- rbind(Tbi_all_perm_out, run_all_Tbi)	
+
+  run_all_Tce <- perm_all_glm(pos_sel_dat_2_Tce)	
+  Tce_all_perm_out <- rbind(Tce_all_perm_out, run_all_Tce)
+  
+  run_all_Tcm <- perm_all_glm(pos_sel_dat_2_Tcm)	
+  Tcm_all_perm_out <- rbind(Tcm_all_perm_out, run_all_Tcm)
+  
+  run_all_Tpa <- perm_all_glm(pos_sel_dat_2_Tpa)	
+  Tpa_all_perm_out <- rbind(Tpa_all_perm_out, run_all_Tpa)	
+  
+  run_all_Tps <- perm_all_glm(pos_sel_dat_2_Tps)	
+  Tps_all_perm_out <- rbind(Tps_all_perm_out, run_all_Tps)	
+  
+}
+
+colnames(Tbi_all_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+colnames(Tce_all_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+colnames(Tcm_all_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+colnames(Tpa_all_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+colnames(Tps_all_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+
+
+#### output
+
+write.csv(Tbi_all_perm_out, file=paste("Tbi_all_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+write.csv(Tce_all_perm_out, file=paste("Tce_all_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+write.csv(Tcm_all_perm_out, file=paste("Tcm_all_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+write.csv(Tpa_all_perm_out, file=paste("Tpa_all_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+write.csv(Tps_all_perm_out, file=paste("Tps_all_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+
+
+#################################################################################################################
+##### just flip chr type
+
+
+perm_chr_glm <- function(df){
+  as.character(df$chr_soft_class)
+  
+  dd <- as.data.frame(cbind(
+    as.character(df$omega0_1),
+    sample(as.character(df$chr_soft_class)),
+    as.character(df$GC),
+    as.character(df$mean_FKPM)    
+  ))
+  
+  colnames(dd) <- c("omega0_1 ", "chr_soft_class", "GC", "mean_FKPM")
+  
+  dd$omega0_1          <- as.numeric(as.character(dd$omega0_1))
+  dd$chr_soft_class    <- as.factor(as.character(dd$chr_soft_class))
+  dd$GC                <- as.numeric(as.character(dd$GC))
+  dd$mean_FKPM         <- as.numeric(as.character(dd$mean_FKPM))
+  
+  model_1 <- glm(dd$omega0_1 ~ dd$mean_FKPM + dd$GC * dd$chr_soft_class)
+  out <- drop1(model_1,~.,test="F") 
+  
+  #print(head(dd))
+  
+  F_mean_FKPM = out$F[2]  
+  F_GC = out$F[3]
+  F_chr_soft_class = out$F[4]
+  F_int = out$F[5]
+  
+  P_mean_FKPM = out$P[2]  
+  P_GC = out$P[3]
+  P_chr_soft_class = out$P[4]
+  P_int = out$P[5]
+  
+  out_vals <- c(F_mean_FKPM, F_GC, F_chr_soft_class, F_int, P_mean_FKPM, P_GC, P_chr_soft_class, P_int)
+  return(out_vals)
+  
+}
+
+
+Tbi_chr_perm_out <- data.frame()
+Tce_chr_perm_out <- data.frame()
+Tcm_chr_perm_out <- data.frame()
+Tpa_chr_perm_out <- data.frame()
+Tps_chr_perm_out <- data.frame()
+
+for(i in seq(1:N_perm)){
+  run_chr_Tbi <- perm_chr_glm(pos_sel_dat_2_Tbi)	
+  Tbi_chr_perm_out <- rbind(Tbi_chr_perm_out, run_chr_Tbi)	
+  
+  run_chr_Tce <- perm_chr_glm(pos_sel_dat_2_Tce)	
+  Tce_chr_perm_out <- rbind(Tce_chr_perm_out, run_chr_Tce)
+  
+  run_chr_Tcm <- perm_chr_glm(pos_sel_dat_2_Tcm)	
+  Tcm_chr_perm_out <- rbind(Tcm_chr_perm_out, run_chr_Tcm)
+  
+  run_chr_Tpa <- perm_chr_glm(pos_sel_dat_2_Tpa)	
+  Tpa_chr_perm_out <- rbind(Tpa_chr_perm_out, run_chr_Tpa)	
+  
+  run_chr_Tps <- perm_chr_glm(pos_sel_dat_2_Tps)	
+  Tps_chr_perm_out <- rbind(Tps_chr_perm_out, run_chr_Tps)	
+  
+}
+
+colnames(Tbi_chr_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+colnames(Tce_chr_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+colnames(Tcm_chr_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+colnames(Tpa_chr_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+colnames(Tps_chr_perm_out) <- c("F_mean_FKPM", "F_GC", "F_chr_soft_class", "F_int", "P_mean_FKPM", "P_GC", "P_chr_soft_class", "P_int")
+
+write.csv(Tbi_chr_perm_out, file=paste("Tbi_chr_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+write.csv(Tce_chr_perm_out, file=paste("Tce_chr_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+write.csv(Tcm_chr_perm_out, file=paste("Tcm_chr_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+write.csv(Tpa_chr_perm_out, file=paste("Tpa_chr_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+write.csv(Tps_chr_perm_out, file=paste("Tps_chr_perm_out_nperm=", N_perm, ".csv", sep = ""), row.names=FALSE)
+
+
+
+##############################################################################################################
+## get p vals
+
+get_P_val <- function(perm_vector, orig_TS){
+  v1 <- ifelse(perm_vector > orig_TS , perm_vector, NA)
+  v2 <- v1[!is.na(v1)]
+  N_over = length(v2)
+  P = N_over / length(perm_vector)
+ # print(N_over)
+  return(P)	
+}
+
+Tbi_F_mean_FKPM      = m1_omega0_1_Tbi_out$F[2]  
+Tbi_F_GC             = m1_omega0_1_Tbi_out$F[3]
+Tbi_F_chr_soft_class = m1_omega0_1_Tbi_out$F[4]
+Tbi_F_int            = m1_omega0_1_Tbi_out$F[5]
+
+get_P_val(Tbi_all_perm_out$F_mean_FKPM, Tbi_F_mean_FKPM )
+get_P_val(Tbi_all_perm_out$F_GC, Tbi_F_GC )
+get_P_val(Tbi_all_perm_out$F_chr_soft_class, Tbi_F_chr_soft_class)
+get_P_val(Tbi_all_perm_out$F_int, Tbi_F_int)
+
+
+Tce_F_mean_FKPM      = m1_omega0_1_Tce_out$F[2]  
+Tce_F_GC             = m1_omega0_1_Tce_out$F[3]
+Tce_F_chr_soft_class = m1_omega0_1_Tce_out$F[4]
+Tce_F_int            = m1_omega0_1_Tce_out$F[5]
+
+get_P_val(Tce_all_perm_out$F_mean_FKPM, Tce_F_mean_FKPM )
+get_P_val(Tce_all_perm_out$F_GC, Tce_F_GC )
+get_P_val(Tce_all_perm_out$F_chr_soft_class, Tce_F_chr_soft_class)
+get_P_val(Tce_all_perm_out$F_int, Tce_F_int)
+
+
+Tcm_F_mean_FKPM      = m1_omega0_1_Tcm_out$F[2]  
+Tcm_F_GC             = m1_omega0_1_Tcm_out$F[3]
+Tcm_F_chr_soft_class = m1_omega0_1_Tcm_out$F[4]
+Tcm_F_int            = m1_omega0_1_Tcm_out$F[5]
+
+get_P_val(Tcm_all_perm_out$F_mean_FKPM, Tcm_F_mean_FKPM )
+get_P_val(Tcm_all_perm_out$F_GC, Tcm_F_GC )
+get_P_val(Tcm_all_perm_out$F_chr_soft_class, Tcm_F_chr_soft_class)
+get_P_val(Tcm_all_perm_out$F_int, Tcm_F_int)
+
+Tpa_F_mean_FKPM      = m1_omega0_1_Tpa_out$F[2]  
+Tpa_F_GC             = m1_omega0_1_Tpa_out$F[3]
+Tpa_F_chr_soft_class = m1_omega0_1_Tpa_out$F[4]
+Tpa_F_int            = m1_omega0_1_Tpa_out$F[5]
+
+get_P_val(Tpa_all_perm_out$F_mean_FKPM, Tpa_F_mean_FKPM )
+get_P_val(Tpa_all_perm_out$F_GC, Tpa_F_GC )
+get_P_val(Tpa_all_perm_out$F_chr_soft_class, Tpa_F_chr_soft_class)
+get_P_val(Tpa_all_perm_out$F_int, Tpa_F_int)
+
+Tps_F_mean_FKPM      = m1_omega0_1_Tps_out$F[2]  
+Tps_F_GC             = m1_omega0_1_Tps_out$F[3]
+Tps_F_chr_soft_class = m1_omega0_1_Tps_out$F[4]
+Tps_F_int            = m1_omega0_1_Tps_out$F[5]
+
+get_P_val(Tps_all_perm_out$F_mean_FKPM, Tps_F_mean_FKPM )
+get_P_val(Tps_all_perm_out$F_GC, Tps_F_GC )
+get_P_val(Tps_all_perm_out$F_chr_soft_class, Tps_F_chr_soft_class)
+get_P_val(Tps_all_perm_out$F_int, Tps_F_int)
+
+
+
+get_P_val(Tbi_all_perm_out$F_chr_soft_class, Tbi_F_chr_soft_class)
+get_P_val(Tce_all_perm_out$F_chr_soft_class, Tce_F_chr_soft_class)
+get_P_val(Tcm_all_perm_out$F_chr_soft_class, Tcm_F_chr_soft_class)
+get_P_val(Tpa_all_perm_out$F_chr_soft_class, Tpa_F_chr_soft_class)
+get_P_val(Tps_all_perm_out$F_chr_soft_class, Tps_F_chr_soft_class)
+
+### very similar results
+get_P_val(Tbi_chr_perm_out$F_chr_soft_class, Tbi_F_chr_soft_class)
+get_P_val(Tce_chr_perm_out$F_chr_soft_class, Tce_F_chr_soft_class)
+get_P_val(Tcm_chr_perm_out$F_chr_soft_class, Tcm_F_chr_soft_class)
+get_P_val(Tpa_chr_perm_out$F_chr_soft_class, Tpa_F_chr_soft_class)
+get_P_val(Tps_chr_perm_out$F_chr_soft_class, Tps_F_chr_soft_class)
+
+
+
+
 #################################################################################
 ## LG
 
