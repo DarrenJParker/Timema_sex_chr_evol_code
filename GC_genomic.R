@@ -221,4 +221,59 @@ getwd() ## where has my plot gone....?
 
 
 
+####################################################
+### plot GC all together
+
+
+head(Tbi_dat)
+
+allsp_GC_dat <- as.data.frame(cbind(
+c(Tbi_dat$GC, Tce_dat$GC, Tcm_dat$GC, Tpa_dat$GC, Tps_dat$GC),
+c(Tbi_dat$class_soft, Tce_dat$class_soft, Tcm_dat$class_soft, Tpa_dat$class_soft, Tps_dat$class_soft),
+c(rep("Tbi", length(Tbi_dat[,1])), rep("Tce", length(Tce_dat[,1])), rep("Tcm", length(Tcm_dat[,1])), rep("Tpa", length(Tpa_dat[,1])), rep("Tps", length(Tps_dat[,1]))  )
+))
+
+colnames(allsp_GC_dat) <- c("GC", "class_soft", "sp")
+
+
+allsp_GC_dat$GC <- as.numeric(as.character(allsp_GC_dat$GC ))
+allsp_GC_dat$sp_soft <- paste(allsp_GC_dat$sp, allsp_GC_dat$class_soft, sep = "_")
+
+str(allsp_GC_dat)
+
+
+## get means
+GC_means_soft  <- summarySE(allsp_GC_dat, measurevar="GC", groupvars=c("sp_soft"))
+GC_means_soft$upper <- GC_means_soft$GC +  GC_means_soft$se
+GC_means_soft$lower <- GC_means_soft$GC -  GC_means_soft$se
+GC_means_soft$chr_soft <- str_split_fixed(GC_means_soft$sp_soft, "_", 2)[,2]
+
+
+
+
+
+## plot
+P_mean_GC_soft_g_all <- ggplot() + 
+  geom_errorbar(data=GC_means_soft, mapping=aes(x=sp_soft, ymin=upper, ymax=lower,  color= chr_soft), width=0.2, size=1) + 
+  theme_bw() +
+  geom_point(data=GC_means_soft, mapping=aes(x = sp_soft, y=GC,  fill=chr_soft), size=4, shape=21) + 
+  scale_color_manual(values=c("darkgrey", "darkorange2")) +
+  scale_fill_manual(values=c("darkgrey", "darkorange2")) + ggtitle("genomic soft chr, mean +/- SE")
+
+pdf(paste("P_mean_GC_g_soft_allsp" ,".pdf", sep = ""), width = 6, height = 8)
+P_mean_GC_soft_g_all
+dev.off()
+getwd() ## where has my plot gone....
+
+
+
+
+
+
+
+
+
+
+
+
 
