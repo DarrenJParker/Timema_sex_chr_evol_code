@@ -3,7 +3,7 @@
 
 This is the repository for the collected scripts used in the study:
 
->Parker, D. J., Jaron, K. S., Dumas, Z., Robinson-Rechavi, M., Schwander, T. 2021. X chromosomes show relaxed selection and complete somatic dosage compensation across _Timema_ stick insect species. bioRxiv.
+>Parker, D. J., Jaron, K. S., Dumas, Z., Robinson-Rechavi, M., Schwander, T. 2021. X chromosomes show relaxed selection and complete somatic dosage compensation across _Timema_ stick insect species. bioRxiv. https://doi.org/10.1101/2021.11.28.470265
 
 Raw sequence reads generated in this project have been deposited in NCBI’s sequence read archive under the bioproject number PRJNA725673. 
 
