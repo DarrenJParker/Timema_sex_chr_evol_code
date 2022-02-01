@@ -15,7 +15,7 @@ python3 accessory_scripts/alignments_to_seq.py -i data/selection/Selectome_v07_T
 # download and add here:data/genomes
 mkdir data/genomes
 cd data/genomes
-wget https://zenodo.org/record/5636226/files/Tbi_data/genomes/
+wget https://zenodo.org/record/5636226/files/Tbi_b3v08.fasta
 wget https://zenodo.org/record/5636226/files/Tce_b3v08.fasta
 wget https://zenodo.org/record/5636226/files/Tcm_b3v08.fasta
 wget https://zenodo.org/record/5636226/files/Tpa_b3v08.fasta
