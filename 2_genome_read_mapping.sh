@@ -178,18 +178,12 @@ done
 
 ## remove original bams and _badnames.txt
 
-mv ./mapping_v8/BWA_out/mapped_as_single/*_flagstat_out.txt  mapping_v8/BWA_out/flagstat_out_single/
-rm ./mapping_v8/BWA_out/mapped_as_single/*_mapqfilt_30_sorted.bam
-
-mv ./mapping_v8/BWA_out/mapped_as_paired/*_flagstat_out.txt  mapping_v8/BWA_out/flagstat_out_paired/
 rm ./mapping_v8/BWA_out/mapped_as_paired/*badnames.txt
 rm ./mapping_v8/BWA_out/mapped_as_paired/*_mapqfilt_30_sorted.bam
 
 
 #########################################################################################################################
 ##### merge bams
-
-mkdir /scratch/axiom/FAC/FBM/DEE/tschwand/sex_chromosomes/dparker/mapping_v8/BWA_out/mapped_as_paired_merged
 
 samtools merge mapping_v8/BWA_out/mapped_as_paired_merged/Tbi_F_CC86B_to_Tbi_v8_pe_BWA_mapqfilt_30a_sorted.bam mapping_v8/BWA_out/mapped_as_paired/Tbi_F_CC86B*_mapqfilt_30a_sorted.bam
 samtools merge mapping_v8/BWA_out/mapped_as_paired_merged/Tbi_F_CC86C_to_Tbi_v8_pe_BWA_mapqfilt_30a_sorted.bam mapping_v8/BWA_out/mapped_as_paired/Tbi_F_CC86C*_mapqfilt_30a_sorted.bam
