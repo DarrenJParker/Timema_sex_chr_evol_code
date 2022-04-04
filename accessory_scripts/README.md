@@ -15,5 +15,6 @@
 * **sex_chr_cov_readcounts_tidier.py** | add ortholog infomation to read count table - see *3_RNAseq_mapping.sh*
 * **sex_chr_cov_readcounts_orth_tidier.py** | get read counts for orthologs in each species - see *3_RNAseq_mapping.sh*
 * **add_gene_name_to_sel_data.py** | add gene name to selection data - see *3_RNAseq_mapping.sh*
-* **alignments_to_seq.py** | turn alignments into sequences - see  *4_selection_analyses.sh*
-* **add_GC_contigs.py** | add GC ests to coverage file - see  *4_selection_analyses.sh*
+* **alignments_to_seq.py** | turn alignments into sequences - see *4_selection_analyses.sh*
+* **add_GC_contigs.py** | add GC ests to coverage file - see *4_selection_analyses.sh*
+* **filter_alignment.py** | filter alignment files to only contain 4 or more sexual species - see *4_selection_analyses.sh*
