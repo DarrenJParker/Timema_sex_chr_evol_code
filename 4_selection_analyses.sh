@@ -52,3 +52,38 @@ python3 accessory_scripts/add_GC_contigs.py -g data/output/sel_out/GC_g.csv -c d
 
 
 ### Then selection_on_the_X.R to look at selection on the X
+
+
+
+
+#########################
+### M8a
+
+mkdir data/output/M8a
+## need just sexual species - keeping only HOGs with >= 4 sexual species
+### get sequences from alignments (data/selection/Selectome_v07_Timema-nt_masked.zip)
+## Unzip first and add to data/output/M8a
+
+cd data/output/M8a
+
+for f in Selectome_v07_Timema-nt_masked/*fas; do
+python3  ../../../accessory_scripts/filter_alignment.py -f $f
+done
+
+mkdir Selectome_v07_Timema-nt_masked_sexualspeciesonly
+mv Selectome_v07_Timema-nt_masked/*_sexonly.fas Selectome_v07_Timema-nt_masked_sexualspeciesonly/
+
+ls -l Selectome_v07_Timema-nt_masked/*fas | wc -l
+#7157
+ls -l Selectome_v07_Timema-nt_masked_sexualspeciesonly/*fas | wc -l
+#6296
+
+
+
+
+
+
+
+
+
+
