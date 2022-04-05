@@ -70,13 +70,18 @@ for f in Selectome_v07_Timema-nt_masked/*fas; do
 python3  ../../../accessory_scripts/filter_alignment.py -f $f
 done
 
-mkdir Selectome_v07_Timema-nt_masked_sexualspeciesonly
-mv Selectome_v07_Timema-nt_masked/*_sexonly.fas Selectome_v07_Timema-nt_masked_sexualspeciesonly/
+mkdir Selectome_v07_Timema-nt_masked_sexualspeciesonly_fasta
+mkdir Selectome_v07_Timema-nt_masked_sexualspeciesonly_trees
+mv Selectome_v07_Timema-nt_masked/*_sexonly.fas Selectome_v07_Timema-nt_masked_sexualspeciesonly_fasta/
+mv Selectome_v07_Timema-nt_masked/*.treetop.nwk Selectome_v07_Timema-nt_masked_sexualspeciesonly_trees/
 
 ls -l Selectome_v07_Timema-nt_masked/*fas | wc -l
 #7157
-ls -l Selectome_v07_Timema-nt_masked_sexualspeciesonly/*fas | wc -l
+ls -l Selectome_v07_Timema-nt_masked_sexualspeciesonly_fasta/*fas | wc -l
 #6296
+ls -l Selectome_v07_Timema-nt_masked_sexualspeciesonly_trees/*nwk | wc -l
+#6296
+
 
 
 

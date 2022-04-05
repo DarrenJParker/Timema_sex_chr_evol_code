@@ -37,7 +37,17 @@ for opt, arg in opts:
 		print("i dont know")
 		sys.exit(2)
 
-	
+
+#############################################
+### tree topologies
+
+tree_dict = {}
+tree_dict["TbiTceTcmTpaTps"] = "(((Tps,Tcm),Tce),(Tpa,Tbi));"
+tree_dict["TceTcmTpaTps"] = "(((Tps,Tcm),Tce),Tpa);"
+tree_dict["TbiTcmTpaTps"] = "((Tps,Tcm),(Tpa,Tbi));"
+tree_dict["TbiTceTpaTps"] = "((Tps,Tce),(Tpa,Tbi));"
+tree_dict["TbiTceTcmTps"] = "(((Tps,Tcm),Tce),Tbi);"
+tree_dict["TbiTceTcmTpa"] = "((Tcm,Tce),(Tpa,Tbi));"
 
 ### read in file
 
@@ -107,17 +117,24 @@ for s in fasta_seqs_names:
 # print(fasta_seqs_names)
 # print(sex_sp_in_file)
 
-print("N sex sp = " + str(len(sex_sp_in_file)))
+#print("N sex sp = " + str(len(sex_sp_in_file)))
 
 
 
 if len(sex_sp_in_file) >= 4:
+	sex_sp_in_file_sorted = sorted(sex_sp_in_file)
+	sex_sp_in_file_str = ""
+	for i in sex_sp_in_file_sorted:
+		sex_sp_in_file_str = sex_sp_in_file_str + i
+	tree_top = tree_dict.get(sex_sp_in_file_str)
+	output_tree_file = open(in_file_name.replace(".nt_masked.fas", ".treetop.nwk"), "w")
+	output_tree_file.write(tree_top)
+	
 	output_file = open(in_file_name.replace(".nt_masked.fas", ".nt_masked_sexonly.fas"), "w")
 	for s in sex_sp_in_file:
 		seq = fasta_seqs_dict.get(s)
 		output_file.write(">" + s + "\n" + seq + "\n")
 	
-
 
 
 
