@@ -82,8 +82,8 @@ ls -l Selectome_v07_Timema-nt_masked_sexualspeciesonly_fasta/*fas | wc -l
 ls -l Selectome_v07_Timema-nt_masked_sexualspeciesonly_trees/*nwk | wc -l
 #6296
 
-
-
+## run selectome to compare v8 v8a models
+## results: data/selection/Selectome_timema_M8.zip
 
 
 
