@@ -84,6 +84,43 @@ ls -l Selectome_v07_Timema-nt_masked_sexualspeciesonly_trees/*nwk | wc -l
 
 ## run selectome to compare v8 v8a models
 ## results: data/selection/Selectome_timema_M8.zip
+## Unzip Selectome_timema_M8.zip
+
+python3 accessory_scripts/m8a_process.py -i data/selection/Selectome_timema_M8 -c data/counts/
+
+## then
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
